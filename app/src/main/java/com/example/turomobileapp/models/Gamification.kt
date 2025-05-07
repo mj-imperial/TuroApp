@@ -34,3 +34,12 @@ data class Leaderboard(
     @SerializedName("ranking") val ranking: Int,
     @SerializedName("last_updated") val lastUpdated: Instant
 )
+
+@JsonClass(generateAdapter = true)
+data class ShopItem(
+    @SerializedName("item_id") val itemId: String,
+    @SerializedName("item_name") val itemName: String,
+    @SerializedName("item_description") val itemDescription: String,
+    @SerializedName("item_picture") val itemPicture: String,
+    @SerializedName("points_required") val pointsRequired: Int,
+)

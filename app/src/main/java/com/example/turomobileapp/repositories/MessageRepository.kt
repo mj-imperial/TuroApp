@@ -16,77 +16,48 @@ import javax.inject.Inject
 class MessageRepository @Inject constructor(private val messageApiService: MessageApiService){
 
     fun getMessage(messageId: String): Flow<Result<Message>> = flow {
-        try {
-            val response = messageApiService.getMessage(messageId)
-            if (response.isSuccessful){
-                val message = response.body()
-                message?.let {
-                    emit(Result.Success(it))
-                } ?: emit(Result.Failure(IOException("getMessage Response Body is Empty")))
-            }else{
-                val errorMessage = "Failed to get message: ${response.code()} - ${response.errorBody()?.string() ?: "Unknown error"}"
-                emit(Result.Failure(IOException(errorMessage)))
-            }
-        }catch (e: IOException) {
-            emit(Result.Failure(e))
-        }catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { messageApiService.getMessage(messageId) },
+            errorMessage = "Failed to get message $messageId"
+        )
     }
 
     fun getInboxMessages(userId: String, page: Int = 0, pageSize: Int = 20): Flow<Result<List<Message>>> = flow {
-        try {
-            val response = messageApiService.getInboxMessages(userId, page, pageSize)
-            if (response.isSuccessful){
-                val messages = response.body()
-                messages?.let {
-                    emit(Result.Success(it))
-                } ?: emit(Result.Failure(IOException("getInboxMessages Response Body is Empty")))
-            }else{
-                val errorMessage = "Failed to get inbox messages: ${response.code()} - ${response.errorBody()?.string() ?: "Unknown error"}"
-                emit(Result.Failure(IOException(errorMessage)))
-            }
-        }catch (e: IOException) {
-            emit(Result.Failure(e))
-        }catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { messageApiService.getInboxMessages(userId, page, pageSize) },
+            errorMessage = "Failed to get inbox messages for user $userId"
+        )
     }
 
     fun sendMessage(message: Message, attachments: List<File>): Flow<Result<Message>> = flow {
         try {
             val attachmentIds = mutableListOf<String>()
-            if (attachments.isNotEmpty()){
-                for (attachment in attachments){
+            if (attachments.isNotEmpty()) {
+                for (attachment in attachments) {
                     val requestFile = attachment.asRequestBody("multipart/form-data".toMediaTypeOrNull())
                     val body = MultipartBody.Part.createFormData("file", attachment.name, requestFile)
+
                     val uploadResponse = messageApiService.uploadAttachment(body)
                     if (uploadResponse.isSuccessful) {
-                        val attachmentId = uploadResponse.body()?.string()
-                            ?: throw Exception("Attachment upload failed: No ID returned")
+                        val idBody = uploadResponse.body()
+                        val attachmentId = idBody?.string() ?: throw IOException("Attachment upload failed: No ID returned")
                         attachmentIds.add(attachmentId)
                     } else {
-                        emit(Result.Failure(Exception("Failed to upload attachment: ${uploadResponse.errorBody()?.string()}")))
+                        val errorBodyString = uploadResponse.errorBody()?.string() ?: "Unknown error"
+                        emit(Result.Failure(IOException("Failed to upload attachment: ${uploadResponse.code()} - $errorBodyString")))
                         return@flow
                     }
                 }
             }
 
             val messageWithAttachments = message.copy(attachmentIds = attachmentIds)
-            val response = messageApiService.sendMessage(messageWithAttachments)
-            when{
-                response.isSuccessful -> {
-                    val sentMessage = response.body() ?: throw Exception("Failed to send message")
-                    emit(Result.Success(sentMessage))
-                }
-                else -> {
-                    val errorMessage = "Failed to send message: ${response.code()} - ${response.errorBody()?.string() ?: "Unknown error"}"
-                    emit(Result.Failure(IOException(errorMessage)))
-                }
-            }
-        }catch (e: IOException) {
+            handleApiResponse(
+                call = { messageApiService.sendMessage(messageWithAttachments) },
+                errorMessage = "Failed to send message"
+            )
+        } catch (e: IOException) {
             emit(Result.Failure(e))
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             emit(Result.Failure(e))
         }
     }
@@ -96,108 +67,44 @@ class MessageRepository @Inject constructor(private val messageApiService: Messa
     }
 
     fun markMessageAsRead(messageId: String, isRead: Boolean): Flow<Result<Unit>> = flow {
-        try {
-            val response = messageApiService.markMessageAsRead(messageId, isRead)
-            when{
-                response.isSuccessful -> emit(Result.Success(Unit))
-                else -> {
-                    val errorMessage = "Failed to mark message as read: ${response.code()} - ${response.errorBody()?.string() ?: "Unknown error"}"
-                    emit(Result.Failure(IOException(errorMessage)))
-                }
-            }
-        }catch (e: IOException) {
-            emit(Result.Failure(e))
-        }catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { messageApiService.markMessageAsRead(messageId, isRead) },
+            errorMessage = "Failed to mark message $messageId as read"
+        )
     }
 
     fun deleteMessage(messageId: String, deleteForUser: Boolean = true): Flow<Result<Unit>> = flow {
-        try {
-            val response = messageApiService.deleteMessage(messageId, deleteForUser)
-            when{
-                response.isSuccessful -> emit(Result.Success(Unit))
-                else -> {
-                    val errorMessage = "Failed to delete message: ${response.code()} - ${response.errorBody()?.string() ?: "Unknown error"}"
-                    emit(Result.Failure(IOException(errorMessage)))
-                }
-            }
-        }catch (e: IOException) {
-            emit(Result.Failure(e))
-        }catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { messageApiService.deleteMessage(messageId, deleteForUser) },
+            errorMessage = "Failed to delete message $messageId"
+        )
     }
 
     fun getAttachment(attachmentId: String): Flow<Result<Attachment>> = flow {
-        try {
-            val response = messageApiService.getAttachment(attachmentId)
-            if (response.isSuccessful){
-                val attachment = response.body()
-                attachment?.let {
-                    emit(Result.Success(it))
-                } ?: emit(Result.Failure(IOException("getAttachment Response Body is Empty")))
-            }else{
-                val errorMessage = "Failed to get attachment: ${response.code()} - ${response.errorBody()?.string() ?: "Unknown error"}"
-                emit(Result.Failure(IOException(errorMessage)))
-            }
-        }catch (e: IOException) {
-            emit(Result.Failure(e))
-        }catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { messageApiService.getAttachment(attachmentId) },
+            errorMessage = "Failed to get attachment $attachmentId"
+        )
     }
 
     fun getAllAttachments(messageId: String, attachmentIds: List<String>): Flow<Result<List<Attachment>>> = flow {
-        try {
-            val response = messageApiService.getAllAttachments(messageId, attachmentIds)
-            if (response.isSuccessful){
-                val attachments = response.body()
-                attachments?.let {
-                    emit(Result.Success(it))
-                } ?: emit(Result.Failure(IOException("getAllAttachments Response Body is Empty")))
-            }else{
-                val errorMessage = "Failed to get all attachments: ${response.code()} - ${response.errorBody()?.string() ?: "Unknown error"}"
-                emit(Result.Failure(IOException(errorMessage)))
-            }
-        }catch (e: IOException) {
-            emit(Result.Failure(e))
-        }catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { messageApiService.getAllAttachments(messageId, attachmentIds) },
+            errorMessage = "Failed to get all attachments $attachmentIds for message $messageId"
+        )
     }
 
     fun updateAttachment(attachmentId: String): Flow<Result<Unit>> = flow {
-        try {
-            val response = messageApiService.updateAttachment(attachmentId)
-            when{
-                response.isSuccessful -> emit(Result.Success(Unit))
-                else -> {
-                    val errorMessage = "Failed to update attachment: ${response.code()} - ${response.errorBody()?.string() ?: "Unknown error"}"
-                    emit(Result.Failure(IOException(errorMessage)))
-                }
-            }
-        }catch (e: IOException) {
-            emit(Result.Failure(e))
-        }catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { messageApiService.updateAttachment(attachmentId) },
+            errorMessage = "Failed to update attachment $attachmentId"
+        )
     }
 
     fun deleteAttachment(attachmentId: String): Flow<Result<Unit>> = flow {
-        try {
-            val response = messageApiService.deleteAttachment(attachmentId)
-            when{
-                response.isSuccessful -> emit(Result.Success(Unit))
-                else -> {
-                    val errorMessage = "Failed to delete attachment: ${response.code()} - ${response.errorBody()?.string() ?: "Unknown error"}"
-                    emit(Result.Failure(IOException(errorMessage)))
-                }
-            }
-        }catch (e: IOException) {
-            emit(Result.Failure(e))
-        }catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { messageApiService.deleteAttachment(attachmentId) },
+            errorMessage = "Failed to delete attachment $attachmentId"
+        )
     }
 }

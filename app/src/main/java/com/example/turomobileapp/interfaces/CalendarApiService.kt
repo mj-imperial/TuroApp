@@ -1,6 +1,5 @@
 package com.example.turomobileapp.interfaces
 
-import com.example.turomobileapp.models.Activity
 import com.example.turomobileapp.models.CalendarEvent
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -49,8 +48,9 @@ interface CalendarApiService {
         @Query("pageSize") pageSize: Int = 20
     ): Response<List<CalendarEvent>>
 
-    @GET("/calendar/events")
+    @GET("/calendar/users/{userId}/events")
     suspend fun getCalendarEventsByDateRange(
+        @Path("userId") userId: String,
         @Query("startDate") startDate: String,
         @Query("endDate") endDate: String,
         @Query("page") page: Int = 0,
@@ -61,9 +61,4 @@ interface CalendarApiService {
     suspend fun isCalendarEventDuplicate(
         @Body calendarEvent: CalendarEvent
     ): Response<Boolean>
-
-    @POST("/calendar/events/fromActivity")
-    suspend fun createCalendarEventFromActivity(
-        @Body activityId: Activity,
-    ): Response<CalendarEvent>
 }

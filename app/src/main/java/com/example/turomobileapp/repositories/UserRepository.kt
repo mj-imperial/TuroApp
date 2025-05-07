@@ -7,95 +7,44 @@ import com.example.turomobileapp.models.EmailRequest
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.io.InputStream
-import java.security.MessageDigest
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(private val userApiService: UserApiService) {
 
     fun login(userEmail: String, password: String): Flow<Result<User>> = flow {
-        try {
-            val hashedPassword = hashPassword(password)
-            val response = userApiService.login(userEmail, hashedPassword)
-            if (response.isSuccessful) {
-                response.body()?.let { user ->
-                    emit(Result.Success(user))
-                } ?: run {
-                    emit(Result.Failure(Exception("Login successful, but user data is null")))
-                }
-            } else {
-                val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                emit(Result.Failure(Exception("Login failed: ${response.code()} - $errorBody")))
-            }
-        } catch (e: IOException) {
-            emit(Result.Failure(e))
-        } catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { userApiService.login(userEmail, password) },
+            errorMessage = "Login failed"
+        )
     }
 
     fun logout(): Flow<Result<Unit>> = flow {
-        try{
-            val response = userApiService.logout()
-            when{
-                response.isSuccessful -> emit(Result.Success(Unit))
-                else -> {
-                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    emit(Result.Failure(Exception("Logout failed: ${response.code()} - $errorBody")))
-                }
-            }
-        } catch (e: IOException) {
-            emit(Result.Failure(e))
-        } catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { userApiService.logout() },
+            errorMessage = "Logout failed"
+        )
     }
 
     fun getUserById(userId: String): Flow<Result<User>> = flow {
-        try {
-            val response = userApiService.getUserById(userId)
-            if (response.isSuccessful) {
-                response.body()?.let { user ->
-                    emit(Result.Success(user))
-                } ?: emit(Result.Failure(Exception("User not found")))
-            } else {
-                val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                emit(Result.Failure(Exception("Failed to get user by ID: ${response.code()} - $errorBody")))
-            }
-        } catch (e: IOException) {
-            emit(Result.Failure(e))
-        } catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { userApiService.getUserById(userId) },
+            errorMessage = "Failed to get user by ID $userId"
+        )
     }
 
 
     fun getUserByEmail(email: String): Flow<Result<User>> = flow {
-        try{
-            val response = userApiService.getUserByEmail(email)
-            if (response.isSuccessful) {
-                response.body()?.let { user ->
-                    emit(Result.Success(user))
-                } ?: run {
-                    emit(Result.Failure(Exception("User not found")))
-                }
-            } else {
-                val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                emit(Result.Failure(Exception("Failed to get user by email: ${response.code()} - $errorBody")))
-            }
-        } catch (e: IOException) {
-            emit(Result.Failure(e))
-        } catch (e: Exception) {
-            emit(Result.Failure(e))
-        }
+        handleApiResponse(
+            call = { userApiService.getUserByEmail(email) },
+            errorMessage = "Failed to get user by email $email"
+        )
     }
 
     fun updateUser(userId: String, user: User): Flow<Result<Unit>> = flow {
@@ -236,16 +185,6 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
             emit(Result.Failure(e))
         }
     }
-
-    @OptIn(ExperimentalStdlibApi::class)
-    private suspend fun hashPassword(password: String): String = withContext(Dispatchers.IO) {
-        val bytes = password.toByteArray()
-        val md = MessageDigest.getInstance("SHA-256")
-        val digest = md.digest(bytes)
-        digest.toHexString()
-    }
-
-    private fun ByteArray.toHexString(): String = joinToString("") { "%02x".format(it) }
 
     fun getAllStudents(): Flow<Result<List<Student>>> = flow {
         try{

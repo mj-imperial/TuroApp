@@ -77,6 +77,7 @@ data class ScreeningExam(
     @SerializedName("event_id") override val eventId: String?,
     @SerializedName("tier_passed") var tierPassed: ScreeningTier,
     @SerializedName("is_Passed") var isPassed: Boolean,
+    @SerializedName("questions") val questions: List<Question> = emptyList()
 ): Activity(activityId,moduleId, activityType, activityName, activityDescription, unlockDate, deadlineDate, eventId)
 
 @JsonClass(generateAdapter = true)

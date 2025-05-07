@@ -15,11 +15,10 @@ interface LectureApiService {
     suspend fun createLecture(
         @Path("moduleId") moduleId: String,
         @Body lecture: Lecture
-    ): Response<ResponseBody>
+    ): Response<Lecture>
 
-    @POST("/modules/{moduleId}/isDuplicate")
+    @GET("/lectures/validateDuplication")
     suspend fun isLectureDuplicate(
-        @Path("moduleId") moduleId: String,
         @Body lecture: Lecture
     ): Response<Boolean>
 
@@ -43,9 +42,4 @@ interface LectureApiService {
     suspend fun deleteLecture(
         @Path("lectureId") lectureId: String
     ): Response<ResponseBody>
-
-    @GET("/lectures/validateDuplication")
-    suspend fun isLectureDuplicate(
-        @Body lecture: Lecture
-    ): Response<Boolean>
 }

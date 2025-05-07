@@ -1,5 +1,8 @@
 package com.example.turomobileapp.interfaces
 
+import com.example.turomobileapp.models.Answers
+import com.example.turomobileapp.models.AssessmentResult
+import com.example.turomobileapp.models.Question
 import com.example.turomobileapp.models.ScreeningExam
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -15,7 +18,7 @@ interface ScreeningExamApiService {
     suspend fun createScreeningExam(
         @Path("moduleId") moduleId: String,
         @Body screeningExam: ScreeningExam
-    ): Response<ResponseBody>
+    ): Response<ScreeningExam>
 
     @POST("/modules/{moduleId}/screeningExams/validateDuplication")
     suspend fun isScreeningExamDuplicate(
@@ -33,6 +36,11 @@ interface ScreeningExamApiService {
         @Path("moduleId") moduleId: String
     ): Response<List<ScreeningExam>>
 
+    @GET("/screeningExams/{screeningExamId}/questions")
+    suspend fun getQuestionsForScreeningExam(
+        @Path("screeningExamId") screeningExamId: String
+    ): Response<List<Question>>
+
     @PUT("/screeningExams/{screeningExamId}")
     suspend fun updateScreeningExam(
         @Path("screeningExamId") screeningExamId: String,
@@ -43,4 +51,11 @@ interface ScreeningExamApiService {
     suspend fun deleteScreeningExam(
         @Path("screeningExamId") screeningExamId: String
     ): Response<ResponseBody>
+
+    @POST("/students/{studentId}/screeningExams/{screeningExamId}/submit")
+    suspend fun submitScreeningExam(
+        @Path("studentId") studentId: String,
+        @Path("screeningExamId") screeningExamId: String,
+        @Body answers: List<Answers>
+    ): Response<AssessmentResult>
 }

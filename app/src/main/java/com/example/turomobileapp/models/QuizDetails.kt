@@ -38,7 +38,7 @@ data class AssessmentResult(
     @SerializedName("result_id") val resultId: String,
     @SerializedName("student_id") val studentId: String,
     @SerializedName("module_id") val moduleId: String,
-    @SerializedName("quiz_id") val quizId: String,
+    @SerializedName("activity_id") val activityId: String,
     @SerializedName("score_percentage") val scorePercentage: Double,
     @SerializedName("date_taken") val dateTaken: Date,
     @SerializedName("attempt_number") val attemptNumber: Int,

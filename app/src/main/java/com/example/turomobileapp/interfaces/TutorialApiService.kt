@@ -15,7 +15,7 @@ interface TutorialApiService {
     suspend fun createTutorial(
         @Path("moduleId") moduleId: String,
         @Body tutorial: Tutorial
-    ): Response<ResponseBody>
+    ): Response<Tutorial>
 
     @POST("/modules/{moduleId}/tutorials/validateDuplication")
     suspend fun isTutorialDuplicate(

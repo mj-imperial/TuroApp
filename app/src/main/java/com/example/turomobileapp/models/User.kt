@@ -32,7 +32,8 @@ data class Student(
     @SerializedName("isCatchUp") var isCatchUp: Boolean = false,
     @SerializedName("totalPoints") var totalPoints: Int = 0,
     @SerializedName("achievements") var achievements: List<Achievements> = emptyList(),
-    @SerializedName("badges") var badges: List<Badges> = emptyList()
+    @SerializedName("badges") var badges: List<Badges> = emptyList(),
+    @SerializedName("boughtItems") var boughtItems: List<ShopItem> = emptyList()
 ): User(userId, firstName, lastName, email, role, profilePic, agreedToTerms, requiresPasswordChange, calendarEvents)
 
 @JsonClass(generateAdapter = true)

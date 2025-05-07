@@ -2,6 +2,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.enums.ResetStep
+import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.repositories.UserRepository
 import com.example.turomobileapp.viewmodels.ChangePasswordUiState
 import com.example.turomobileapp.viewmodels.higherorderfunctions.handleResult
@@ -11,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.example.turomobileapp.repositories.Result
 
 @HiltViewModel
 class ChangePasswordViewModel @Inject constructor(
