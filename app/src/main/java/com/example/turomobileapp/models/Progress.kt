@@ -13,12 +13,10 @@ data class StudentProgress(
     @SerializedName("leaderboard_rank") val leaderboardRank: Int
 )
 
-@JsonClass(generateAdapter = true)
 data class UpdateStudentModuleProgressRequest(
     val averageScore: Double? = null,
 )
 
-@JsonClass(generateAdapter = true)
 data class UpdateStudentCourseProgressRequest(
     val averageScore: Double? = null,
     val totalPoints: Int? = null,

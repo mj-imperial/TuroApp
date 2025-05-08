@@ -63,15 +63,3 @@ data class Admin(
     @SerializedName("calendar_events") override val calendarEvents: List<CalendarEvent> = emptyList(),
 ): User(userId, firstName, lastName, email, role, profilePic, agreedToTerms, requiresPasswordChange, calendarEvents)
 
-@JsonClass(generateAdapter = true)
-data class EmailRequest(
-    val email: String
-)
-
-@JsonClass(generateAdapter = true)
-data class CodeVerificationRequest(
-    @SerializedName("user_id") val userId: String,
-    @SerializedName("token") val code: String,
-    @SerializedName("new_password") val newPassword: String?
-)
-

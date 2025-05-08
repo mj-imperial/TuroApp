@@ -1,8 +1,6 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Admin
-import com.example.turomobileapp.models.CodeVerificationRequest
-import com.example.turomobileapp.models.EmailRequest
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
@@ -48,15 +46,18 @@ interface UserApiService {
     @GET("/admins")
     suspend fun getAllAdmins(): Response<List<Admin>>
 
-    @POST("/users/password/reset/request")
+    @POST("/users/{userId}/email/password/reset/request")
     suspend fun requestPasswordReset(
-        @Body emailRequest: EmailRequest
-    ): Response<ResponseBody>
+        @Path("userId") userId: String,
+        @Query("email") email: String
+    ): Response<Unit>
 
-    @POST("/users/password/reset/verify")
+    @POST("/users/{userId}/password/reset/verify")
     suspend fun verifyPasswordResetCode(
-        @Body codeVerificationRequest: CodeVerificationRequest
-    ): Response<ResponseBody>
+        @Path("userId") userId: String,
+        code: String,
+        newPassword: String?
+    ): Response<Unit>
 
     @PUT("/users/{userId}")
     suspend fun updateUser(

@@ -7,6 +7,7 @@ import com.example.turomobileapp.interfaces.BadgesApiService
 import com.example.turomobileapp.interfaces.CalendarApiService
 import com.example.turomobileapp.interfaces.CourseApiService
 import com.example.turomobileapp.interfaces.EnrollmentApiService
+import com.example.turomobileapp.interfaces.LeaderboardApiService
 import com.example.turomobileapp.interfaces.LectureApiService
 import com.example.turomobileapp.interfaces.MessageApiService
 import com.example.turomobileapp.interfaces.ModuleApiService
@@ -15,10 +16,12 @@ import com.example.turomobileapp.interfaces.OptionsApiService
 import com.example.turomobileapp.interfaces.QuestionApiService
 import com.example.turomobileapp.interfaces.QuizApiService
 import com.example.turomobileapp.interfaces.ScreeningExamApiService
+import com.example.turomobileapp.interfaces.ShopItemApiService
 import com.example.turomobileapp.interfaces.StudentProgressApiService
 import com.example.turomobileapp.interfaces.TutorialApiService
 import com.example.turomobileapp.interfaces.UserApiService
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,16 +38,30 @@ object NetworkModule{
 
     @Provides
     @Singleton
-    fun provideBaseUrl(): String = "CHANGE DEPENDING ON DATABASE LOCATION"
+    //change base url if transferring to online database
+    fun provideBaseUrl(): String = "http://localhost/turo_app/"
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
+    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
+        return HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMoshi(): Moshi {
+        return Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
             .build()
     }
 
@@ -60,73 +77,8 @@ object NetworkModule{
 
     @Provides
     @Singleton
-    fun provideUserApiService(retrofit: Retrofit): UserApiService =
-        retrofit.create(UserApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideTutorialApiService(retrofit: Retrofit): TutorialApiService =
-        retrofit.create(TutorialApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideStudentProgressApiService(retrofit: Retrofit): StudentProgressApiService =
-        retrofit.create(StudentProgressApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideScreeningExamApiService(retrofit: Retrofit): ScreeningExamApiService =
-        retrofit.create(ScreeningExamApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideQuizApiService(retrofit: Retrofit): QuizApiService =
-        retrofit.create(QuizApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideQuestionApiService(retrofit: Retrofit): QuestionApiService =
-        retrofit.create(QuestionApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideOptionsApiService(retrofit: Retrofit): OptionsApiService =
-        retrofit.create(OptionsApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideModuleProgressApiService(retrofit: Retrofit): ModuleProgressApiService =
-        retrofit.create(ModuleProgressApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideModuleApiService(retrofit: Retrofit): ModuleApiService =
-        retrofit.create(ModuleApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideLectureApiService(retrofit: Retrofit): LectureApiService =
-        retrofit.create(LectureApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideEnrollmentApiService(retrofit: Retrofit): EnrollmentApiService =
-        retrofit.create(EnrollmentApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideCourseApiService(retrofit: Retrofit): CourseApiService =
-        retrofit.create(CourseApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideBadgesApiService(retrofit: Retrofit): BadgesApiService =
-        retrofit.create(BadgesApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideAssessmentResultApiService(retrofit: Retrofit): AssessmentResultApiService =
-        retrofit.create(AssessmentResultApiService::class.java)
+    fun provideAchievementsApiService(retrofit: Retrofit): AchievementsApiService =
+        retrofit.create(AchievementsApiService::class.java)
 
     @Provides
     @Singleton
@@ -135,8 +87,13 @@ object NetworkModule{
 
     @Provides
     @Singleton
-    fun provideAchievementsApiService(retrofit: Retrofit): AchievementsApiService =
-        retrofit.create(AchievementsApiService::class.java)
+    fun provideAssessmentResultApiService(retrofit: Retrofit): AssessmentResultApiService =
+        retrofit.create(AssessmentResultApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideBadgesApiService(retrofit: Retrofit): BadgesApiService =
+        retrofit.create(BadgesApiService::class.java)
 
     @Provides
     @Singleton
@@ -145,6 +102,77 @@ object NetworkModule{
 
     @Provides
     @Singleton
+    fun provideCourseApiService(retrofit: Retrofit): CourseApiService =
+        retrofit.create(CourseApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideEnrollmentApiService(retrofit: Retrofit): EnrollmentApiService =
+        retrofit.create(EnrollmentApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideLeaderboardApiService(retrofit: Retrofit): LeaderboardApiService =
+        retrofit.create(LeaderboardApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideLectureApiService(retrofit: Retrofit): LectureApiService =
+        retrofit.create(LectureApiService::class.java)
+
+    @Provides
+    @Singleton
     fun provideMessageApiService(retrofit: Retrofit): MessageApiService =
         retrofit.create(MessageApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideModuleApiService(retrofit: Retrofit): ModuleApiService =
+        retrofit.create(ModuleApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideModuleProgressApiService(retrofit: Retrofit): ModuleProgressApiService =
+        retrofit.create(ModuleProgressApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideOptionsApiService(retrofit: Retrofit): OptionsApiService =
+        retrofit.create(OptionsApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideQuestionApiService(retrofit: Retrofit): QuestionApiService =
+        retrofit.create(QuestionApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideQuizApiService(retrofit: Retrofit): QuizApiService =
+        retrofit.create(QuizApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideScreeningExamApiService(retrofit: Retrofit): ScreeningExamApiService =
+        retrofit.create(ScreeningExamApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideShopItemApiService(retrofit: Retrofit): ShopItemApiService =
+        retrofit.create(ShopItemApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideStudentProgressApiService(retrofit: Retrofit): StudentProgressApiService =
+        retrofit.create(StudentProgressApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideTutorialApiService(retrofit: Retrofit): TutorialApiService =
+        retrofit.create(TutorialApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUserApiService(retrofit: Retrofit): UserApiService =
+        retrofit.create(UserApiService::class.java)
+
 }
