@@ -2,6 +2,7 @@ package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.interfaces.AchievementsApiService
 import com.example.turomobileapp.models.Achievements
+import com.example.turomobileapp.helperfunctions.handleApiResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -10,21 +11,21 @@ class AchievementsRepository @Inject constructor(private val achievementsApiServ
 
     fun getAllAchievements(): Flow<Result<List<Achievements>>> = flow {
         handleApiResponse(
-            call = {achievementsApiService.getAllAchievements()},
+            call = { achievementsApiService.getAllAchievements() },
             errorMessage = "Failed to get all achievements"
         )
     }
 
     fun getAchievement(achievementId: String): Flow<Result<Achievements>> = flow {
         handleApiResponse(
-            call = {achievementsApiService.getAchievement(achievementId)},
+            call = { achievementsApiService.getAchievement(achievementId) },
             errorMessage = "Failed to get achievement $achievementId"
         )
     }
 
     fun getAllAchievementsForStudent(studentId: String): Flow<Result<List<Achievements>>> = flow {
         handleApiResponse(
-            call = {achievementsApiService.getAllAchievementsForStudent(studentId)},
+            call = { achievementsApiService.getAllAchievementsForStudent(studentId) },
             errorMessage = "Failed to get all achievements for student $studentId"
         )
     }

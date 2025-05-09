@@ -1,4 +1,4 @@
-package com.example.turomobileapp.viewmodels.higherorderfunctions
+package com.example.turomobileapp.helperfunctions
 
 import com.example.turomobileapp.repositories.Result
 

@@ -1,6 +1,7 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Admin
+import com.example.turomobileapp.models.LoginResponse
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
@@ -8,6 +9,8 @@ import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
@@ -18,11 +21,12 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface UserApiService {
-    @POST("/users/{userEmail}/password/login")
+    @FormUrlEncoded
+    @POST("auth/login")
     suspend fun login(
-        @Path("userEmail") userEmail: String,
-        @Query("password") password: String
-    ): Response<User>
+        @Field("email") userEmail: String,
+        @Field("password") password: String
+    ): Response<LoginResponse>
 
     @POST("/logout")
     suspend fun logout(): Response<ResponseBody>

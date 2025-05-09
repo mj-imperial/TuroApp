@@ -1,5 +1,6 @@
-package com.example.turomobileapp.repositories
+package com.example.turomobileapp.helperfunctions
 
+import com.example.turomobileapp.repositories.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.Response

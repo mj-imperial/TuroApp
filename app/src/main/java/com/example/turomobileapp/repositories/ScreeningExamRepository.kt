@@ -5,6 +5,7 @@ import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.Question
 import com.example.turomobileapp.models.ScreeningExam
+import com.example.turomobileapp.helperfunctions.handleApiResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.IOException
@@ -73,7 +74,13 @@ class ScreeningExamRepository @Inject constructor(private val screeningExamApiSe
 
     fun submitScreeningExam(studentId: String, screeningExamId: String, answers: List<Answers>): Flow<Result<AssessmentResult>> = flow {
         handleApiResponse(
-            call = { screeningExamApiService.submitScreeningExam(studentId, screeningExamId, answers) },
+            call = {
+                screeningExamApiService.submitScreeningExam(
+                    studentId,
+                    screeningExamId,
+                    answers
+                )
+            },
             errorMessage = "Failed to submit screening exam $screeningExamId"
         )
     }

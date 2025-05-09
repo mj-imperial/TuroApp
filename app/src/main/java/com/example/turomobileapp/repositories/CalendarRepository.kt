@@ -2,6 +2,7 @@ package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.interfaces.CalendarApiService
 import com.example.turomobileapp.models.CalendarEvent
+import com.example.turomobileapp.helperfunctions.handleApiResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -52,7 +53,15 @@ class CalendarRepository @Inject constructor(private val calendarApiService: Cal
 
     fun getCalendarEventsByDateRange(userId: String, startDate: String, endDate: String, page: Int = 0, pageSize: Int = 20): Flow<Result<List<CalendarEvent>>> = flow {
         handleApiResponse(
-            call = { calendarApiService.getCalendarEventsByDateRange(userId ,startDate, endDate, page, pageSize) },
+            call = {
+                calendarApiService.getCalendarEventsByDateRange(
+                    userId,
+                    startDate,
+                    endDate,
+                    page,
+                    pageSize
+                )
+            },
             errorMessage = "Failed to get calendar events by date range for user $userId"
         )
     }

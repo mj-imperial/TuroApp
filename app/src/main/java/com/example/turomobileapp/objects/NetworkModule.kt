@@ -39,7 +39,7 @@ object NetworkModule{
     @Provides
     @Singleton
     //change base url if transferring to online database
-    fun provideBaseUrl(): String = "http://localhost/turo_app/"
+    fun provideBaseUrl(): String = "http://10.0.2.2/turo_app/api/v1/"
 
     @Provides
     @Singleton

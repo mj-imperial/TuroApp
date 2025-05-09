@@ -1,10 +1,13 @@
 package com.example.turomobileapp.repositories
 
+import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.interfaces.UserApiService
 import com.example.turomobileapp.models.Admin
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
+import com.example.turomobileapp.helperfunctions.handleApiResponse
+import com.example.turomobileapp.helperfunctions.requestAndMap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -16,12 +19,20 @@ import javax.inject.Inject
 
 class UserRepository @Inject constructor(private val userApiService: UserApiService) {
 
-    fun login(userEmail: String, password: String): Flow<Result<User>> = flow {
-        handleApiResponse(
-            call = { userApiService.login(userEmail, password) },
-            errorMessage = "Login failed"
+    fun login(email: String, password: String): Flow<Result<User>> =
+        requestAndMap(
+            call   = { userApiService.login(email, password) },
+            mapper = { dto ->
+                User(
+                    userId = dto.userId,
+                    email = dto.email,
+                    firstName = dto.firstName,
+                    lastName = dto.lastName,
+                    role = UserRole.fromId(dto.roleId),
+                    requiresPasswordChange  = dto.requiresPasswordChange
+                )
+            }
         )
-    }
 
     fun logout(): Flow<Result<Unit>> = flow {
         handleApiResponse(

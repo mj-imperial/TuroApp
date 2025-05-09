@@ -63,3 +63,14 @@ data class Admin(
     @SerializedName("calendar_events") override val calendarEvents: List<CalendarEvent> = emptyList(),
 ): User(userId, firstName, lastName, email, role, profilePic, agreedToTerms, requiresPasswordChange, calendarEvents)
 
+data class LoginResponse(
+    @SerializedName("user_id") val userId: String,
+    @SerializedName("first_name") val firstName: String,
+    @SerializedName("last_name") val lastName: String,
+    @SerializedName("role_id") val roleId: Int,
+    @SerializedName("role") val roleName: String,
+    @SerializedName("requires_password_change") val requiresPasswordChange: Boolean,
+    val success: Boolean,
+    val email: String,
+)
+

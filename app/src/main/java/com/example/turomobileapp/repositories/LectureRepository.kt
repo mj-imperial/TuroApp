@@ -2,6 +2,7 @@ package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.interfaces.LectureApiService
 import com.example.turomobileapp.models.Lecture
+import com.example.turomobileapp.helperfunctions.handleApiResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.models.User
 import com.example.turomobileapp.repositories.UserRepository
-import com.example.turomobileapp.viewmodels.higherorderfunctions.handleResult
+import com.example.turomobileapp.helperfunctions.handleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

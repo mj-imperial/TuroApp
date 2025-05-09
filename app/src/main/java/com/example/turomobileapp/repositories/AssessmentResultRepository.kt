@@ -2,6 +2,7 @@ package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.interfaces.AssessmentResultApiService
 import com.example.turomobileapp.models.AssessmentResult
+import com.example.turomobileapp.helperfunctions.handleApiResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -10,14 +11,19 @@ class AssessmentResultRepository @Inject constructor(private val assessmentResul
 
     fun saveAssessmentResult(result: AssessmentResult): Flow<Result<Unit>> = flow {
         handleApiResponse(
-            call = {assessmentResultApiService.saveAssessmentResult(result)},
+            call = { assessmentResultApiService.saveAssessmentResult(result) },
             errorMessage = "Failed to save assessment result $result"
         )
     }
 
     fun getAssessmentResultsForQuizAndStudent(studentId: String, quizId: String): Flow<Result<List<AssessmentResult>>> = flow {
         handleApiResponse(
-            call = { assessmentResultApiService.getAssessmentResultsForQuizAndStudent(studentId, quizId) },
+            call = {
+                assessmentResultApiService.getAssessmentResultsForQuizAndStudent(
+                    studentId,
+                    quizId
+                )
+            },
             errorMessage = "Failed to get assessment result for quiz $quizId and student $studentId"
         )
     }
@@ -38,7 +44,12 @@ class AssessmentResultRepository @Inject constructor(private val assessmentResul
 
     fun getAssessmentResultsForStudentAndModule(studentId: String, moduleId: String): Flow<Result<List<AssessmentResult>>> = flow {
         handleApiResponse(
-            call = { assessmentResultApiService.getAssessmentResultsForStudentAndModule(studentId, moduleId) },
+            call = {
+                assessmentResultApiService.getAssessmentResultsForStudentAndModule(
+                    studentId,
+                    moduleId
+                )
+            },
             errorMessage = "Failed to get assessment results for student $studentId and module $moduleId"
         )
     }
