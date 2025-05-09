@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">TuroMobileApp</string>
+    <string name="TURO">TURO</string>
+    <string name="byGSCS">by GSCS</string>
 </resources>
