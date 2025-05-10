@@ -1,14 +1,8 @@
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        gradlePluginPortal()  // for KSP, Kotlin, Hilt plugins
+        google()
         mavenCentral()
-        gradlePluginPortal()
     }
 }
 dependencyResolutionManagement {
@@ -21,4 +15,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "TuroMobileApp"
 include(":app")
- 

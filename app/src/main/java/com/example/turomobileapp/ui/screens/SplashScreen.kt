@@ -10,12 +10,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,18 +29,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.MainOrange
+import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import kotlinx.coroutines.delay
-
-private val AlexandriaBold = FontFamily(
-    Font(R.font.alexandria_bold, weight = FontWeight.Bold)
-)
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -59,10 +54,10 @@ fun SplashScreen(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary)
+                .background(MainRed)
                 .systemBarsPadding()
         ){
-            val logoSize = maxWidth * 0.4f
+            val logoSize = maxWidth * 0.5f
             val rawHeadingSize = with(LocalDensity.current) {
                 (maxWidth * 0.12f).toSp()
             }
@@ -83,41 +78,50 @@ fun SplashScreen(
 
             Column(
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
             ) {
                 Image(
                     painter = painterResource(R.drawable.book_open),
                     contentDescription = null,
                     modifier = Modifier.size(logoSize),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.FillBounds
                 )
-
-                Spacer(modifier = Modifier.height((this@BoxWithConstraints.maxHeight * 0.02f).coerceIn(8.dp, 24.dp)))
 
                 Text(
                     text = stringResource(R.string.TURO),
                     fontSize = headingSize,
-                    fontFamily = AlexandriaBold,
-                    color = MainWhite
+                    fontFamily = FontFamily(Font(R.font.alexandria_bold)),
+                    color = MainWhite,
+                    modifier = Modifier
+                        .width(logoSize * 0.9f),
+                    textAlign = TextAlign.Start
                 )
 
                 Text(
                     text = stringResource(R.string.byGSCS),
                     fontSize = subheadingSize,
-                    fontFamily = AlexandriaBold,
+                    fontFamily = FontFamily(Font(R.font.alexandria_bold)),
                     color = MainOrange
                 )
             }
         }
     }
 
+
     LaunchedEffect(Unit) {
         visible = true
         delay(2_000)
         visible = false
         delay(300)
-        navController.navigate("login") {
+        navController.navigate(Screen.Login.route) {
             popUpTo("splash") { inclusive = true }
         }
     }
 }
+
+//@Preview
+//@Composable
+//fun SplashScreenPreview() {
+//    SplashScreen()
+//}

@@ -1,9 +1,9 @@
 package com.example.turomobileapp.repositories
 
+import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.interfaces.StudentProgressApiService
 import com.example.turomobileapp.models.StudentProgress
 import com.example.turomobileapp.models.UpdateStudentModuleProgressRequest
-import com.example.turomobileapp.helperfunctions.handleApiResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

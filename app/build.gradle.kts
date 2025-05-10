@@ -2,8 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    kotlin("kapt")
 }
 
 android {
@@ -43,51 +43,54 @@ android {
 
 dependencies {
 
+    // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.ui)
+    implementation(libs.ui.graphics)
+    implementation(libs.ui.tooling.preview)
+    implementation(libs.material3)
+    debugImplementation(libs.ui.tooling)
+    debugImplementation(libs.ui.test.manifest)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    androidTestImplementation(libs.ui.test.junit4)
 
-    //coroutine
-    implementation(libs.kotlinx.coroutines.android)
+    // Coroutines
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
-    //retrofit
+    // Retrofit + Moshi
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
-    //retrofit moshi
     implementation(libs.moshi.kotlin)
+    //noinspection KaptUsageInsteadOfKsp
     kapt(libs.moshi.kotlin.codegen)
     implementation(libs.converter.moshi)
 
-
-    //hilt dependency injection
+    // Hilt
     implementation(libs.hilt.android)
     kapt(libs.dagger.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    //lifecycle for viewmodel and coroutine
-    implementation(libs.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-
-    //date
-    implementation(libs.jackson.module.kotlin)
-
-    //navigation
+    // Navigation
     implementation(libs.androidx.navigation.compose)
 
-    //image loading
+    // Coil
     implementation(libs.coil.compose)
+
+    // Jackson (dates, etc.)
+    implementation(libs.jackson.module.kotlin)
 }
+
+kapt { correctErrorTypes = true }

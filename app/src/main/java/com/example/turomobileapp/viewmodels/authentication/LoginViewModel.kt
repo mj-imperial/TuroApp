@@ -3,9 +3,9 @@ package com.example.turomobileapp.viewmodels.authentication
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.User
 import com.example.turomobileapp.repositories.UserRepository
-import com.example.turomobileapp.helperfunctions.handleResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,21 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class LoginUiState(
-    val loading: Boolean = false,
-    val errorMessage: String? = null,
-    val email: String = "",
-    val password: String = "",
-    val loggedInUser: User? = null,
-    val isLoginEnabled: Boolean = false,
-    val loginSuccess: Boolean? = null
-)
-
-sealed class LoginEvent {
-    data class ShowToast(val message: String) : LoginEvent()
-    data class NavigateToChangePassword(val requireChange: Boolean?) : LoginEvent()
-}
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -127,3 +112,19 @@ class LoginViewModel @Inject constructor(
         }
     }
 }
+
+data class LoginUiState(
+    val loading: Boolean = false,
+    val errorMessage: String? = null,
+    val email: String = "",
+    val password: String = "",
+    val loggedInUser: User? = null,
+    val isLoginEnabled: Boolean = false,
+    val loginSuccess: Boolean? = null
+)
+
+sealed class LoginEvent {
+    data class ShowToast(val message: String) : LoginEvent()
+    data class NavigateToChangePassword(val requireChange: Boolean?) : LoginEvent()
+}
+
