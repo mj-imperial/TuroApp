@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.TuroMobileApp" parent="android:Theme.Material.Light.NoActionBar" />
+<style name="Theme.TuroApp.Starting" parent="android:Theme.Material.Light.NoActionBar" >
+    <item name="windowSplashScreenBackground">@color/MainRed</item>
+    <item name="windowSplashScreenAnimatedIcon">@mipmap/turoappicon</item>
+    <item name="windowSplashScreenAnimationDuration">200</item>
+    <item name="postSplashScreenTheme">@style/Theme.TuroApp.Starting</item>
+</style>
 </resources>

@@ -33,12 +33,12 @@ class LoginViewModel @Inject constructor(
     val eventFlow: SharedFlow<LoginEvent> = _eventFlow.asSharedFlow()
 
     fun updateEmail(newEmail: String){
-        _uiState.update { it.copy(email = newEmail) }
+        _uiState.update { it.copy(email = newEmail, errorMessage = null ) }
         validateLoginInput()
     }
 
     fun updatePassword(newPassword: String){
-        _uiState.update { it.copy(password = newPassword) }
+        _uiState.update { it.copy(password = newPassword, errorMessage = null ) }
         validateLoginInput()
     }
 
@@ -51,7 +51,10 @@ class LoginViewModel @Inject constructor(
     }
 
     fun login(){
-        if (_uiState.value.loading || !_uiState.value.isLoginEnabled) return
+        if (_uiState.value.loading || !_uiState.value.isLoginEnabled) {
+            _uiState.update { it.copy(errorMessage = "Please complete all fields") }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null, loginSuccess = null) }
@@ -70,7 +73,7 @@ class LoginViewModel @Inject constructor(
                         }
                         savedStateHandle["userId"] = user.userId
                         _eventFlow.tryEmit(LoginEvent.ShowToast("Login successful"))
-                        _eventFlow.tryEmit(LoginEvent.NavigateToChangePassword(user.requiresPasswordChange))
+                        _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.requiresPasswordChange))
                     },
                     onFailure = { error ->
                         _uiState.update { old ->
@@ -93,7 +96,7 @@ class LoginViewModel @Inject constructor(
 
     fun resetNavigation() {
         viewModelScope.launch {
-            _eventFlow.emit(LoginEvent.NavigateToChangePassword(null))
+            _eventFlow.emit(LoginEvent.NavigateToChangeDefaultPassword(null))
         }
     }
 
@@ -125,6 +128,7 @@ data class LoginUiState(
 
 sealed class LoginEvent {
     data class ShowToast(val message: String) : LoginEvent()
-    data class NavigateToChangePassword(val requireChange: Boolean?) : LoginEvent()
+    data class NavigateToChangeDefaultPassword(val requireChange: Boolean?) : LoginEvent()
+    data class NavigateToChangeCurrentPassword(val newPassword: String): LoginEvent()
 }
 

@@ -91,6 +91,12 @@ dependencies {
 
     // Jackson (dates, etc.)
     implementation(libs.jackson.module.kotlin)
+
+    //window - size
+    implementation(libs.androidx.material3.window.size.class1)
+
+    //splash screen
+    implementation(libs.androidx.core.splashscreen)
 }
 
 kapt { correctErrorTypes = true }

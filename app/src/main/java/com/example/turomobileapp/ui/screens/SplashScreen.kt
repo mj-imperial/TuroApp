@@ -2,6 +2,7 @@ package com.example.turomobileapp.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,16 +25,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.ui.navigation.Screen
+import com.example.turomobileapp.ui.reusablefunctions.ResponsiveFont
+import com.example.turomobileapp.ui.reusablefunctions.WindowInfo
+import com.example.turomobileapp.ui.reusablefunctions.rememberWindowInfo
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
@@ -45,10 +47,11 @@ fun SplashScreen(
     navController: NavController
 ){
     var visible by remember { mutableStateOf(true) }
+    val windowInfo = rememberWindowInfo()
 
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(animationSpec = tween(durationMillis = 600)),
+        enter   = EnterTransition.None,
         exit  = fadeOut(animationSpec = tween(durationMillis = 300))
     ){
         BoxWithConstraints(
@@ -57,24 +60,14 @@ fun SplashScreen(
                 .background(MainRed)
                 .systemBarsPadding()
         ){
-            val logoSize = maxWidth * 0.5f
-            val rawHeadingSize = with(LocalDensity.current) {
-                (maxWidth * 0.12f).toSp()
-            }
-            val headingSize = when {
-                rawHeadingSize < 24.sp -> 24.sp
-                rawHeadingSize > 48.sp -> 48.sp
-                else -> rawHeadingSize
+            val logoSize = when (windowInfo.screenWidthInfo) {
+                WindowInfo.WindowType.Compact  -> windowInfo.screenWidth * 0.3f
+                WindowInfo.WindowType.Medium   -> windowInfo.screenWidth * 0.4f
+                WindowInfo.WindowType.Expanded -> windowInfo.screenWidth * 0.5f
             }
 
-            val rawSubheadingSize = with(LocalDensity.current) {
-                (maxWidth * 0.05f).toSp()
-            }
-            val subheadingSize = when {
-                rawSubheadingSize < 12.sp -> 12.sp
-                rawSubheadingSize > 24.sp -> 24.sp
-                else -> rawSubheadingSize
-            }
+            val headingSize    = ResponsiveFont.title(windowInfo)
+            val subheadingSize = ResponsiveFont.heading2(windowInfo)
 
             Column(
                 verticalArrangement = Arrangement.Center,
@@ -110,8 +103,7 @@ fun SplashScreen(
 
 
     LaunchedEffect(Unit) {
-        visible = true
-        delay(2_000)
+        delay(800)
         visible = false
         delay(300)
         navController.navigate(Screen.Login.route) {

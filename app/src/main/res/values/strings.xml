@@ -2,4 +2,9 @@
     <string name="app_name">TuroMobileApp</string>
     <string name="TURO">TURO</string>
     <string name="byGSCS">by GSCS</string>
+    <string name="Login">LOGIN</string>
+    <string name="Email">EMAIL</string>
+    <string name="Password">PASSWORD</string>
+    <string name="SignIn">SIGN IN</string>
+    <string name="ForgotPassword">Forgot Password?</string>
 </resources>
