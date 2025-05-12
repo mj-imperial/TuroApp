@@ -22,7 +22,7 @@ import retrofit2.http.Query
 
 interface UserApiService {
     @FormUrlEncoded
-    @POST("auth/login")
+    @POST("login")
     suspend fun login(
         @Field("email") userEmail: String,
         @Field("password") password: String
@@ -50,18 +50,27 @@ interface UserApiService {
     @GET("/admins")
     suspend fun getAllAdmins(): Response<List<Admin>>
 
-    @POST("/users/{userId}/email/password/reset/request")
+    @FormUrlEncoded
+    @POST("request_password_reset")
     suspend fun requestPasswordReset(
         @Path("userId") userId: String,
-        @Query("email") email: String
-    ): Response<Unit>
+        @Field("email") email: String?
+    ): Response<ResponseBody>
 
-    @POST("/users/{userId}/password/reset/verify")
+    @FormUrlEncoded
+    @POST("verify_password_reset_code")
     suspend fun verifyPasswordResetCode(
-        @Path("userId") userId: String,
-        code: String,
-        newPassword: String?
-    ): Response<Unit>
+        @Field("email") email: String,
+        @Field("code") code: String
+    ): Response<ResponseBody>
+
+    @FormUrlEncoded
+    @PATCH("change_password")
+    suspend fun resetPassword(
+        @Path("email") email: String,
+        @Field("oldPassword") oldPassword: String?,
+        @Field("newPassword") newPassword: String
+    ): Response<ResponseBody>
 
     @PUT("/users/{userId}")
     suspend fun updateUser(

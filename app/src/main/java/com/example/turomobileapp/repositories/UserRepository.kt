@@ -87,13 +87,19 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
         )
     }
 
-    fun verifyPasswordResetCode(userId: String, code: String, newPassword: String?): Flow<Result<Unit>> = flow {
+    fun verifyPasswordResetCode(email: String, code: String): Flow<Result<Unit>> = flow {
         handleApiResponse(
-            call = { userApiService.verifyPasswordResetCode(userId, code, newPassword) },
+            call = { userApiService.verifyPasswordResetCode(email, code) },
             errorMessage = "Failed to verify password reset code"
         )
     }
 
+    fun resetPassword(email: String, oldPassword: String?, newPassword: String): Flow<Result<Unit>> = flow {
+        handleApiResponse(
+            call = {userApiService.resetPassword(email, oldPassword, newPassword)},
+            errorMessage = "Failed to reset password"
+        )
+    }
 
     fun getDefaultPasswordChangeStatus(userId: String): Flow<Result<Boolean>> = flow {
         handleApiResponse(

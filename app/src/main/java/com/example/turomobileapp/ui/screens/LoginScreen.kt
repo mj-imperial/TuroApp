@@ -169,14 +169,14 @@ fun LoginScreen(
             when(event) {
                 is LoginEvent.ShowToast ->
                     Toast.makeText(ctx, event.message, Toast.LENGTH_SHORT).show()
-                is LoginEvent.NavigateToChangeDefaultPassword -> {
-                    navController.navigate("change_default_password") {
+                is LoginEvent.NavigateToChangePassword -> {
+                    navController.navigate("change_password") {
                         popUpTo("login") { inclusive = true }
                     }
                     viewModel.clearLoginSuccess()
                 }
-                is LoginEvent.NavigateToChangeCurrentPassword -> {
-                    navController.navigate("change_current_password") {
+                is LoginEvent.NavigateToHome -> {
+                    navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }
                     viewModel.clearLoginSuccess()
