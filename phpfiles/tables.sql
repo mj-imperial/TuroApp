@@ -352,5 +352,16 @@ CREATE TABLE Student_ShopItem (
     FOREIGN KEY (item_id) REFERENCES ShopItem(item_id)
 );
 
+CREATE TABLE `password_resets` (
+    user_id VARCHAR(255) NOT NULL PRIMARY KEY,
+    code_hash VARCHAR(255) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_expires_at` (expires_at),
+    CONSTRAINT `fk_password_resets_user`
+        FOREIGN KEY (user_id) REFERENCES User(user_id)
+        ON DELETE CASCADE
+)
+
 -- Re-enable foreign key checks after the entire script
 SET FOREIGN_KEY_CHECKS = 1;
