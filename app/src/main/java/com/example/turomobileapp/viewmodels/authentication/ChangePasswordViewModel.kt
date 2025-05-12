@@ -5,16 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.enums.ResetStep
 import com.example.turomobileapp.helperfunctions.handleResult
+import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.repositories.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.example.turomobileapp.repositories.Result
 
 @HiltViewModel
 class ChangePasswordViewModel @Inject constructor(
@@ -66,6 +65,10 @@ class ChangePasswordViewModel @Inject constructor(
 
     fun updateNewPassword(password: String) {
         _uiState.update { it.copy(newPassword = password) }
+    }
+
+    fun updateOldPassword(password: String){
+        _uiState.update { it.copy(oldPassword = password) }
     }
 
     fun updateConfirmPassword(password: String) {
