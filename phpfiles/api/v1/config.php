@@ -23,4 +23,14 @@ try {
     exit;
 }
 
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 587);
+define('SMTP_USER', 'turoapplication40@gmail.com');   
+define('SMTP_PASS', 'ergi kqhi npgj iecr');
+define('SMTP_SECURE','tls');
+
+define('MAIL_FROM_EMAIL','no-reply@yourdomain.com');
+define('MAIL_FROM_NAME', 'Turo App');
+
+require_once __DIR__ . '/functions.php';
 ?>
