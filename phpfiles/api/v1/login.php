@@ -16,8 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 header('Content-Type: application/json; charset=UTF-8');
 require_once __DIR__ . '/config.php';
 
-$email    = trim($_POST['email']    ?? '');
-$password =           $_POST['password'] ?? '';
+$email = trim($_POST['email'] ?? '');
+$password = $_POST['password'] ?? '';
 
 if ($email === '' || $password === '') {
     http_response_code(400);
@@ -44,7 +44,7 @@ try {
             u.email,
             u.first_name,
             u.last_name,
-            u.password   AS password_hash,
+            u.password AS password_hash,
             u.requires_password_change,
             u.role_id,
             r.role_name
