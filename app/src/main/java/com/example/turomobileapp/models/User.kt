@@ -76,7 +76,12 @@ data class LoginResponse(
 )
 
 data class UserResponse(
-    @Json(name = "success") val success: Boolean,
-    @Json(name = "user") val user: User
+    @Json(name="success") val success: Boolean,
+    @Json(name="user_id") val userId: String,
+    @Json(name="email") val email: String,
+    @Json(name="first_name") val firstName: String,
+    @Json(name="last_name") val lastName:  String,
+    @Json(name="role") val role: String,
+    @Json(name="requires_password_change") val requiresPasswordChange: Boolean
 )
 

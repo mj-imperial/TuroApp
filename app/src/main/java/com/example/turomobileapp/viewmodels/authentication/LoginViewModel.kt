@@ -72,6 +72,8 @@ class LoginViewModel @Inject constructor(
                             )
                         }
                         savedStateHandle["userId"] = user.userId
+                        savedStateHandle["email"] = user.email
+                        savedStateHandle["requiresChange"] = user.requiresPasswordChange
                         _eventFlow.tryEmit(LoginEvent.ShowToast("Login successful"))
                         if (user.requiresPasswordChange) {
                             _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,true))

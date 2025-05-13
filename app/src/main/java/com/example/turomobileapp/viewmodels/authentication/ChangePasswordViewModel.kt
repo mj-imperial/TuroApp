@@ -31,6 +31,8 @@ class ChangePasswordViewModel @Inject constructor(
     private val _requiresChange = MutableStateFlow<Boolean>(savedStateHandle.get<Boolean>("requiresChange") != false)
     val requiresChange: StateFlow<Boolean> = _requiresChange.asStateFlow()
 
+    private val _initialEmail = MutableStateFlow<String>(savedStateHandle["email"] ?: "")
+
     // Seed UI state’s first screen
     private val _uiState = MutableStateFlow(
         ChangePasswordUiState(
@@ -45,8 +47,7 @@ class ChangePasswordViewModel @Inject constructor(
 
     init {
         if (_requiresChange.value) {
-            _uiState.update { it.copy(resetStep = ResetStep.LOADING) }
-            getEmail()
+            _uiState.update { it.copy(email = _initialEmail.value) }
         }
     }
 
@@ -80,26 +81,6 @@ class ChangePasswordViewModel @Inject constructor(
             !pwd.any { it.isDigit() }    -> "Password must contain at least one digit."
             !pwd.any { it.isUpperCase() }-> "Password must contain at least one uppercase letter."
             else -> null
-        }
-    }
-
-    fun getEmail(){
-        viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
-
-            userRepository.getUserById(_userId.value).collect { result ->
-                handleResult(
-                    result = result,
-                    onSuccess = { resp ->
-                        val resp = resp.user
-                        _uiState.update { it.copy(email = resp.email, requiresPasswordChangeStatus = true, resetStep = ResetStep.PASSWORD_INPUT, loading = false) }
-                    },
-                    onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
-                        Log.d("ChangePwdVM", "getEmail FAILURE: ${err}")
-                    }
-                )
-            }
         }
     }
 

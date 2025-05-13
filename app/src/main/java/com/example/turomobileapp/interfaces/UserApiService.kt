@@ -34,7 +34,7 @@ interface UserApiService {
 
     @GET("get_user_by_id.php")
     suspend fun getUserById(
-        @Query("userId") userId: String
+        @Query("user_id") userId: String
     ): Response<UserResponse>
 
     @GET("/users/{userEmail}")
