@@ -7,4 +7,12 @@
     <string name="Password">PASSWORD</string>
     <string name="SignIn">SIGN IN</string>
     <string name="ForgotPassword">Forgot Password?</string>
+    <string name="ChangeDefaultPassword">CHANGE DEFAULT PASSWORD</string>
+    <string name="OldPassword">CURRENT PASSWORD</string>
+    <string name="NewPassword">NEW PASSWORD</string>
+    <string name="ChangePassword">CHANGE PASSWORD</string>
+    <string name="ConfirmPassword">CONFIRM PASSWORD</string>
+    <string name="GetEmailCode">GET PASSWORD RESET CODE</string>
+    <string name="EnterEmailCode">ENTER PASSWORD RESET CODE</string>
+    <string name="Timer">You have 10 minutes to enter the code.</string>
 </resources>

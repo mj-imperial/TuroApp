@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.reusablefunctions.CapsuleButton
 import com.example.turomobileapp.ui.reusablefunctions.CapsuleTextField
 import com.example.turomobileapp.ui.reusablefunctions.ResponsiveFont
@@ -170,14 +171,14 @@ fun LoginScreen(
                 is LoginEvent.ShowToast ->
                     Toast.makeText(ctx, event.message, Toast.LENGTH_SHORT).show()
                 is LoginEvent.NavigateToChangePassword -> {
-                    navController.navigate("change_password") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate(Screen.ChangeDefaultPassword.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                     }
                     viewModel.clearLoginSuccess()
                 }
                 is LoginEvent.NavigateToHome -> {
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                     }
                     viewModel.clearLoginSuccess()
                 }

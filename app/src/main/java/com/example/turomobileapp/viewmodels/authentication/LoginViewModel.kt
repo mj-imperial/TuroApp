@@ -28,7 +28,7 @@ class LoginViewModel @Inject constructor(
 
     private val _eventFlow = MutableSharedFlow<LoginEvent>(
         replay = 0,
-        extraBufferCapacity = 1
+        extraBufferCapacity = 2
     )
     val eventFlow: SharedFlow<LoginEvent> = _eventFlow.asSharedFlow()
 
@@ -98,12 +98,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun resetNavigation() {
-        viewModelScope.launch {
-            _eventFlow.emit(LoginEvent.NavigateToChangePassword(null))
-        }
-    }
-
     fun clearLoginSuccess() {
         _uiState.update { it.copy(loginSuccess = null) }
     }
@@ -127,7 +121,8 @@ data class LoginUiState(
     val password: String = "",
     val loggedInUser: User? = null,
     val isLoginEnabled: Boolean = false,
-    val loginSuccess: Boolean? = null
+    val loginSuccess: Boolean? = null,
+    val requiresChange: Boolean? = null
 )
 
 sealed class LoginEvent {

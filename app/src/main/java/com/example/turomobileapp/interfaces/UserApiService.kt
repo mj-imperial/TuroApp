@@ -5,6 +5,7 @@ import com.example.turomobileapp.models.LoginResponse
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
+import com.example.turomobileapp.models.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -22,7 +23,7 @@ import retrofit2.http.Query
 
 interface UserApiService {
     @FormUrlEncoded
-    @POST("login")
+    @POST("login.php")
     suspend fun login(
         @Field("email") userEmail: String,
         @Field("password") password: String
@@ -31,15 +32,15 @@ interface UserApiService {
     @POST("/logout")
     suspend fun logout(): Response<ResponseBody>
 
-    @GET("/users/{userId}")
+    @GET("get_user_by_id.php")
     suspend fun getUserById(
-        @Path("userId") userId: String
-    ): Response<User>
+        @Query("userId") userId: String
+    ): Response<UserResponse>
 
     @GET("/users/{userEmail}")
     suspend fun getUserByEmail(
         @Path("userEmail") userEmail: String
-    ): Response<User>
+    ): Response<UserResponse>
 
     @GET("/teachers")
     suspend fun getAllTeachers(): Response<List<Teacher>>
@@ -51,23 +52,22 @@ interface UserApiService {
     suspend fun getAllAdmins(): Response<List<Admin>>
 
     @FormUrlEncoded
-    @POST("request_password_reset")
+    @POST("request_password_reset.php")
     suspend fun requestPasswordReset(
-        @Path("userId") userId: String,
         @Field("email") email: String?
     ): Response<ResponseBody>
 
     @FormUrlEncoded
-    @POST("verify_password_reset_code")
+    @POST("verify_password_reset_code.php")
     suspend fun verifyPasswordResetCode(
         @Field("email") email: String,
         @Field("code") code: String
     ): Response<ResponseBody>
 
     @FormUrlEncoded
-    @PATCH("change_password")
+    @POST("change_password.php")
     suspend fun resetPassword(
-        @Path("email") email: String,
+        @Field("email") email: String,
         @Field("oldPassword") oldPassword: String?,
         @Field("newPassword") newPassword: String
     ): Response<ResponseBody>

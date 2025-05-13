@@ -5,11 +5,13 @@ package com.example.turomobileapp.ui.reusablefunctions
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 
@@ -26,7 +28,8 @@ fun CapsuleTextField(
     roundedCornerShape: Dp,
     colors: TextFieldColors,
     modifier: Modifier,
-    enabled: Boolean
+    enabled: Boolean,
+    textStyle: TextStyle = LocalTextStyle.current
 ){
     OutlinedTextField(
         value = value,
@@ -40,6 +43,7 @@ fun CapsuleTextField(
         visualTransformation= visualTransformation,
         shape = RoundedCornerShape(roundedCornerShape),
         colors = colors,
-        enabled = enabled
+        enabled = enabled,
+        textStyle = textStyle
     )
 }

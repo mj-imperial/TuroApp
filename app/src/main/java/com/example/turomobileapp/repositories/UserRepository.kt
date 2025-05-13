@@ -8,6 +8,7 @@ import com.example.turomobileapp.models.Admin
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
+import com.example.turomobileapp.models.UserResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -41,7 +42,7 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
         )
     }
 
-    fun getUserById(userId: String): Flow<Result<User>> = flow {
+    fun getUserById(userId: String): Flow<Result<UserResponse>> = flow {
         handleApiResponse(
             call = { userApiService.getUserById(userId) },
             errorMessage = "Failed to get user by ID $userId"
@@ -80,9 +81,9 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
         }
     }
 
-    fun requestPasswordReset(userId: String, email: String): Flow<Result<Unit>> = flow {
+    fun requestPasswordReset(email: String): Flow<Result<Unit>> = flow {
         handleApiResponse(
-            call = { userApiService.requestPasswordReset(userId, email) },
+            call = { userApiService.requestPasswordReset(email) },
             errorMessage = "Password reset request failed"
         )
     }
