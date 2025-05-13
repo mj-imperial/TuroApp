@@ -73,7 +73,8 @@ import com.example.turomobileapp.viewmodels.authentication.LoginViewModel
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
+    onLoginSuccess: (userId: String, requiresChange: Boolean) -> Unit
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
@@ -170,10 +171,8 @@ fun LoginScreen(
             when(event) {
                 is LoginEvent.ShowToast ->
                     Toast.makeText(ctx, event.message, Toast.LENGTH_SHORT).show()
-                is LoginEvent.NavigateToChangePassword -> {
-                    navController.navigate(Screen.ChangeDefaultPassword.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
+                is LoginEvent.NavigateToChangeDefaultPassword -> {
+                    onLoginSuccess(event.userId, event.requiresChange)
                     viewModel.clearLoginSuccess()
                 }
                 is LoginEvent.NavigateToHome -> {

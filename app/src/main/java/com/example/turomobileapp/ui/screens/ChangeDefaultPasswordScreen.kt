@@ -39,10 +39,10 @@ import com.example.turomobileapp.viewmodels.authentication.ChangePasswordViewMod
 fun ChangeDefaultPasswordScreen(
     navController: NavController,
     viewModel: ChangePasswordViewModel = hiltViewModel(),
+    requiresPasswordChange: Boolean
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
-    val requiresPasswordChange by viewModel.requiresChange.collectAsState()
 
     if (uiState.resetStep == ResetStep.LOADING) {
         Box(
