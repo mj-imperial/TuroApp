@@ -148,7 +148,7 @@ function changeDefaultPassword(
 
     // 3) Update to new password
     $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
-    $updSql  = "UPDATE `User` SET `password_hash` = ? WHERE `email` = ?";
+    $updSql  = "UPDATE `User` SET `password_hash` = ?, `requires_password_change` = 0 WHERE `email` = ?";
     $updStmt = $conn->prepare($updSql);
     $updStmt->bind_param('ss', $newHash, $email);
 
