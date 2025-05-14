@@ -1,7 +1,10 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Admin
+import com.example.turomobileapp.models.ApiResponse
+import com.example.turomobileapp.models.ChangeDefaultPasswordRequest
 import com.example.turomobileapp.models.LoginResponse
+import com.example.turomobileapp.models.ResetPasswordRequest
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
@@ -67,10 +70,19 @@ interface UserApiService {
     @FormUrlEncoded
     @POST("change_password.php")
     suspend fun resetPassword(
+        @Field("action") action: String,
         @Field("email") email: String,
-        @Field("oldPassword") oldPassword: String?,
-        @Field("newPassword") newPassword: String
-    ): Response<ResponseBody>
+        @Field("new_password") newPassword: String,
+    ): Response<ApiResponse>
+
+    @FormUrlEncoded
+    @POST("change_password.php")
+    suspend fun changeDefaultPassword(
+        @Field("action") action: String,
+        @Field("email") email: String,
+        @Field("old_password") oldPassword: String,
+        @Field("new_password") newPassword: String
+    ): Response<ApiResponse>
 
     @PUT("/users/{userId}")
     suspend fun updateUser(

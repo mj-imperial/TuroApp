@@ -15,4 +15,5 @@
     <string name="GetEmailCode">GET PASSWORD RESET CODE</string>
     <string name="EnterEmailCode">ENTER PASSWORD RESET CODE</string>
     <string name="Timer">You have 10 minutes to enter the code.</string>
+    <string name="Sending">SENDING…</string>
 </resources>

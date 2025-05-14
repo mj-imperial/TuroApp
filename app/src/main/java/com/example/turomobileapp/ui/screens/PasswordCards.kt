@@ -1,5 +1,6 @@
 package com.example.turomobileapp.ui.screens
 
+import android.annotation.SuppressLint
 import android.graphics.PointF.length
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults.colors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,6 +55,7 @@ import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.SoftGray
+import kotlinx.coroutines.delay
 
 @Composable
 fun PasswordCard(
@@ -282,6 +286,7 @@ fun PasswordCard(
     )
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun EmailStep(
     title: TextUnit,
@@ -295,6 +300,23 @@ fun EmailStep(
     onSendCode: () -> Unit
 ) {
     var showTimer by remember { mutableStateOf(false) }
+    var secondsRemaining by remember { mutableIntStateOf(600) }
+
+    LaunchedEffect(showTimer) {
+        if (showTimer) {
+            secondsRemaining = 600
+            while (secondsRemaining > 0) {
+                delay(1_000L)
+                secondsRemaining--
+            }
+            showTimer = false
+        }
+    }
+
+    val minutes = secondsRemaining / 60
+    val seconds = secondsRemaining % 60
+    val timerText = String.format("%02d:%02d", minutes, seconds)
+
 
     Text(
         text = stringResource(R.string.GetEmailCode),
@@ -372,19 +394,11 @@ fun EmailStep(
     Column {
         CapsuleButton(
             text = {
-                if (loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = stringResource(R.string.ChangePassword),
-                        fontSize = heading3Size,
-                        fontFamily = FontFamily(Font(R.font.alata))
-                    )
-                }
+                Text(
+                    text = if (loading) stringResource(R.string.Sending) else stringResource(R.string.ChangePassword),
+                    fontSize = heading3Size,
+                    fontFamily = FontFamily(Font(R.font.alata))
+                )
             },
             onClick = {
                 onSendCode()
@@ -408,11 +422,14 @@ fun EmailStep(
 
         if (showTimer) {
             Text(
-                text = stringResource(R.string.Timer),
+                text = timerText,
                 color = LoginText,
                 fontFamily = FontFamily(Font(R.font.alata)),
                 fontSize = subtitle,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
             )
         }
     }

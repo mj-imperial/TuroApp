@@ -25,11 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.enums.ResetStep
+import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.reusablefunctions.ResponsiveFont
 import com.example.turomobileapp.ui.reusablefunctions.WindowInfo
 import com.example.turomobileapp.ui.reusablefunctions.rememberWindowInfo
-import com.example.turomobileapp.ui.theme.LoginText
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.viewmodels.authentication.ChangePasswordViewModel
@@ -73,8 +73,8 @@ fun ChangeDefaultPasswordScreen(
             WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.7f
         }
 
-        LaunchedEffect(uiState.resetStep) {
-            if (uiState.resetStep == ResetStep.DONE) {
+        LaunchedEffect(uiState.passwordChangeResult) {
+            if (uiState.passwordChangeResult == Result.Success(Unit)) {
                 navController.navigate(Screen.Home.route) {
                     popUpTo(Screen.Login.route) { inclusive = true }
                 }
@@ -139,9 +139,9 @@ fun ChangeDefaultPasswordScreen(
                                 onNewPasswordChange = viewModel::updateNewPassword,
                                 confirmPassword = uiState.confirmPassword,
                                 onChangeConfirmPassword = viewModel::updateConfirmPassword,
-                                onChangePassword = viewModel::changePassword,
                                 errorMessage = uiState.errorMessage,
-                                requiresPasswordChange = requiresPasswordChange
+                                requiresPasswordChange = requiresPasswordChange,
+                                onChangePassword = if (requiresPasswordChange) viewModel::changeDefaultPassword else viewModel::resetPassword
                             )
                         }
                         else -> {Unit}
@@ -151,12 +151,3 @@ fun ChangeDefaultPasswordScreen(
         }
     }
 }
-
-
-
-
-//@Preview
-//@Composable
-//fun ChangeDefaultPasswordScreenPreview(){
-//    ChangeDefaultPasswordScreen()
-//}

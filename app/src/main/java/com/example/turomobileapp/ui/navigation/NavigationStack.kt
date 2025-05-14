@@ -23,8 +23,19 @@ fun NavigationStack(modifier: Modifier = Modifier) {
         composable(Screen.Login.route) {
             LoginScreen(navController = navController)
         }
-        composable(Screen.ChangeDefaultPassword.route) {
-            ChangeDefaultPasswordScreen(navController = navController)
+        composable(
+            route = "changePassword?requiresChange={requiresChange}&email={email}",
+            arguments = listOf(
+                navArgument("requiresChange") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                },
+                navArgument("email") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            ChangeDefaultPasswordScreen(navController)
         }
         composable(route = Screen.Home.route){
             HomeScreen()

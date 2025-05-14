@@ -139,8 +139,7 @@ class ChangePasswordViewModel @Inject constructor(
         }
     }
 
-    fun changePassword() {
-        // Used on the final PASSWORD_INPUT screen
+    fun resetPassword(){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
@@ -151,17 +150,7 @@ class ChangePasswordViewModel @Inject constructor(
                 return@launch
             }
 
-            //if user is require change is true
-            if (_requiresChange.value && _uiState.value.oldPassword.isBlank()){
-                _uiState.update { it.copy(errorMessage = "Please enter your current password", loading = false) }
-                return@launch
-            }
-
-            userRepository.resetPassword(
-                email = _uiState.value.email,
-                oldPassword = if (_requiresChange.value) _uiState.value.oldPassword else "",
-                newPassword = _uiState.value.newPassword
-            ).collect { result ->
+            userRepository.resetPassword(_uiState.value.email, _uiState.value.newPassword).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = {
@@ -170,9 +159,36 @@ class ChangePasswordViewModel @Inject constructor(
                     onFailure = { err ->
                         _uiState.update { it.copy(loading = false, errorMessage = err, passwordChangeResult = null) }
                     },
-                    onLoading = {
-                        _uiState.update { it.copy(loading = true) }
-                    }
+                )
+            }
+        }
+    }
+
+    fun changeDefaultPassword(){
+        viewModelScope.launch {
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
+
+            if (_uiState.value.resetStep != ResetStep.PASSWORD_INPUT) return@launch
+
+            getPasswordValidationError()?.let { err ->
+                _uiState.update { it.copy(errorMessage = err, loading = false) }
+                return@launch
+            }
+
+            if (_uiState.value.oldPassword.isBlank()){
+                _uiState.update { it.copy(errorMessage = "Please enter your current password", loading = false) }
+                return@launch
+            }
+
+            userRepository.changeDefaultPassword(_uiState.value.email, _uiState.value.oldPassword, _uiState.value.newPassword).collect { result ->
+                handleResult(
+                    result = result,
+                    onSuccess = {
+                        _uiState.update { it.copy(loading = false, resetStep = ResetStep.DONE, passwordChangeResult = Result.Success(Unit)) }
+                    },
+                    onFailure = { err ->
+                        _uiState.update { it.copy(loading = false, errorMessage = err, passwordChangeResult = null) }
+                    },
                 )
             }
         }

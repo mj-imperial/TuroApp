@@ -76,7 +76,7 @@ class LoginViewModel @Inject constructor(
                         savedStateHandle["requiresChange"] = user.requiresPasswordChange
                         _eventFlow.tryEmit(LoginEvent.ShowToast("Login successful"))
                         if (user.requiresPasswordChange) {
-                            _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,true))
+                            _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,user.email,true))
                         } else {
                             _eventFlow.tryEmit(LoginEvent.NavigateToHome)
                         }
@@ -129,7 +129,7 @@ data class LoginUiState(
 
 sealed class LoginEvent {
     data class ShowToast(val message: String) : LoginEvent()
-    data class NavigateToChangeDefaultPassword(val userId: String, val requiresChange: Boolean) : LoginEvent()
+    data class NavigateToChangeDefaultPassword(val userId: String, val email: String,val requiresChange: Boolean) : LoginEvent()
     object NavigateToHome : LoginEvent()
 }
 

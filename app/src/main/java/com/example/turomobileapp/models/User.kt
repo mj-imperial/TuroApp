@@ -64,6 +64,7 @@ data class Admin(
     @SerializedName("calendar_events") override val calendarEvents: List<CalendarEvent> = emptyList(),
 ): User(userId, firstName, lastName, email, role, profilePic, agreedToTerms, requiresPasswordChange, calendarEvents)
 
+@JsonClass(generateAdapter = true)
 data class LoginResponse(
     @Json(name = "user_id") val userId: String,
     @Json(name = "first_name") val firstName: String,
@@ -75,6 +76,7 @@ data class LoginResponse(
     @Json(name = "email") val email: String,
 )
 
+@JsonClass(generateAdapter = true)
 data class UserResponse(
     @Json(name="success") val success: Boolean,
     @Json(name="user_id") val userId: String,
@@ -83,5 +85,26 @@ data class UserResponse(
     @Json(name="last_name") val lastName:  String,
     @Json(name="role") val role: String,
     @Json(name="requires_password_change") val requiresPasswordChange: Boolean
+)
+
+@JsonClass(generateAdapter = true)
+data class ApiResponse(
+    @Json(name="success") val success: Boolean,
+    @Json(name="message")val message: String
+)
+
+@JsonClass(generateAdapter = true)
+data class ResetPasswordRequest(
+    @Json(name="action") val action: String = "resetPassword",
+    @Json(name="email") val email: String,
+    @Json(name="new_password") val newPassword: String
+)
+
+@JsonClass(generateAdapter = true)
+data class ChangeDefaultPasswordRequest(
+    @Json(name="action") val action: String = "changeDefaultPassword",
+    @Json(name="email") val email: String,
+    @Json(name="old_password") val oldPassword: String,
+    @Json(name="new_password") val newPassword: String
 )
 

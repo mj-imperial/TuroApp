@@ -1,6 +1,7 @@
 package com.example.turomobileapp.ui.screens
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -171,10 +172,13 @@ fun LoginScreen(
                 is LoginEvent.ShowToast ->
                     Toast.makeText(ctx, event.message, Toast.LENGTH_SHORT).show()
                 is LoginEvent.NavigateToChangeDefaultPassword -> {
-                    navController.navigate(Screen.ChangeDefaultPassword.route) {
-                        popUpTo(Screen.Login) { inclusive = true }
+                    val route = buildString {
+                        append("changePassword?requiresChange=${event.requiresChange}")
+                        append("&email=${Uri.encode(event.email)}")
                     }
-                    viewModel.clearLoginSuccess()
+                    navController.navigate(route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
                 }
                 is LoginEvent.NavigateToHome -> {
                     navController.navigate(Screen.Home.route) {
