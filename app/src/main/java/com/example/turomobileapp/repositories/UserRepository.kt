@@ -6,8 +6,6 @@ import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.UserApiService
 import com.example.turomobileapp.models.Admin
 import com.example.turomobileapp.models.ApiResponse
-import com.example.turomobileapp.models.ChangeDefaultPasswordRequest
-import com.example.turomobileapp.models.ResetPasswordRequest
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
@@ -84,26 +82,23 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
         }
     }
 
-    fun requestPasswordReset(email: String): Flow<Result<Unit>> = flow {
+    fun requestPasswordReset(email: String): Flow<Result<ApiResponse>> =
         handleApiResponse(
             call = { userApiService.requestPasswordReset(email) },
             errorMessage = "Password reset request failed"
         )
-    }
 
-    fun verifyPasswordResetCode(email: String, code: String): Flow<Result<Unit>> = flow {
+    fun verifyPasswordResetCode(email: String, code: String): Flow<Result<ApiResponse>> =
         handleApiResponse(
             call = { userApiService.verifyPasswordResetCode(email, code) },
             errorMessage = "Failed to verify password reset code"
         )
-    }
 
-    fun resetPassword(email: String, newPassword: String): Flow<Result<ApiResponse>> = flow {
+    fun resetPassword(email: String, newPassword: String): Flow<Result<ApiResponse>> =
         handleApiResponse(
             call = {userApiService.resetPassword(action = "resetPassword", email = email, newPassword = newPassword)},
             errorMessage = "Failed to reset password"
         )
-    }
 
     fun changeDefaultPassword(email: String, oldPassword: String, newPassword: String): Flow<Result<ApiResponse>> =
         handleApiResponse(

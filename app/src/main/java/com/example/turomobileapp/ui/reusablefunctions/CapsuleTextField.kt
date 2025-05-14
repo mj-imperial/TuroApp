@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.Dp
 fun CapsuleTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: @Composable () -> Unit = { Text("Placeholder") },
+    placeholder: @Composable () -> Unit = { Text("") },
     label: @Composable (() -> Unit)? = null,
     isSingleLine: Boolean,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,

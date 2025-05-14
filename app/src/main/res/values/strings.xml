@@ -16,4 +16,10 @@
     <string name="EnterEmailCode">ENTER PASSWORD RESET CODE</string>
     <string name="Timer">You have 10 minutes to enter the code.</string>
     <string name="Sending">SENDING…</string>
+    <string name="Dashboard">DASHBOARD</string>
+    <string name="Calendar">CALENDAR</string>
+    <string name="MiniGames">MINI GAMES</string>
+    <string name="Leaderboard">LEADERBOARD</string>
+    <string name="Inbox">INBOX</string>
+    <string name="CheckInbox">Note: The code may be sent in the spam folder.</string>
 </resources>

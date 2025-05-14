@@ -78,7 +78,7 @@ class LoginViewModel @Inject constructor(
                         if (user.requiresPasswordChange) {
                             _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,user.email,true))
                         } else {
-                            _eventFlow.tryEmit(LoginEvent.NavigateToHome)
+                            _eventFlow.tryEmit(LoginEvent.NavigateToDashboard(user.userId))
                         }
                     },
                     onFailure = { error ->
@@ -130,6 +130,6 @@ data class LoginUiState(
 sealed class LoginEvent {
     data class ShowToast(val message: String) : LoginEvent()
     data class NavigateToChangeDefaultPassword(val userId: String, val email: String,val requiresChange: Boolean) : LoginEvent()
-    object NavigateToHome : LoginEvent()
+    data class NavigateToDashboard(val userId: String) : LoginEvent()
 }
 

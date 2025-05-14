@@ -154,12 +154,12 @@ fun LoginScreen(
                     onPasswordChange = viewModel::updatePassword,
                     onSignIn = viewModel::login,
                     errorMessage = uiState.errorMessage,
-                    onForgotPassword = { TODO()/*add navcontroller after*/ },
                     cardHeight = cardHeight,
                     heading1Size = heading1Size,
                     body = body,
                     heading3Size = heading3Size,
-                    subtitle = subtitle
+                    subtitle = subtitle,
+                    navController = navController
                 )
             }
         }
@@ -180,11 +180,11 @@ fun LoginScreen(
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
-                is LoginEvent.NavigateToHome -> {
-                    navController.navigate(Screen.Home.route) {
+                is LoginEvent.NavigateToDashboard -> {
+                    val route = "dashboard_screen/${event.userId}"
+                    navController.navigate(route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
-                    viewModel.clearLoginSuccess()
                 }
             }
         }
@@ -201,14 +201,13 @@ fun LoginCard(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onSignIn: () -> Unit,
-    onForgotPassword: () -> Unit,
     cardHeight: Dp,
     heading1Size: TextUnit,
     heading3Size: TextUnit,
     body: TextUnit,
     subtitle: TextUnit,
-    modifier: Modifier = Modifier,
-    errorMessage: String?
+    errorMessage: String?,
+    navController: NavController
 ){
     val passwordFocusRequester = remember { FocusRequester() }
 
@@ -390,13 +389,21 @@ fun LoginCard(
                         .align(Alignment.End)
                         .clickable(
                             enabled = true,
-                            onClick = { onForgotPassword() }
+                            onClick = {
+                                navController.navigate(
+                                    Screen.ChangePassword.createRoute(
+                                        requiresChange = false,
+                                        email = ""
+                                    )
+                                )
+                            }
                         )
                 )
             }
         }
     }
 }
+
 
 //@Preview
 //@Composable

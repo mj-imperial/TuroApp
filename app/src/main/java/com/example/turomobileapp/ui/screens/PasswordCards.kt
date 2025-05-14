@@ -1,12 +1,10 @@
 package com.example.turomobileapp.ui.screens
 
 import android.annotation.SuppressLint
-import android.graphics.PointF.length
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,8 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults.colors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +32,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.example.turomobileapp.R
@@ -56,6 +54,7 @@ import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.SoftGray
 import kotlinx.coroutines.delay
+import kotlin.coroutines.CoroutineContext.Key
 
 @Composable
 fun PasswordCard(
@@ -297,26 +296,13 @@ fun EmailStep(
     loading: Boolean,
     errorMessage: String?,
     onEmailChange: (String) -> Unit,
-    onSendCode: () -> Unit
+    onSendCode: () -> Unit,
+    cooldownRemaining: Int
 ) {
     var showTimer by remember { mutableStateOf(false) }
-    var secondsRemaining by remember { mutableIntStateOf(600) }
-
-    LaunchedEffect(showTimer) {
-        if (showTimer) {
-            secondsRemaining = 600
-            while (secondsRemaining > 0) {
-                delay(1_000L)
-                secondsRemaining--
-            }
-            showTimer = false
-        }
-    }
-
-    val minutes = secondsRemaining / 60
-    val seconds = secondsRemaining % 60
+    val minutes = cooldownRemaining / 60
+    val seconds = cooldownRemaining % 60
     val timerText = String.format("%02d:%02d", minutes, seconds)
-
 
     Text(
         text = stringResource(R.string.GetEmailCode),
@@ -395,7 +381,7 @@ fun EmailStep(
         CapsuleButton(
             text = {
                 Text(
-                    text = if (loading) stringResource(R.string.Sending) else stringResource(R.string.ChangePassword),
+                    text = if (loading) "WAIT $timerText" else "SEND CODE",
                     fontSize = heading3Size,
                     fontFamily = FontFamily(Font(R.font.alata))
                 )
@@ -417,7 +403,7 @@ fun EmailStep(
                 containerColor = MainOrange,
                 contentColor = MainWhite
             ),
-            enabled = !loading
+            enabled = !loading && cooldownRemaining == 0
         )
 
         if (showTimer) {
@@ -431,6 +417,26 @@ fun EmailStep(
                     .fillMaxWidth()
                     .padding(top = 8.dp)
             )
+
+            Text(
+                text = stringResource(R.string.CheckInbox),
+                color = LoginText,
+                fontFamily = FontFamily(Font(R.font.alata)),
+                fontSize = subtitle,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            )
+
+            if (cooldownRemaining > 0) {
+                Text(
+                    text = "Please wait $timerText to resend code",
+                    fontSize = subtitle,
+                    color = LoginText,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
         }
     }
 }
@@ -461,12 +467,12 @@ fun CodeStep(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        for ( i in 0..5){
+        chars.forEachIndexed { i, charState ->
             CapsuleTextField(
                 value = chars[i].value,
                 onValueChange = { new ->
                     if (new.length <= 1 && new.all { it.isDigit() }) {
-                        chars[i].value = new
+                        charState.value = new
                         onCodeChange(chars.joinToString("") { it.value })
                         if (new.isNotEmpty() && i < 5) {
                             focusRequesters[i + 1].requestFocus()
@@ -492,8 +498,18 @@ fun CodeStep(
                     cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 modifier = Modifier
-                    .size(48.dp)
-                    .focusRequester(focusRequesters[i]),
+                    .size(64.dp)
+                    .focusRequester(focusRequesters[i])
+                    .onKeyEvent { keyEvent ->
+                        if (keyEvent.type == KeyEventType.KeyUp && keyEvent.type == KeyEventType.KeyDown) {
+                            if (charState.value.isEmpty() && i > 0) {
+                                focusRequesters[i - 1].requestFocus()
+                            }
+                            true
+                        } else {
+                            false
+                        }
+                    },
                 enabled = true,
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
             )

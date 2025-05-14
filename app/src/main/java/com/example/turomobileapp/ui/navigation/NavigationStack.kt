@@ -7,8 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.turomobileapp.ui.screens.ChangeDefaultPasswordScreen
-import com.example.turomobileapp.ui.screens.HomeScreen
+import com.example.turomobileapp.ui.screens.ChangePasswordScreen
+import com.example.turomobileapp.ui.screens.DashboardScreen
 import com.example.turomobileapp.ui.screens.LoginScreen
 import com.example.turomobileapp.ui.screens.SplashScreen
 
@@ -24,7 +24,7 @@ fun NavigationStack(modifier: Modifier = Modifier) {
             LoginScreen(navController = navController)
         }
         composable(
-            route = "changePassword?requiresChange={requiresChange}&email={email}",
+            route = Screen.ChangePassword.route,
             arguments = listOf(
                 navArgument("requiresChange") {
                     type = NavType.BoolType
@@ -32,13 +32,17 @@ fun NavigationStack(modifier: Modifier = Modifier) {
                 },
                 navArgument("email") {
                     type = NavType.StringType
+                    defaultValue = ""
                 }
             )
         ) {
-            ChangeDefaultPasswordScreen(navController)
+            ChangePasswordScreen(navController)
         }
-        composable(route = Screen.Home.route){
-            HomeScreen()
+        composable(
+            route = Screen.Dashboard.route,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            DashboardScreen(navController)
         }
     }
 }

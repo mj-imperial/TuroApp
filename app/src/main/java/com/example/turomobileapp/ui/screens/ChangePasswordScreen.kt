@@ -36,13 +36,14 @@ import com.example.turomobileapp.viewmodels.authentication.ChangePasswordViewMod
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun ChangeDefaultPasswordScreen(
+fun ChangePasswordScreen(
     navController: NavController,
     viewModel: ChangePasswordViewModel = hiltViewModel(),
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
     val requiresPasswordChange by viewModel.requiresChange.collectAsState()
+    val cooldown by viewModel.cooldownRemaining.collectAsState()
 
     if (uiState.resetStep == ResetStep.LOADING) {
         Box(
@@ -75,8 +76,8 @@ fun ChangeDefaultPasswordScreen(
 
         LaunchedEffect(uiState.passwordChangeResult) {
             if (uiState.passwordChangeResult == Result.Success(Unit)) {
-                navController.navigate(Screen.Home.route) {
-                    popUpTo(Screen.Login.route) { inclusive = true }
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(0) { inclusive = true }
                 }
                 viewModel.resetPasswordChangeResult()
             }
@@ -113,7 +114,8 @@ fun ChangeDefaultPasswordScreen(
                                 title = title,
                                 body = body,
                                 heading3Size = heading3Size,
-                                subtitle = subtitle
+                                subtitle = subtitle,
+                                cooldownRemaining = cooldown,
                             )
                         }
                         ResetStep.CODE_INPUT  -> {

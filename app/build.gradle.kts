@@ -97,6 +97,9 @@ dependencies {
 
     //splash screen
     implementation(libs.androidx.core.splashscreen)
+
+    //add more icons
+    implementation(libs.androidx.material.icons.extended)
 }
 
 kapt { correctErrorTypes = true }

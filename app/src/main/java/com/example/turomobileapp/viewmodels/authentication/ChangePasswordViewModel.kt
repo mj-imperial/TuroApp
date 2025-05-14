@@ -1,19 +1,17 @@
 package com.example.turomobileapp.viewmodels.authentication
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.enums.ResetStep
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.User
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.repositories.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,6 +21,9 @@ class ChangePasswordViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private val _cooldownRemaining = MutableStateFlow(0)
+    val cooldownRemaining: StateFlow<Int> = _cooldownRemaining.asStateFlow()
 
     private val _userId = MutableStateFlow<String>(savedStateHandle["userId"] ?: "")
     val userId: StateFlow<String> = _userId.asStateFlow()
@@ -84,6 +85,16 @@ class ChangePasswordViewModel @Inject constructor(
         }
     }
 
+    private fun startCooldown(seconds: Int) {
+        viewModelScope.launch {
+            _cooldownRemaining.value = seconds
+            while (_cooldownRemaining.value > 0) {
+                delay(1000L)
+                _cooldownRemaining.value -= 1
+            }
+        }
+    }
+
     fun sendRequestCode() {
         // Only used when resetStep == EMAIL_INPUT
         viewModelScope.launch {
@@ -103,6 +114,10 @@ class ChangePasswordViewModel @Inject constructor(
                         },
                         onFailure = { err ->
                             _uiState.update { it.copy(loading = false, errorMessage = err) }
+                            val match = Regex("""Please wait (\d+) seconds?""").find(err.toString())
+                            match?.groups?.get(1)?.value?.toIntOrNull()?.let { secs ->
+                                startCooldown(secs)
+                            }
                         },
                         onLoading = {
                             _uiState.update { it.copy(loading = true) }
@@ -211,5 +226,6 @@ data class ChangePasswordUiState(
     val passwordChangeResult: Result<Unit>? = null,
     val loading: Boolean = false,
     val errorMessage: String? = null,
-    val resetStep: ResetStep = ResetStep.PASSWORD_INPUT
+    val resetStep: ResetStep = ResetStep.PASSWORD_INPUT,
+    val coolDown: Int = 0
 )
