@@ -37,3 +37,21 @@ val navigationItems = listOf(
         route = Screen.Inbox.route
     )
 )
+
+//val sideNavigationItems = listOf(
+//    NavigationBarsItem(
+//        title = R.string.Files,
+//        icon = R.drawable.file_icon,
+//        route = Screen.Files.route,
+//    ),
+//    NavigationBarsItem(
+//        title = TODO(),
+//        icon = TODO(),
+//        route = TODO()
+//    ),
+//    NavigationBarsItem(
+//        title = TODO(),
+//        icon = TODO(),
+//        route = TODO()
+//    )
+//)

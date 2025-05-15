@@ -1,7 +1,10 @@
 package com.example.turomobileapp.ui.reusablefunctions
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -31,15 +34,20 @@ import com.example.turomobileapp.ui.theme.MainOrange
 fun BottomNavigationBar(
     navController: NavController,
     barHeight: Dp,
-    subtitle: TextUnit
+    caption: TextUnit
 ){
     NavigationBar(
         containerColor = MainRed,
         contentColor = MainWhite,
-        modifier = Modifier.padding(10.dp)
+        tonalElevation = 4.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
+
+        val iconSize = barHeight * 0.5f
 
         navigationItems.forEach { item ->
             val isSelected = currentRoute == item.route
@@ -47,11 +55,13 @@ fun BottomNavigationBar(
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
-                    navController.navigate(item.route){
-                        launchSingleTop = true
-                        restoreState    = true
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+                    if (!isSelected) {
+                        navController.navigate(item.route) {
+                            launchSingleTop = true
+                            restoreState    = true
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
                         }
                     }
                 },
@@ -60,13 +70,13 @@ fun BottomNavigationBar(
                         painter = painterResource(item.icon),
                         tint = if (isSelected) MainOrange else MainWhite,
                         contentDescription = stringResource(item.title),
-                        modifier = Modifier.padding(10.dp)
+                        modifier = Modifier.size(iconSize)
                     )
                 },
                 label = {
                     Text(
                         text = stringResource(item.title),
-                        fontSize = subtitle,
+                        fontSize = caption,
                         fontFamily = FontFamily(Font(R.font.alata)),
                         color = if (isSelected) MainOrange else MainWhite
                     )

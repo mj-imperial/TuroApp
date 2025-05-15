@@ -106,6 +106,11 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
             errorMessage = "Failed to reset password"
         )
 
+    fun setTermsAgreementStatus(userId: String, agreed: Boolean): Flow<Result<ApiResponse>> =
+        handleApiResponse(
+            call = { userApiService.setTermsAgreementStatus(userId, agreed) },
+            errorMessage = "Failed to set terms agreement status for $userId"
+        )
 
     fun getDefaultPasswordChangeStatus(userId: String): Flow<Result<Boolean>> = flow {
         handleApiResponse(
@@ -118,13 +123,6 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
         handleApiResponse(
             call = { userApiService.getUserById(userId) },
             errorMessage = "Failed to get user $userId"
-        )
-    }
-
-    fun setTermsAgreementStatus(userId: String, agreed: Boolean): Flow<Result<Unit>> = flow {
-        handleApiResponse(
-            call = { userApiService.setTermsAgreementStatus(userId, agreed) },
-            errorMessage = "Failed to set terms agreement status for $userId"
         )
     }
 

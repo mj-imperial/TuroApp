@@ -18,8 +18,19 @@
     <string name="Sending">SENDING…</string>
     <string name="Dashboard">DASHBOARD</string>
     <string name="Calendar">CALENDAR</string>
-    <string name="MiniGames">MINI GAMES</string>
+    <string name="MiniGames">GAMES</string>
     <string name="Leaderboard">LEADERBOARD</string>
     <string name="Inbox">INBOX</string>
     <string name="CheckInbox">Note: The code may be sent in the spam folder.</string>
+    <string name="Files">FILES</string>
+    <string name="Logout">LOG OUT</string>
+    <string name="Confidentiality">Confidentiality Agreement</string>
+    <string name="ConfidentialityP1">The Turo Tutorship Platform collects and processes certain user data to provide personalized educational content and gamified learning experiences. This includes your quiz scores, learning progress, and activity logs.</string>
+    <string name="ConfidentialityP2">By continuing, you acknowledge and consent to the collection of this data for the purpose of improving the educational experience and contributing to academic research.</string>
+    <string name="ConfidentialityP3">All personal data will be securely stored and handled only by authorized team members involved in the project. Your personal identity will not be revealed in any public report, paper, or publication related to this system.</string>
+    <string name="ConfidentialityP4">We are committed to protecting your privacy and will never share your information with outside parties.</string>
+    <string name="ConfidentialityP5">If you agree with this policy, please confirm below.</string>
+    <string name="Understand">I understand and agree to the confidentiality and data privacy policy.</string>
+    <string name="NotUnderstand">I do not understand and agree the confidentiality and data privacy policy.</string>
+    <string name="Submit">SUBMIT</string>
 </resources>

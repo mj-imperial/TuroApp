@@ -115,7 +115,7 @@ fun ChangePasswordScreen(
                                 body = body,
                                 heading3Size = heading3Size,
                                 subtitle = subtitle,
-                                cooldownRemaining = cooldown,
+                                cooldownRemaining = cooldown
                             )
                         }
                         ResetStep.CODE_INPUT  -> {
@@ -126,7 +126,9 @@ fun ChangePasswordScreen(
                                 onVerifyCode = viewModel::verifyResetCode,
                                 title = title,
                                 body = body,
-                                heading3Size = heading3Size
+                                heading3Size = heading3Size,
+                                cooldownRemaining = cooldown,
+                                subtitle = subtitle
                             )
                         }
                         ResetStep.PASSWORD_INPUT -> {

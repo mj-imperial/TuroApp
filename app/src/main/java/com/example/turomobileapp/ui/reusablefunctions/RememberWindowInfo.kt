@@ -77,6 +77,11 @@ object ResponsiveFont {
         WindowInfo.WindowType.Medium   -> 14.sp
         WindowInfo.WindowType.Expanded -> 16.sp
     }
+    @Composable fun caption(window: WindowInfo): TextUnit = when (window.screenWidthInfo) {
+        WindowInfo.WindowType.Compact  -> 8.sp
+        WindowInfo.WindowType.Medium   -> 10.sp
+        WindowInfo.WindowType.Expanded -> 12.sp
+    }
 }
 
 

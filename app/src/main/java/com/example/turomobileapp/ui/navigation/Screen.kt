@@ -11,10 +11,18 @@ sealed class Screen(val route: String) {
         fun createRoute(requiresChange: Boolean, email: String) =
             "changePassword?requiresChange=$requiresChange&email=${Uri.encode(email)}"
     }
-    object Dashboard: Screen("dashboard_screen/{userId}")
+    object TermsAgreement: Screen("terms_agreement_screen/{userId}/{agreedToTerms}"){
+        fun createRoute(userId: String, agreedToTerms: Boolean) =
+            "terms_agreement_screen/$userId/$agreedToTerms"
+    }
+    object Dashboard: Screen("dashboard_screen/{userId}"){
+        fun createRoute(userId: String) =
+            "dashboard_screen/$userId"
+    }
     object Calendar: Screen("calendar_screen")
     object MiniGames: Screen("mini_games_screen")
     object Leaderboard: Screen("leaderboard_screen")
     object Inbox: Screen("inbox_screen")
     object Notification: Screen("notification_screen")
+    object Files: Screen("files_screen")
 }

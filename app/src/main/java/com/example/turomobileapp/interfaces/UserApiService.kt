@@ -2,11 +2,10 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Admin
 import com.example.turomobileapp.models.ApiResponse
-import com.example.turomobileapp.models.LoginResponse
+import com.example.turomobileapp.models.UserResponse
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
-import com.example.turomobileapp.models.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -28,7 +27,7 @@ interface UserApiService {
     suspend fun login(
         @Field("email") userEmail: String,
         @Field("password") password: String
-    ): Response<LoginResponse>
+    ): Response<UserResponse>
 
     @POST("/logout")
     suspend fun logout(): Response<ResponseBody>
@@ -95,10 +94,11 @@ interface UserApiService {
         @Part file: MultipartBody.Part
     ): Response<ResponseBody>
 
-    @PATCH("/users/{userId}/termsAgreement")
+    @FormUrlEncoded
+    @POST("terms_and_agreement.php")
     suspend fun setTermsAgreementStatus(
-        @Path("userId") userId: String,
-        @Query("agreedToTerms") agreedToTerms: Boolean
-    ): Response<ResponseBody>
+        @Field("user_id") userId: String,
+        @Field("agreed_to_terms") agreedToTerms: Boolean
+    ): Response<ApiResponse>
 
 }

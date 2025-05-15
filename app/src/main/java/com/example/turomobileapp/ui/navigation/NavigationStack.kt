@@ -11,6 +11,7 @@ import com.example.turomobileapp.ui.screens.ChangePasswordScreen
 import com.example.turomobileapp.ui.screens.DashboardScreen
 import com.example.turomobileapp.ui.screens.LoginScreen
 import com.example.turomobileapp.ui.screens.SplashScreen
+import com.example.turomobileapp.ui.screens.TermsAgreementScreen
 
 @Composable
 fun NavigationStack(modifier: Modifier = Modifier) {
@@ -39,9 +40,26 @@ fun NavigationStack(modifier: Modifier = Modifier) {
             ChangePasswordScreen(navController)
         }
         composable(
+            route = Screen.TermsAgreement.route,
+            arguments = listOf(
+                navArgument("userId") {
+                    type = NavType.StringType
+                },
+                navArgument("agreedToTerms") {
+                    type = NavType.BoolType
+                }
+            )
+        ) {
+            TermsAgreementScreen(navController)
+        }
+        composable(
             route = Screen.Dashboard.route,
-            arguments = listOf(navArgument("userId") { type = NavType.StringType })
-        ) { backStackEntry ->
+            arguments = listOf(
+                navArgument("userId") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
             DashboardScreen(navController)
         }
     }

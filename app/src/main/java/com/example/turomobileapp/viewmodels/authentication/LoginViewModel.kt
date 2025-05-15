@@ -74,10 +74,13 @@ class LoginViewModel @Inject constructor(
                         savedStateHandle["userId"] = user.userId
                         savedStateHandle["email"] = user.email
                         savedStateHandle["requiresChange"] = user.requiresPasswordChange
+                        savedStateHandle["agreedToTerms"] = user.agreedToTerms
                         _eventFlow.tryEmit(LoginEvent.ShowToast("Login successful"))
                         if (user.requiresPasswordChange) {
                             _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,user.email,true))
-                        } else {
+                        } else if (!user.agreedToTerms) {
+                            _eventFlow.tryEmit(LoginEvent.NavigateToTermsAgreement(user.userId, user.agreedToTerms))
+                        }else{
                             _eventFlow.tryEmit(LoginEvent.NavigateToDashboard(user.userId))
                         }
                     },
@@ -111,6 +114,9 @@ class LoginViewModel @Inject constructor(
                 it.copy(loggedInUser = null, email = "", password = "")
             }
             savedStateHandle["userId"] = ""
+            savedStateHandle["email"] = ""
+            savedStateHandle["requiresChange"] = ""
+            savedStateHandle["agreedToTerms"] = ""
             _eventFlow.emit(LoginEvent.ShowToast("Logged out"))
         }
     }
@@ -130,6 +136,7 @@ data class LoginUiState(
 sealed class LoginEvent {
     data class ShowToast(val message: String) : LoginEvent()
     data class NavigateToChangeDefaultPassword(val userId: String, val email: String,val requiresChange: Boolean) : LoginEvent()
+    data class NavigateToTermsAgreement(val userId: String, val agreedToTerms: Boolean) : LoginEvent()
     data class NavigateToDashboard(val userId: String) : LoginEvent()
 }
 

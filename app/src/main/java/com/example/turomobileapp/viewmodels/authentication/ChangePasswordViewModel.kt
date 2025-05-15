@@ -111,6 +111,7 @@ class ChangePasswordViewModel @Inject constructor(
                         result = result,
                         onSuccess = {
                             _uiState.update { it.copy( loading = false, resetStep = ResetStep.CODE_INPUT) }
+                            startCooldown(10 * 60)
                         },
                         onFailure = { err ->
                             _uiState.update { it.copy(loading = false, errorMessage = err) }
@@ -142,6 +143,7 @@ class ChangePasswordViewModel @Inject constructor(
                         result = result,
                         onSuccess = {
                             _uiState.update { it.copy(loading = false, resetStep = ResetStep.PASSWORD_INPUT) }
+                            startCooldown(10 * 60)
                         },
                         onFailure = { err ->
                             _uiState.update { it.copy(loading = false, errorMessage = err) }

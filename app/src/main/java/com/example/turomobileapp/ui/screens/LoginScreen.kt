@@ -179,12 +179,21 @@ fun LoginScreen(
                     navController.navigate(route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
+                    viewModel.clearLoginSuccess()
                 }
                 is LoginEvent.NavigateToDashboard -> {
                     val route = "dashboard_screen/${event.userId}"
                     navController.navigate(route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
+                    viewModel.clearLoginSuccess()
+                }
+                is LoginEvent.NavigateToTermsAgreement -> {
+                   val route = "terms_agreement_screen/${event.userId}/${event.agreedToTerms}"
+                   navController.navigate(route){
+                       popUpTo(Screen.Login.route) { inclusive = true }
+                   }
+                    viewModel.clearLoginSuccess()
                 }
             }
         }

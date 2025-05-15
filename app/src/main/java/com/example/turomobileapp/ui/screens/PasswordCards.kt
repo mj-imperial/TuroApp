@@ -381,7 +381,7 @@ fun EmailStep(
         CapsuleButton(
             text = {
                 Text(
-                    text = if (loading) "WAIT $timerText" else "SEND CODE",
+                    text = if (loading) "WAIT" else "SEND CODE",
                     fontSize = heading3Size,
                     fontFamily = FontFamily(Font(R.font.alata))
                 )
@@ -449,10 +449,16 @@ fun CodeStep(
     loading: Boolean,
     errorMessage: String?,
     onCodeChange: (String) -> Unit,
-    onVerifyCode: () -> Unit
+    onVerifyCode: () -> Unit,
+    cooldownRemaining: Int,
+    subtitle: TextUnit
 ) {
     val focusRequesters = remember { List(6) { FocusRequester() } }
     val chars = remember { List(6) { mutableStateOf("") } }
+
+    val minutes = cooldownRemaining / 60
+    val seconds = cooldownRemaining % 60
+    val timerText = String.format("%02d:%02d", minutes, seconds)
 
     Text(
         text = stringResource(R.string.EnterEmailCode),
@@ -528,39 +534,63 @@ fun CodeStep(
         )
     }
 
-    CapsuleButton(
-        text = {
-            if (loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = Color.White,
-                    strokeWidth = 2.dp
-                )
-            } else {
-                Text(
-                    text = stringResource(R.string.EnterEmailCode),
-                    fontSize = heading3Size,
-                    fontFamily = FontFamily(Font(R.font.alata))
-                )
-            }
-        },
-        onClick = {
-            onVerifyCode()
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp),
-        roundedCornerShape = 24.dp,
-        buttonElevation = ButtonDefaults.buttonElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 2.dp,
-            disabledElevation = 0.dp
-        ),
-        buttonColors = ButtonDefaults.buttonColors(
-            containerColor = MainOrange,
-            contentColor = MainWhite
-        ),
-        enabled = !loading
-    )
+    Column {
+        CapsuleButton(
+            text = {
+                if (loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.EnterEmailCode),
+                        fontSize = heading3Size,
+                        fontFamily = FontFamily(Font(R.font.alata))
+                    )
+                }
+            },
+            onClick = {
+                onVerifyCode()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            roundedCornerShape = 24.dp,
+            buttonElevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 4.dp,
+                pressedElevation = 2.dp,
+                disabledElevation = 0.dp
+            ),
+            buttonColors = ButtonDefaults.buttonColors(
+                containerColor = MainOrange,
+                contentColor = MainWhite
+            ),
+            enabled = !loading
+        )
+
+        Text(
+            text = timerText,
+            color = LoginText,
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontSize = subtitle,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        )
+
+        Text(
+            text = stringResource(R.string.CheckInbox),
+            color = LoginText,
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontSize = subtitle,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        )
+    }
 }
 
