@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.User
 import com.example.turomobileapp.repositories.UserRepository
+import com.example.turomobileapp.viewmodels.shared.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -75,6 +77,7 @@ class LoginViewModel @Inject constructor(
                         savedStateHandle["email"] = user.email
                         savedStateHandle["requiresChange"] = user.requiresPasswordChange
                         savedStateHandle["agreedToTerms"] = user.agreedToTerms
+                        sessionManager.startSession(user.userId, user.agreedToTerms, user.requiresPasswordChange, user.email)
                         _eventFlow.tryEmit(LoginEvent.ShowToast("Login successful"))
                         if (user.requiresPasswordChange) {
                             _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,user.email,true))
@@ -117,6 +120,7 @@ class LoginViewModel @Inject constructor(
             savedStateHandle["email"] = ""
             savedStateHandle["requiresChange"] = ""
             savedStateHandle["agreedToTerms"] = ""
+            sessionManager.clearSession()
             _eventFlow.emit(LoginEvent.ShowToast("Logged out"))
         }
     }

@@ -1,8 +1,8 @@
 package com.example.turomobileapp.ui.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -22,28 +22,24 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.navigation.Screen
@@ -67,7 +63,6 @@ fun TermsAgreementScreen(
     var cardWidth = windowInfo.screenWidth * 0.9f
     val heading1 = ResponsiveFont.heading1(windowInfo)
     val heading2 = ResponsiveFont.heading2(windowInfo)
-    val subtitle = ResponsiveFont.subtitle(windowInfo)
     val paragraphList = listOf(
         stringResource(R.string.ConfidentialityP1),
         stringResource(R.string.ConfidentialityP2),
@@ -103,7 +98,6 @@ fun TermsAgreementScreen(
             cardHeight = cardHeight,
             heading1 = heading1,
             heading2 = heading2,
-            subtitle = subtitle,
             titlePaddings = titlePaddings,
             paragraphList = paragraphList,
             radioList = radioList,
@@ -115,15 +109,14 @@ fun TermsAgreementScreen(
         )
     }
 
+    val ctx = LocalContext.current
     LaunchedEffect(uiState.isAgreementSaved) {
         if (uiState.isAgreementSaved is Result.Success){
             navController.navigate(Screen.Dashboard.route){
                 popUpTo(0) { inclusive = true }
             }
         }else{
-            navController.navigate(Screen.Login.route){
-                popUpTo(0) { inclusive = true }
-            }
+            Toast.makeText(ctx, "Failed to save agreement, please try again", Toast.LENGTH_LONG).show()
         }
     }
 }
@@ -134,7 +127,6 @@ fun TermsCard(
     cardHeight: Dp,
     heading1: TextUnit,
     heading2: TextUnit,
-    subtitle: TextUnit,
     titlePaddings: Dp,
     paragraphList: List<String>,
     radioList: List<String>,
@@ -158,7 +150,8 @@ fun TermsCard(
                 .verticalScroll(rememberScrollState())
         ) {
             Column(
-                verticalArrangement = Arrangement.SpaceAround
+                verticalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = "Confidentiality Agreement",
@@ -181,7 +174,7 @@ fun TermsCard(
 
             Column(
                 verticalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.padding(top = titlePaddings)
+                modifier = Modifier.padding(top = titlePaddings).fillMaxWidth()
             ){
                 radioList.forEach { option ->
                     Row(
@@ -203,7 +196,7 @@ fun TermsCard(
                         )
                         Text(
                             text = option,
-                            fontSize = subtitle,
+                            fontSize = heading2,
                             fontFamily = FontFamily(Font(R.font.alexandria)),
                             modifier = Modifier.padding(start = 16.dp)
                         )
@@ -216,7 +209,7 @@ fun TermsCard(
                         )
                     },
                     onClick = {
-                        if (hasAgreed) saveAgreement
+                        if (hasAgreed) saveAgreement()
                     },
                     modifier = Modifier.height(40.dp).width(100.dp).align(Alignment.CenterHorizontally),
                     roundedCornerShape = 24.dp,

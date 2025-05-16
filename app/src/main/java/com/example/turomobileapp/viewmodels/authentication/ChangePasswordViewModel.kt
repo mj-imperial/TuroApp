@@ -1,12 +1,12 @@
 package com.example.turomobileapp.viewmodels.authentication
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.enums.ResetStep
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.repositories.UserRepository
+import com.example.turomobileapp.viewmodels.shared.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,25 +19,21 @@ import javax.inject.Inject
 @HiltViewModel
 class ChangePasswordViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _cooldownRemaining = MutableStateFlow(0)
     val cooldownRemaining: StateFlow<Int> = _cooldownRemaining.asStateFlow()
 
-    private val _userId = MutableStateFlow<String>(savedStateHandle["userId"] ?: "")
-    val userId: StateFlow<String> = _userId.asStateFlow()
-
     //Read the nav‐arg into a simple Boolean
-    private val _requiresChange = MutableStateFlow<Boolean>(savedStateHandle.get<Boolean>("requiresChange") != false)
-    val requiresChange: StateFlow<Boolean> = _requiresChange.asStateFlow()
+    val requiresChange: StateFlow<Boolean?> = sessionManager.requiresPasswordChange
 
-    private val _initialEmail = MutableStateFlow<String>(savedStateHandle["email"] ?: "")
+    private val _initialEmail = sessionManager.email
 
     // Seed UI state’s first screen
     private val _uiState = MutableStateFlow(
         ChangePasswordUiState(
-            resetStep = if (_requiresChange.value) {
+            resetStep = if (requiresChange.value == true) {
                 ResetStep.PASSWORD_INPUT    // old→new→confirm
             } else {
                 ResetStep.EMAIL_INPUT       // email→code→new→confirm
@@ -47,8 +43,8 @@ class ChangePasswordViewModel @Inject constructor(
     val uiState: StateFlow<ChangePasswordUiState> = _uiState.asStateFlow()
 
     init {
-        if (_requiresChange.value) {
-            _uiState.update { it.copy(email = _initialEmail.value) }
+        if (requiresChange.value == true) {
+            _uiState.update { it.copy(email = _initialEmail.value.toString()) }
         }
     }
 

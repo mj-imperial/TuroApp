@@ -2,10 +2,10 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Admin
 import com.example.turomobileapp.models.ApiResponse
-import com.example.turomobileapp.models.UserResponse
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
 import com.example.turomobileapp.models.User
+import com.example.turomobileapp.models.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response

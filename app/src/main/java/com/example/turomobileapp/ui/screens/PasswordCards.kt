@@ -19,9 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults.colors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,7 +31,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.stringResource
@@ -53,8 +50,6 @@ import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.SoftGray
-import kotlinx.coroutines.delay
-import kotlin.coroutines.CoroutineContext.Key
 
 @Composable
 fun PasswordCard(
@@ -70,7 +65,7 @@ fun PasswordCard(
     onChangeConfirmPassword: (String) -> Unit,
     onChangePassword: () -> Unit,
     errorMessage: String?,
-    requiresPasswordChange: Boolean
+    requiresPasswordChange: Boolean?
 ){
     val passwordFocusRequester = remember { FocusRequester() }
 
@@ -82,7 +77,7 @@ fun PasswordCard(
         textAlign = TextAlign.Center
     )
 
-    if (requiresPasswordChange){
+    if (requiresPasswordChange == true){
         CapsuleTextField(
             value = oldPassword,
             onValueChange = { newOldPassword ->

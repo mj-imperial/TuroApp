@@ -2,11 +2,9 @@ package com.example.turomobileapp.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.turomobileapp.ui.screens.ChangePasswordScreen
 import com.example.turomobileapp.ui.screens.DashboardScreen
 import com.example.turomobileapp.ui.screens.LoginScreen
@@ -24,42 +22,13 @@ fun NavigationStack(modifier: Modifier = Modifier) {
         composable(Screen.Login.route) {
             LoginScreen(navController = navController)
         }
-        composable(
-            route = Screen.ChangePassword.route,
-            arguments = listOf(
-                navArgument("requiresChange") {
-                    type = NavType.BoolType
-                    defaultValue = false
-                },
-                navArgument("email") {
-                    type = NavType.StringType
-                    defaultValue = ""
-                }
-            )
-        ) {
+        composable(Screen.ChangePassword.route) {
             ChangePasswordScreen(navController)
         }
-        composable(
-            route = Screen.TermsAgreement.route,
-            arguments = listOf(
-                navArgument("userId") {
-                    type = NavType.StringType
-                },
-                navArgument("agreedToTerms") {
-                    type = NavType.BoolType
-                }
-            )
-        ) {
+        composable(Screen.TermsAgreement.route) {
             TermsAgreementScreen(navController)
         }
-        composable(
-            route = Screen.Dashboard.route,
-            arguments = listOf(
-                navArgument("userId") {
-                    type = NavType.StringType
-                }
-            )
-        ) {
+        composable(Screen.Dashboard.route) {
             DashboardScreen(navController)
         }
     }

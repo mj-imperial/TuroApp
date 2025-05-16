@@ -1,11 +1,11 @@
 package com.example.turomobileapp.viewmodels.authentication
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.repositories.UserRepository
+import com.example.turomobileapp.viewmodels.shared.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,16 +17,15 @@ import javax.inject.Inject
 @HiltViewModel
 class AgreementTermsViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val sessionManager: SessionManager
 ): ViewModel(){
 
-    private val _userId = MutableStateFlow<String>(savedStateHandle["userId"] ?: "")
-    val userId: StateFlow<String> = _userId.asStateFlow()
+    private val _userId: StateFlow<String?> = sessionManager.userId
 
-    private val _hasAgreed = MutableStateFlow<Boolean>(savedStateHandle.get<Boolean>("agreedToTerms") != false)
+    private val _hasAgreed: StateFlow<Boolean?> = sessionManager.agreedToTerms
 
     private val _uiState = MutableStateFlow(
-        AgreementTermsUIState(hasAgreed = _hasAgreed.value)
+        AgreementTermsUIState(hasAgreed = _hasAgreed.value == true)
     )
     val uiState: StateFlow<AgreementTermsUIState> = _uiState.asStateFlow()
 
@@ -38,7 +37,7 @@ class AgreementTermsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
             
-            userRepository.setTermsAgreementStatus(_userId.value, _uiState.value.hasAgreed).collect { result ->
+            userRepository.setTermsAgreementStatus(_userId.value.toString(), _uiState.value.hasAgreed).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = {
