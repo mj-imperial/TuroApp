@@ -46,6 +46,7 @@ try {
             u.last_name,
             u.requires_password_change,
             u.role_id,
+            u.agreed_to_terms,
             r.role_name
         FROM `user` AS u
         JOIN `userrole` AS r
@@ -63,6 +64,7 @@ try {
         $lastName,
         $requiresPasswordChange,
         $roleId,
+        $agreedToTerms,
         $roleName
     );
 
@@ -86,4 +88,14 @@ if (! password_verify($password, $passwordHash)) {
 $_SESSION['user_id'] = $userId;
 
 ob_end_clean();
-jsonResponse([ 'success' => true, 'user_id' => $userId, 'email' => $emailFromDb, 'first_name'  => $firstName, 'last_name' => $lastName, 'role_id'   => $roleId, 'role'  => $roleName, 'requires_password_change' => (bool) $requiresPasswordChange ]);
+jsonResponse([ 
+    'success' => true, 
+    'user_id' => $userId, 
+    'email' => $emailFromDb, 
+    'first_name'  => $firstName, 
+    'last_name' => $lastName, 
+    'role_id'   => $roleId, 
+    'agreed_to_terms' => (bool) $agreedToTerms,
+    'role'  => $roleName, 
+    'requires_password_change' => (bool) $requiresPasswordChange 
+]);
