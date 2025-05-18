@@ -1,6 +1,5 @@
 package com.example.turomobileapp.interfaces
 
-import com.example.turomobileapp.models.Admin
 import com.example.turomobileapp.models.ApiResponse
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
@@ -29,7 +28,7 @@ interface UserApiService {
         @Field("password") password: String
     ): Response<UserResponse>
 
-    @POST("/logout")
+    @POST("logout.php")
     suspend fun logout(): Response<ResponseBody>
 
     @GET("get_user_by_id.php")
@@ -47,9 +46,6 @@ interface UserApiService {
 
     @GET("/students")
     suspend fun getAllStudents(): Response<List<Student>>
-
-    @GET("/admins")
-    suspend fun getAllAdmins(): Response<List<Admin>>
 
     @FormUrlEncoded
     @POST("request_password_reset.php")

@@ -31,10 +31,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.components.ResponsiveFont
+import com.example.turomobileapp.ui.components.WindowInfo
+import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
-import com.example.turomobileapp.ui.reusablefunctions.ResponsiveFont
-import com.example.turomobileapp.ui.reusablefunctions.WindowInfo
-import com.example.turomobileapp.ui.reusablefunctions.rememberWindowInfo
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite

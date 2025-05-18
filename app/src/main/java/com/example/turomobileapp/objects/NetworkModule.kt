@@ -1,5 +1,6 @@
 package com.example.turomobileapp.objects
 
+import android.util.Log
 import com.example.turomobileapp.interfaces.AchievementsApiService
 import com.example.turomobileapp.interfaces.ActivityApiService
 import com.example.turomobileapp.interfaces.AssessmentResultApiService
@@ -65,12 +66,19 @@ object NetworkModule{
             .build()
     }
 
+    val logger = HttpLoggingInterceptor { msg -> Log.d("OKHTTP", msg) }
+        .apply { level = HttpLoggingInterceptor.Level.BODY }
+
+    val client = OkHttpClient.Builder()
+        .addInterceptor(logger)
+        .build()
+
     @Provides
     @Singleton
-    fun provideRetrofit(baseUrl: String, okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
+    fun provideRetrofit(baseUrl: String, moshi: Moshi): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
-            .client(okHttpClient)
+            .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
     }

@@ -1,11 +1,16 @@
 package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.helperfunctions.handleApiResponse
+import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.CourseApiService
 import com.example.turomobileapp.models.Course
+import com.example.turomobileapp.models.CourseResponse
+import com.example.turomobileapp.models.CoursesResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import kotlin.map
 
 class CourseRepository @Inject constructor(private val courseApiService: CourseApiService) {
 
@@ -23,38 +28,15 @@ class CourseRepository @Inject constructor(private val courseApiService: CourseA
         )
     }
 
-    fun createCourse(course: Course): Flow<Result<Course>> = flow {
-        handleApiResponse(
-            call = { courseApiService.createCourse(course) },
-            errorMessage = "Failed to create course $course"
+    fun getCoursesForStudent(userId: String): Flow<Result<List<CourseResponse>>> =
+        requestAndMap(
+            call = { courseApiService.getCoursesForStudent(action = "studentCourses", userId = userId) },
+            mapper = { dto -> dto.courses }
         )
-    }
 
-    fun updateCourse(courseId: String, course: Course): Flow<Result<Unit>> = flow {
-        handleApiResponse(
-            call = { courseApiService.updateCourse(courseId, course) },
-            errorMessage = "Failed to update course $courseId"
+    fun getCoursesForTeacher(userId: String): Flow<Result<List<CourseResponse>>> =
+        requestAndMap(
+            call = { courseApiService.getCoursesForTeacher(action = "teacherCourses", userId = userId) },
+            mapper = { dto -> dto.courses }
         )
-    }
-
-    fun deleteCourse(courseId: String): Flow<Result<Unit>> = flow {
-        handleApiResponse(
-            call = { courseApiService.deleteCourse(courseId) },
-            errorMessage = "Failed to delete course $courseId"
-        )
-    }
-
-    fun isCourseDuplicate(course: Course): Flow<Result<Boolean>> = flow {
-        handleApiResponse(
-            call = { courseApiService.isCourseDuplicate(course) },
-            errorMessage = "Failed to check course $course duplicate"
-        )
-    }
-
-    fun getCoursesForStudent(studentId: String): Flow<Result<List<Course>>> = flow {
-        handleApiResponse(
-            call = { courseApiService.getCoursesForStudent(studentId) },
-            errorMessage = "Failed to get courses for student $studentId"
-        )
-    }
 }

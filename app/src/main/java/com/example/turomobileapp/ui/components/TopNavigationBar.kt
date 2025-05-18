@@ -1,4 +1,4 @@
-package com.example.turomobileapp.ui.reusablefunctions
+package com.example.turomobileapp.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,6 +43,7 @@ fun TopNavigationBar(
     canNavigateBack: Boolean,
     navigateUp: () -> Unit = {},
     onNotificationClick: () -> Unit,
+    onHamburgerClick: () -> Unit,
     subtitle: TextUnit,
     body: TextUnit,
     modifier: Modifier = Modifier,
@@ -97,7 +98,7 @@ fun TopNavigationBar(
                     )
                 }
             }else{
-                IconButton(onClick = {TODO()}) {
+                IconButton(onClick = onHamburgerClick) {
                     Icon(
                         painter = painterResource(R.drawable.hamburger_icon),
                         tint = MainWhite,

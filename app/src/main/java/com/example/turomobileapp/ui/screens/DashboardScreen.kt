@@ -1,74 +1,184 @@
 package com.example.turomobileapp.ui.screens
 
+import AppScaffold
 import android.annotation.SuppressLint
+import android.util.Log
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.rememberDrawerState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import com.example.turomobileapp.R
+import com.example.turomobileapp.enums.UserRole
+import com.example.turomobileapp.models.CourseResponse
+import com.example.turomobileapp.ui.components.ResponsiveFont
+import com.example.turomobileapp.ui.components.WindowInfo
+import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
-import com.example.turomobileapp.ui.reusablefunctions.BottomNavigationBar
-import com.example.turomobileapp.ui.reusablefunctions.ResponsiveFont
-import com.example.turomobileapp.ui.reusablefunctions.TopNavigationBar
-import com.example.turomobileapp.ui.reusablefunctions.WindowInfo
-import com.example.turomobileapp.ui.reusablefunctions.rememberWindowInfo
-import com.example.turomobileapp.ui.theme.MainWhite
+import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.Text
+import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.shared.DashboardViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun DashboardScreen(
-    navController: NavController = rememberNavController()
+    navController: NavController,
+    sessionManager: SessionManager,
+    viewModel: DashboardViewModel = hiltViewModel()
 ){
+    val userId by sessionManager.userId.collectAsState(initial = "")
+    val roleStr by sessionManager.role.collectAsState(initial = "")
+    val role = if (roleStr == "STUDENT") UserRole.STUDENT else UserRole.TEACHER
+
+    LaunchedEffect(userId, roleStr) {
+        if (!userId.isNullOrBlank() && !roleStr.isNullOrBlank()) {
+            val id = userId!!
+            Log.d("DashboardScreen", "Loading courses for $id / $role")
+            viewModel.loadCourses(id, role)
+        }
+    }
+
     val windowInfo = rememberWindowInfo()
-    val body = ResponsiveFont.body(windowInfo)
-    val subtitle = ResponsiveFont.subtitle(windowInfo)
-    val caption = ResponsiveFont.caption(windowInfo)
     val barHeight = when(windowInfo.screenHeightInfo) {
         WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.10f
         WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.08f
         WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.06f
     }
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val cardHeight = when (windowInfo.screenHeightInfo) {
+        WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.25f
+        WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.20f
+        WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.15f
+    }
+    val uiState by viewModel.uiState.collectAsState()
+    val body = ResponsiveFont.body(windowInfo)
+    val subtitle = ResponsiveFont.subtitle(windowInfo)
 
-
-
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-
+    AppScaffold(
+        navController = navController,
+        barHeight = barHeight,
+        modifier = Modifier,
+        canNavigateBack = false,
+        windowInfo = windowInfo,
+        sessionManager = sessionManager,
+        content = { innerPadding ->
+            DashboardContent(
+                innerPadding = innerPadding,
+                cardHeight = cardHeight,
+                coursesList = uiState.courses,
+                body = body,
+                subtitle = subtitle,
+                navController = navController
+            )
         }
+    )
+}
+
+@Composable
+fun DashboardContent(
+    innerPadding: PaddingValues,
+    cardHeight: Dp,
+    coursesList: List<CourseResponse>,
+    body: TextUnit,
+    subtitle: TextUnit,
+    navController: NavController
+){
+    LazyVerticalGrid(
+        modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize(),
+        columns = GridCells.Adaptive(minSize = 160.dp),
+        contentPadding = PaddingValues(15.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Scaffold(
-            topBar = {
-                TopNavigationBar(
-                    canNavigateBack = false,
-                    body = body,
-                    subtitle = subtitle,
-                    barHeight = barHeight,
-                    onNotificationClick = {
-                        navController.navigate(Screen.Notification.route)
-                    },
-                    hasNotification = false //TODO add notification logic
-                )
-            },
-            bottomBar = { BottomNavigationBar(navController, barHeight, caption) },
-            containerColor = MainWhite,
-        ) { padding ->
-            Column(modifier = Modifier.padding(padding)) {  }
+        items(items = coursesList, key = {it.courseId}){ course ->
+            DashboardItem(
+                courseName = course.courseName,
+                courseCode = course.courseCode,
+                coursePic = course.coursePicture,
+                cardHeight = cardHeight,
+                onCardClick = {
+                    navController.navigate(Screen.CourseDetail.createRoute(course.courseId))
+                },
+                body = body,
+                subtitle = subtitle
+            )
         }
     }
-
-
 }
 
-@Preview
 @Composable
-fun DashboardPreview(){
-    DashboardScreen()
+fun DashboardItem(
+    courseName: String,
+    courseCode: String,
+    coursePic: String,
+    cardHeight: Dp,
+    onCardClick: () -> Unit,
+    body: TextUnit,
+    subtitle: TextUnit
+){
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(cardHeight)
+            .clickable(onClick = onCardClick),
+        shape = RoundedCornerShape(10.dp),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        AsyncImage(
+            model = coursePic,
+            contentDescription = "Course Picture",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .weight(6f)
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(4f)
+                .padding(10.dp)
+        ) {
+            Text(
+                text = courseName,
+                color = Text,
+                fontSize = body,
+                fontFamily = FontFamily(Font(R.font.alata)),
+            )
+
+            Text(
+                text = courseCode,
+                color = Text,
+                fontSize = subtitle,
+                fontFamily = FontFamily(Font(R.font.alata)),
+            )
+        }
+    }
 }
+
+

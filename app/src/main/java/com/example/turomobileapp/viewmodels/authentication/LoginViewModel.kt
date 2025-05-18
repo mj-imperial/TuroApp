@@ -1,12 +1,11 @@
 package com.example.turomobileapp.viewmodels.authentication
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.User
 import com.example.turomobileapp.repositories.UserRepository
-import com.example.turomobileapp.viewmodels.shared.SessionManager
+import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +20,6 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val savedStateHandle: SavedStateHandle,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
@@ -73,15 +71,20 @@ class LoginViewModel @Inject constructor(
                                 loginSuccess = true
                             )
                         }
-                        savedStateHandle["userId"] = user.userId
-                        savedStateHandle["email"] = user.email
-                        savedStateHandle["requiresChange"] = user.requiresPasswordChange
-                        savedStateHandle["agreedToTerms"] = user.agreedToTerms
-                        sessionManager.startSession(user.userId, user.agreedToTerms, user.requiresPasswordChange, user.email)
+                        sessionManager.startSession(
+                            user.userId,
+                            user.agreedToTerms,
+                            user.requiresPasswordChange,
+                            user.email,
+                            user.firstName,
+                            user.lastName,
+                            user.profilePic.toString(),
+                            user.role.toString()
+                        )
                         _eventFlow.tryEmit(LoginEvent.ShowToast("Login successful"))
-                        if (user.requiresPasswordChange) {
+                        if (sessionManager.requiresPasswordChange.value == true) {
                             _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,user.email,true))
-                        } else if (!user.agreedToTerms) {
+                        } else if (sessionManager.agreedToTerms.value == false) {
                             _eventFlow.tryEmit(LoginEvent.NavigateToTermsAgreement(user.userId, user.agreedToTerms))
                         }else{
                             _eventFlow.tryEmit(LoginEvent.NavigateToDashboard(user.userId))
@@ -116,10 +119,6 @@ class LoginViewModel @Inject constructor(
             _uiState.update {
                 it.copy(loggedInUser = null, email = "", password = "")
             }
-            savedStateHandle["userId"] = ""
-            savedStateHandle["email"] = ""
-            savedStateHandle["requiresChange"] = ""
-            savedStateHandle["agreedToTerms"] = ""
             sessionManager.clearSession()
             _eventFlow.emit(LoginEvent.ShowToast("Logged out"))
         }

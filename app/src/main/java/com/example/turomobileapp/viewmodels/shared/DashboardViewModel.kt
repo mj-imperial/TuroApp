@@ -1,13 +1,65 @@
 package com.example.turomobileapp.viewmodels.shared
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.turomobileapp.enums.UserRole
+import com.example.turomobileapp.helperfunctions.handleResult
+import com.example.turomobileapp.models.CourseResponse
+import com.example.turomobileapp.repositories.CourseRepository
+import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AgreementTermsViewModel @Inject constructor(
+class DashboardViewModel @Inject constructor(
+    private val courseRepository: CourseRepository,
     private val sessionManager: SessionManager
 ): ViewModel(){
-    private val _userId: StateFlow<String?> = sessionManager.userId
+
+    private val _uiState = MutableStateFlow(DashboardUIState())
+    val uiState: StateFlow<DashboardUIState> = _uiState.asStateFlow()
+
+    fun loadCourses(userId: String, role: UserRole){
+        viewModelScope.launch {
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
+
+            if (role == UserRole.STUDENT){
+                courseRepository.getCoursesForStudent(userId.toString()).collect { result ->
+                    handleResult(
+                        result = result,
+                        onSuccess = { courses ->
+                            _uiState.update { it.copy(loading = false, courses = courses) }
+                        },
+                        onFailure = { err ->
+                            _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        }
+                    )
+                }
+            }else if(role == UserRole.TEACHER){
+                courseRepository.getCoursesForTeacher(userId.toString()).collect { result ->
+                    handleResult(
+                        result = result,
+                        onSuccess = { courses ->
+                            _uiState.update { it.copy(loading = false, courses = courses) }
+                        },
+                        onFailure = { err ->
+                            _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
+
+data class DashboardUIState(
+    val loading: Boolean = false,
+    val errorMessage: String? = null,
+    val courses: List<CourseResponse> = emptyList(),
+    val role: UserRole = UserRole.STUDENT
+)

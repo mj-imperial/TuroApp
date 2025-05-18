@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName")
 
-package com.example.turomobileapp.ui.reusablefunctions
+package com.example.turomobileapp.ui.components
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions

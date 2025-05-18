@@ -26,10 +26,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.enums.ResetStep
 import com.example.turomobileapp.repositories.Result
+import com.example.turomobileapp.ui.components.ResponsiveFont
+import com.example.turomobileapp.ui.components.WindowInfo
+import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
-import com.example.turomobileapp.ui.reusablefunctions.ResponsiveFont
-import com.example.turomobileapp.ui.reusablefunctions.WindowInfo
-import com.example.turomobileapp.ui.reusablefunctions.rememberWindowInfo
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.viewmodels.authentication.ChangePasswordViewModel
@@ -42,7 +42,7 @@ fun ChangePasswordScreen(
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
-    val requiresPasswordChange by viewModel.requiresChange.collectAsState(initial = false)
+    val requiresPasswordChange by viewModel.requiresChange.collectAsState()
     val cooldown by viewModel.cooldownRemaining.collectAsState()
 
     if (uiState.resetStep == ResetStep.LOADING) {

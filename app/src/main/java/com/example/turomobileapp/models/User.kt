@@ -52,19 +52,6 @@ data class Teacher(
 ): User(userId, firstName, lastName, email, role, profilePic, agreedToTerms, requiresPasswordChange, calendarEvents)
 
 @JsonClass(generateAdapter = true)
-data class Admin(
-    @SerializedName("user_id") override val userId: String,
-    @SerializedName("first_name") override val firstName: String,
-    @SerializedName("last_name") override val lastName: String,
-    @SerializedName("email") override val email: String,
-    @SerializedName("role") override val role: UserRole = UserRole.ADMIN,
-    @SerializedName("profile_pic") override val profilePic: String? = null,
-    @SerializedName("agreedToTerms") override var agreedToTerms: Boolean = false,
-    @SerializedName("requiresPasswordChange") override var requiresPasswordChange: Boolean = true,
-    @SerializedName("calendar_events") override val calendarEvents: List<CalendarEvent> = emptyList(),
-): User(userId, firstName, lastName, email, role, profilePic, agreedToTerms, requiresPasswordChange, calendarEvents)
-
-@JsonClass(generateAdapter = true)
 data class UserResponse(
     @Json(name = "user_id") val userId: String,
     @Json(name = "first_name") val firstName: String,
@@ -74,7 +61,8 @@ data class UserResponse(
     @Json(name = "requires_password_change") val requiresPasswordChange: Boolean,
     @Json(name = "success") val success: Boolean,
     @Json(name = "email") val email: String,
-    @Json(name = "agreed_to_terms") val agreedToTerms: Boolean
+    @Json(name = "agreed_to_terms") val agreedToTerms: Boolean,
+    @Json(name = "profile_pic") val profilePic: String?
 )
 
 @JsonClass(generateAdapter = true)

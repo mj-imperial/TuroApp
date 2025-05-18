@@ -1,4 +1,4 @@
-package com.example.turomobileapp.ui.reusablefunctions
+package com.example.turomobileapp.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

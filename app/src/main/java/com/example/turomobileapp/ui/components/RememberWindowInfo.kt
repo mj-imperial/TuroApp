@@ -1,4 +1,4 @@
-package com.example.turomobileapp.ui.reusablefunctions
+package com.example.turomobileapp.ui.components
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable

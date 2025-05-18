@@ -38,20 +38,21 @@ val navigationItems = listOf(
     )
 )
 
-//val sideNavigationItems = listOf(
-//    NavigationBarsItem(
-//        title = R.string.Files,
-//        icon = R.drawable.file_icon,
-//        route = Screen.Files.route,
-//    ),
-//    NavigationBarsItem(
-//        title = TODO(),
-//        icon = TODO(),
-//        route = TODO()
-//    ),
-//    NavigationBarsItem(
-//        title = TODO(),
-//        icon = TODO(),
-//        route = TODO()
-//    )
-//)
+val sideNavigationItems = listOf(
+    NavigationBarsItem(
+        title = R.string.Help,
+        icon = R.drawable.help_icon,
+        route = Screen.Help.route
+    ),
+    NavigationBarsItem(
+        title = R.string.Shop,
+        icon = R.drawable.shop_icon,
+        route = Screen.Shop.route
+    ),
+    NavigationBarsItem(
+        title = R.string.Logout,
+        icon = R.drawable.logout_icon,
+        route = Screen.Login.route
+    )
+
+)

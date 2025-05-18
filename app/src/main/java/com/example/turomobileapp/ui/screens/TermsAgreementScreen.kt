@@ -42,11 +42,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.repositories.Result
+import com.example.turomobileapp.ui.components.CapsuleButton
+import com.example.turomobileapp.ui.components.ResponsiveFont
+import com.example.turomobileapp.ui.components.WindowInfo
+import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
-import com.example.turomobileapp.ui.reusablefunctions.CapsuleButton
-import com.example.turomobileapp.ui.reusablefunctions.ResponsiveFont
-import com.example.turomobileapp.ui.reusablefunctions.WindowInfo
-import com.example.turomobileapp.ui.reusablefunctions.rememberWindowInfo
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
@@ -186,6 +186,7 @@ fun TermsCard(
                                     setAgreed(option == radioList[0])
                                 }
                             )
+                            .padding(bottom = titlePaddings)
                     ) {
                         RadioButton(
                             selected = (hasAgreed && option == radioList[0]) || (!hasAgreed && option == radioList[1]),
@@ -228,9 +229,3 @@ fun TermsCard(
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun TermsAgreementPreview(){
-//    TermsAgreementScreen()
-//}

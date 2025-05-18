@@ -12,10 +12,14 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.example.turomobileapp.ui.navigation.NavigationStack
 import com.example.turomobileapp.ui.theme.TuroMobileAppTheme
+import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var sessionManager: SessionManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -25,7 +29,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TuroMobileAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavigationStack(modifier = Modifier.padding(innerPadding))
+                    NavigationStack(modifier = Modifier.padding(innerPadding), sessionManager = sessionManager)
                 }
             }
         }

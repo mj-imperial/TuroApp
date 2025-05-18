@@ -8,11 +8,16 @@ import androidx.navigation.compose.rememberNavController
 import com.example.turomobileapp.ui.screens.ChangePasswordScreen
 import com.example.turomobileapp.ui.screens.DashboardScreen
 import com.example.turomobileapp.ui.screens.LoginScreen
+import com.example.turomobileapp.ui.screens.ProfileScreen
 import com.example.turomobileapp.ui.screens.SplashScreen
 import com.example.turomobileapp.ui.screens.TermsAgreementScreen
+import com.example.turomobileapp.viewmodels.SessionManager
 
 @Composable
-fun NavigationStack(modifier: Modifier = Modifier) {
+fun NavigationStack(
+    modifier: Modifier = Modifier,
+    sessionManager: SessionManager
+) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
@@ -29,7 +34,10 @@ fun NavigationStack(modifier: Modifier = Modifier) {
             TermsAgreementScreen(navController)
         }
         composable(Screen.Dashboard.route) {
-            DashboardScreen(navController)
+            DashboardScreen(navController, sessionManager)
+        }
+        composable(Screen.Profile.route) {
+            ProfileScreen()
         }
     }
 }

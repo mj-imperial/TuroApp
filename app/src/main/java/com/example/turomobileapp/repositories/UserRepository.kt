@@ -4,7 +4,6 @@ import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.UserApiService
-import com.example.turomobileapp.models.Admin
 import com.example.turomobileapp.models.ApiResponse
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
@@ -31,7 +30,9 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
                     firstName = dto.firstName,
                     lastName = dto.lastName,
                     role = UserRole.fromId(dto.roleId),
-                    requiresPasswordChange  = dto.requiresPasswordChange
+                    requiresPasswordChange  = dto.requiresPasswordChange,
+                    agreedToTerms = dto.agreedToTerms,
+                    profilePic = dto.profilePic
                 )
             }
         )
@@ -137,13 +138,6 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
         handleApiResponse(
             call = { userApiService.getAllTeachers() },
             errorMessage = "Failed to get all teachers"
-        )
-    }
-
-    fun getAllAdmins(): Flow<Result<List<Admin>>> = flow {
-        handleApiResponse(
-            call = { userApiService.getAllAdmins() },
-            errorMessage = "Failed to get all admins"
         )
     }
 

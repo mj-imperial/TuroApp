@@ -33,4 +33,6 @@
     <string name="Understand">I understand and agree to the confidentiality and data privacy policy.</string>
     <string name="NotUnderstand">I do not understand and agree the confidentiality and data privacy policy.</string>
     <string name="Submit">SUBMIT</string>
+    <string name="Help">HELP</string>
+    <string name="Shop">ITEM STORE</string>
 </resources>

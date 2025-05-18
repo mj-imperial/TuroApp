@@ -55,12 +55,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.components.CapsuleButton
+import com.example.turomobileapp.ui.components.CapsuleTextField
+import com.example.turomobileapp.ui.components.ResponsiveFont
+import com.example.turomobileapp.ui.components.WindowInfo
+import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
-import com.example.turomobileapp.ui.reusablefunctions.CapsuleButton
-import com.example.turomobileapp.ui.reusablefunctions.CapsuleTextField
-import com.example.turomobileapp.ui.reusablefunctions.ResponsiveFont
-import com.example.turomobileapp.ui.reusablefunctions.WindowInfo
-import com.example.turomobileapp.ui.reusablefunctions.rememberWindowInfo
 import com.example.turomobileapp.ui.theme.LoginText
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed

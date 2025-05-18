@@ -43,8 +43,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.example.turomobileapp.R
-import com.example.turomobileapp.ui.reusablefunctions.CapsuleButton
-import com.example.turomobileapp.ui.reusablefunctions.CapsuleTextField
+import com.example.turomobileapp.ui.components.CapsuleButton
+import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.theme.LoginText
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
