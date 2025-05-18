@@ -97,3 +97,61 @@ function changeDefaultPassword(
     }
     $updStmt->close();
 }
+
+function getStudentCourses(mysqli $conn, string $userId){
+    $sql = "SELECT * FROM `Course` AS C INNER JOIN `Enrollment` AS E ON C.course_id = E.course_id WHERE E.student_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $userId);
+    $stmt->execute();
+
+    if (! $stmt->execute()) {
+        http_response_code(500);
+        jsonResponse([ 'success' => false, 'message' => 'Failed to get Student Courses' ], 500);
+        return;
+    }
+
+    $courses = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    if (empty($courses)) {
+        http_response_code(404);
+        jsonResponse([
+            'success' => false,
+            'courses' => []
+        ], 404);
+    } else {
+        jsonResponse([
+            'success' => true,
+            'courses' => $courses
+        ]);
+    }
+}
+
+function getTeacherCourses(mysqli $conn, string $userId){
+    $sql = "SELECT * FROM `COURSE` WHERE `teacher_id` = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $userId);
+    $stmt->execute();
+
+    if (! $stmt->execute()) {
+        http_response_code(500);
+        jsonResponse([ 'success' => false, 'message' => 'Failed to get Student Courses' ], 500);
+        return;
+    }
+
+    $courses = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    if (empty($courses)) {
+        http_response_code(404);
+        jsonResponse([
+            'success' => false,
+            'courses' => []
+        ], 404);
+    } else {
+        jsonResponse([
+            'success' => true,
+            'courses' => $courses
+        ]);
+    }
+}
