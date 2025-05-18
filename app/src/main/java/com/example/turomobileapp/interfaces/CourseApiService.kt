@@ -1,7 +1,6 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Course
-import com.example.turomobileapp.models.CourseResponse
 import com.example.turomobileapp.models.CoursesResponse
 import retrofit2.Response
 import retrofit2.http.GET

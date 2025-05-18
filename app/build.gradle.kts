@@ -100,6 +100,9 @@ dependencies {
 
     //add more icons
     implementation(libs.androidx.material.icons.extended)
+
+    //permissions
+    implementation(libs.accompanist.permissions)
 }
 
 kapt { correctErrorTypes = true }

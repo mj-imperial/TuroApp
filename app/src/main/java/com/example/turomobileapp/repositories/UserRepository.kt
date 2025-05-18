@@ -7,14 +7,16 @@ import com.example.turomobileapp.interfaces.UserApiService
 import com.example.turomobileapp.models.ApiResponse
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
+import com.example.turomobileapp.models.UploadResponse
 import com.example.turomobileapp.models.User
 import com.example.turomobileapp.models.UserResponse
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.IOException
 import java.io.InputStream
 import javax.inject.Inject
 
@@ -66,22 +68,29 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
         )
     }
 
-    fun updateUserProfilePic(userId: String, imageStream: InputStream, mimeType: String): Flow<Result<Unit>> = flow {
+    fun updateUserProfilePic(userId: String, imageBytes: ByteArray, mimeType: String): Flow<Result<UploadResponse>> = flow {
         try {
-            val requestFile = imageStream.readBytes().toRequestBody(mimeType.toMediaTypeOrNull())
-            val part = MultipartBody.Part.createFormData("file", "profile_pic", requestFile)
+            val userIdBody = userId.toRequestBody("text/plain".toMediaType())
 
-            handleApiResponse(
-                call = { userApiService.updateProfilePic(userId, part) },
-                errorMessage = "Profile picture update failed"
+            val requestFile = imageBytes.toRequestBody(mimeType.toMediaTypeOrNull())
+
+            val part = MultipartBody.Part.createFormData(
+                name = "file",
+                filename = "profile_pic.jpg",
+                body = requestFile
             )
 
-        } catch (e: IOException) {
-            emit(Result.Failure(e))
+            emitAll(
+                handleApiResponse(
+                    call = { userApiService.updateProfilePic(userIdBody, part) },
+                    errorMessage = "Failed to change profile pic"
+                )
+            )
         } catch (e: Exception) {
             emit(Result.Failure(e))
         }
     }
+
 
     fun requestPasswordReset(email: String): Flow<Result<ApiResponse>> =
         handleApiResponse(

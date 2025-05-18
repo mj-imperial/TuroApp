@@ -3,9 +3,11 @@ package com.example.turomobileapp.interfaces
 import com.example.turomobileapp.models.ApiResponse
 import com.example.turomobileapp.models.Student
 import com.example.turomobileapp.models.Teacher
+import com.example.turomobileapp.models.UploadResponse
 import com.example.turomobileapp.models.User
 import com.example.turomobileapp.models.UserResponse
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -13,7 +15,6 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Multipart
-import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
@@ -83,12 +84,12 @@ interface UserApiService {
         @Body user: User
     ): Response<ResponseBody>
 
-    @PATCH("/users/{userId}/profilePic")
     @Multipart
+    @POST("change_profile_picture.php")
     suspend fun updateProfilePic(
-        @Path("userId") userId: String,
+        @Part("user_id") userId: RequestBody,
         @Part file: MultipartBody.Part
-    ): Response<ResponseBody>
+    ): Response<UploadResponse>
 
     @FormUrlEncoded
     @POST("terms_and_agreement.php")

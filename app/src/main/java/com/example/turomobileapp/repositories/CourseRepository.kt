@@ -5,12 +5,9 @@ import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.CourseApiService
 import com.example.turomobileapp.models.Course
 import com.example.turomobileapp.models.CourseResponse
-import com.example.turomobileapp.models.CoursesResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-import kotlin.map
 
 class CourseRepository @Inject constructor(private val courseApiService: CourseApiService) {
 

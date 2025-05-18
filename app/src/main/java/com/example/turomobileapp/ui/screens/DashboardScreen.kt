@@ -39,7 +39,6 @@ import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
-import com.example.turomobileapp.ui.theme.LoginText
 import com.example.turomobileapp.ui.theme.Text
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.shared.DashboardViewModel
@@ -64,11 +63,6 @@ fun DashboardScreen(
     }
 
     val windowInfo = rememberWindowInfo()
-    val barHeight = when(windowInfo.screenHeightInfo) {
-        WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.10f
-        WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.08f
-        WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.06f
-    }
     val cardHeight = when (windowInfo.screenHeightInfo) {
         WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.25f
         WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.20f
@@ -80,7 +74,6 @@ fun DashboardScreen(
 
     AppScaffold(
         navController = navController,
-        barHeight = barHeight,
         modifier = Modifier,
         canNavigateBack = false,
         windowInfo = windowInfo,

@@ -35,4 +35,6 @@
     <string name="Submit">SUBMIT</string>
     <string name="Help">HELP</string>
     <string name="Shop">ITEM STORE</string>
+    <string name="Name">Name</string>
+    <string name="Role">ROLE</string>
 </resources>

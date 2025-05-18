@@ -44,7 +44,6 @@ import com.example.turomobileapp.ui.navigation.sideNavigationItems
 import com.example.turomobileapp.ui.theme.LighterOrange
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainWhite
-import com.example.turomobileapp.ui.theme.SideRed
 import com.example.turomobileapp.ui.theme.SideRed1
 
 @Composable
@@ -59,7 +58,6 @@ fun SideDrawer(
     firstName: String,
     lastName: String,
     email: String,
-    onClickProfile: () -> Unit
 ) {
     val drawerWidth = windowInfo.screenWidth * 0.75f
     val drawerHeight = windowInfo.screenHeight
@@ -93,7 +91,12 @@ fun SideDrawer(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(headerHeight)
-                .clickable(onClick = onClickProfile)
+                .clickable(onClick = {
+                    navController.navigate(Screen.Profile.route){
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                })
         ) {
             Column(
                 modifier = Modifier
@@ -156,7 +159,7 @@ fun SideDrawer(
                         }
                         onCloseClick()
                     }
-                    .padding(vertical = 16.dp, horizontal = 24.dp),
+                    .padding(vertical = 16.dp,horizontal = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(

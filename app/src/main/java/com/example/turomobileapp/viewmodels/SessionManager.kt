@@ -55,4 +55,8 @@ class SessionManager @Inject constructor() {
         _profilePicUrl.value = null
         _role.value = null
     }
+
+    fun updateProfilePicUrl(newPic: String){
+        _profilePicUrl.value = newPic
+    }
 }

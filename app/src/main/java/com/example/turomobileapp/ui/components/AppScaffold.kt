@@ -5,6 +5,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -20,16 +21,12 @@ import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.authentication.LoginViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 
 @Composable
 fun AppScaffold(
     navController: NavController,
     content: @Composable (PaddingValues) -> Unit,
-    barHeight: Dp,
-    modifier: Modifier,
-    loginViewModel: LoginViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit = {},
     windowInfo: WindowInfo,
@@ -47,6 +44,13 @@ fun AppScaffold(
     val lastName by sessionManager.lastName.collectAsState(initial = "")
     val email by sessionManager.email.collectAsState(initial = "")
     val profilePic by sessionManager.profilePicUrl.collectAsState(initial = "")
+    val loginViewModel: LoginViewModel = hiltViewModel()
+
+    val barHeight = when(windowInfo.screenHeightInfo) {
+        WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.10f
+        WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.08f
+        WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.06f
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -63,10 +67,8 @@ fun AppScaffold(
                 profilePicUrl = profilePic.toString(),
                 firstName = firstName.toString(),
                 lastName = lastName.toString(),
-                email = email.toString(),
-                onClickProfile = {
-                    navController.navigate(Screen.Profile.route)
-                })
+                email = email.toString()
+            )
         }) {
         Scaffold(topBar = {
             TopNavigationBar(
