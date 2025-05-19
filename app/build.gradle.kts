@@ -101,8 +101,19 @@ dependencies {
     //add more icons
     implementation(libs.androidx.material.icons.extended)
 
-    //permissions
-    implementation(libs.accompanist.permissions)
+//    // The view calendar library for Android
+//    implementation("com.kizitonwose.calendar:view:2.7.0")
+//
+//    // The compose calendar library for Android
+//    implementation("com.kizitonwose.calendar:compose:2.7.0")
+//
+//    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0")
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0")
+    }
 }
 
 kapt { correctErrorTypes = true }

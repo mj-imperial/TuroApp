@@ -3,18 +3,15 @@ package com.example.turomobileapp.repositories
 import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.interfaces.CalendarApiService
 import com.example.turomobileapp.models.CalendarEvent
+import com.example.turomobileapp.models.CalendarEventsResponse
+import com.example.turomobileapp.models.CalendarResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.time.LocalDate
+import java.util.Date
 import javax.inject.Inject
 
 class CalendarRepository @Inject constructor(private val calendarApiService: CalendarApiService) {
-
-    fun getAllCalendarEvents(page: Int = 0, pageSize: Int = 20, startDate: String?, endDate: String?): Flow<Result<List<CalendarEvent>>> = flow {
-        handleApiResponse(
-            call = { calendarApiService.getAllCalendarEvents(page, pageSize, startDate, endDate) },
-            errorMessage = "Failed to get all calendar events"
-        )
-    }
 
     fun getCalendarEvent(eventId: String): Flow<Result<CalendarEvent>> = flow {
         handleApiResponse(
@@ -51,20 +48,11 @@ class CalendarRepository @Inject constructor(private val calendarApiService: Cal
         )
     }
 
-    fun getCalendarEventsByDateRange(userId: String, startDate: String, endDate: String, page: Int = 0, pageSize: Int = 20): Flow<Result<List<CalendarEvent>>> = flow {
-        handleApiResponse(
-            call = {
-                calendarApiService.getCalendarEventsByDateRange(
-                    userId,
-                    startDate,
-                    endDate,
-                    page,
-                    pageSize
-                )
-            },
-            errorMessage = "Failed to get calendar events by date range for user $userId"
-        )
-    }
+//    fun getCalendarEventsByDate(userId: String, date: LocalDate): Flow<Result<List<CalendarResponse>>> =
+//        handleApiResponse(
+//            call = { calendarApiService.getCalendarEventsByDate(userId, date) },
+//            errorMessage = "Failed to get calendar events by date range for user $userId"
+//        )
 
     fun isCalendarEventDuplicate(calendarEvent: CalendarEvent): Flow<Result<Boolean>> = flow {
         handleApiResponse(

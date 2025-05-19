@@ -39,7 +39,7 @@ import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
-import com.example.turomobileapp.ui.theme.Text
+import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.shared.DashboardViewModel
 
@@ -159,14 +159,14 @@ fun DashboardItem(
         ) {
             Text(
                 text = courseName,
-                color = Text,
+                color = TextBlack,
                 fontSize = body,
                 fontFamily = FontFamily(Font(R.font.alata)),
             )
 
             Text(
                 text = courseCode,
-                color = Text,
+                color = TextBlack,
                 fontSize = subtitle,
                 fontFamily = FontFamily(Font(R.font.alata)),
             )

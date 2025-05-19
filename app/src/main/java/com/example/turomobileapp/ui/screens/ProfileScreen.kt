@@ -1,9 +1,7 @@
 package com.example.turomobileapp.ui.screens
 
 import AppScaffold
-import android.Manifest
 import android.net.Uri
-import android.os.Build
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest

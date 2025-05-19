@@ -29,7 +29,8 @@ data class Enrollment(
 @JsonClass(generateAdapter = true)
 data class CoursesResponse(
     @Json(name = "success") val success: Boolean,
-    @Json(name = "courses") val courses: List<CourseResponse>)
+    @Json(name = "courses") val courses: List<CourseResponse>
+)
 
 @JsonClass(generateAdapter = true)
 data class CourseResponse(

@@ -1,6 +1,8 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.CalendarEvent
+import com.example.turomobileapp.models.CalendarEventsResponse
+import com.example.turomobileapp.models.CalendarResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -10,16 +12,10 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
+import java.time.LocalDate
+import java.util.Date
 
 interface CalendarApiService {
-    @GET("/calendar/events")
-    suspend fun getAllCalendarEvents(
-        @Query("page") page: Int = 0,
-        @Query("pageSize") pageSize: Int = 20,
-        @Query("startDate") startDate: String? = null,
-        @Query("endDate") endDate: String? = null,
-    ): Response<List<CalendarEvent>>
-
     @GET("/calendar/events/{eventId}")
     suspend fun getCalendarEvent(
         @Path("eventId") eventId: String
@@ -48,14 +44,11 @@ interface CalendarApiService {
         @Query("pageSize") pageSize: Int = 20
     ): Response<List<CalendarEvent>>
 
-    @GET("/calendar/users/{userId}/events")
-    suspend fun getCalendarEventsByDateRange(
-        @Path("userId") userId: String,
-        @Query("startDate") startDate: String,
-        @Query("endDate") endDate: String,
-        @Query("page") page: Int = 0,
-        @Query("pageSize") pageSize: Int = 20
-    ): Response<List<CalendarEvent>>
+    @GET("get_calendar_events.php")
+    suspend fun getCalendarEventsByDate(
+        @Query("user_id") userId: String,
+        @Query("date") date: LocalDate
+    ): Response<CalendarEventsResponse>
 
     @POST("/calendar/events/validateDuplication")
     suspend fun isCalendarEventDuplicate(

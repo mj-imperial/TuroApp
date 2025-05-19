@@ -1,11 +1,12 @@
 package com.example.turomobileapp.ui.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.turomobileapp.ui.screens.CalendarScreen
 import com.example.turomobileapp.ui.screens.ChangePasswordScreen
 import com.example.turomobileapp.ui.screens.DashboardScreen
 import com.example.turomobileapp.ui.screens.LoginScreen
@@ -14,6 +15,7 @@ import com.example.turomobileapp.ui.screens.SplashScreen
 import com.example.turomobileapp.ui.screens.TermsAgreementScreen
 import com.example.turomobileapp.viewmodels.SessionManager
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationStack(
     modifier: Modifier = Modifier,
@@ -41,7 +43,7 @@ fun NavigationStack(
             ProfileScreen(navController, sessionManager)
         }
         composable(Screen.Calendar.route) {
-            CalendarScreen()
+//            CalendarScreen(navController, sessionManager)
         }
     }
 }
