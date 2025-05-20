@@ -1,6 +1,7 @@
 package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.helperfunctions.handleApiResponse
+import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.CalendarApiService
 import com.example.turomobileapp.models.CalendarEvent
 import com.example.turomobileapp.models.CalendarEventsResponse
@@ -48,11 +49,11 @@ class CalendarRepository @Inject constructor(private val calendarApiService: Cal
         )
     }
 
-//    fun getCalendarEventsByDate(userId: String, date: LocalDate): Flow<Result<List<CalendarResponse>>> =
-//        handleApiResponse(
-//            call = { calendarApiService.getCalendarEventsByDate(userId, date) },
-//            errorMessage = "Failed to get calendar events by date range for user $userId"
-//        )
+    fun getCalendarEventsByDate(userId: String, date: LocalDate): Flow<Result<List<CalendarResponse>>> =
+        requestAndMap(
+            call = { calendarApiService.getCalendarEventsByDate(userId,date) },
+            mapper = { dto -> dto.events },
+        )
 
     fun isCalendarEventDuplicate(calendarEvent: CalendarEvent): Flow<Result<Boolean>> = flow {
         handleApiResponse(

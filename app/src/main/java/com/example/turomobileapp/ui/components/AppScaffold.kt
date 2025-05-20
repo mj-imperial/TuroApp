@@ -58,7 +58,9 @@ fun AppScaffold(
                 navController = navController,
                 onCloseClick = { scope.launch { drawerState.close() } },
                 onLogOut = {
-                    loginViewModel::logout
+                    navController.navigate(Screen.Login.route)
+                    loginViewModel.clearLoginSuccess()
+                    loginViewModel.logout()
                 },
                 windowInfo = rememberWindowInfo(),
                 heading2 = heading2,

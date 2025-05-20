@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.turomobileapp.ui.screens.CalendarScreen
 import com.example.turomobileapp.ui.screens.ChangePasswordScreen
 import com.example.turomobileapp.ui.screens.DashboardScreen
 import com.example.turomobileapp.ui.screens.LoginScreen
@@ -43,7 +44,7 @@ fun NavigationStack(
             ProfileScreen(navController, sessionManager)
         }
         composable(Screen.Calendar.route) {
-//            CalendarScreen(navController, sessionManager)
+            CalendarScreen(navController, sessionManager)
         }
     }
 }

@@ -21,7 +21,6 @@ data class CalendarEvent(
 @JsonClass(generateAdapter = true)
 data class CalendarEventsResponse(
     @Json(name = "success") val success: Boolean,
-    @Json(name = "message") val message: String? = null,
     @Json(name = "events") val events: List<CalendarResponse>
 )
 
@@ -29,9 +28,9 @@ data class CalendarEventsResponse(
 data class CalendarResponse(
     @Json(name = "event_id") val eventId: String,
     @Json(name = "title") val title: String,
-    @Json(name = "description") val description: String? = null,
+    @Json(name = "description") val description: String?,
     @Json(name = "date") val date: Date,
     @Json(name = "event_type") val eventType: EventType,
-    @Json(name = "is_urgent") var isUrgent: Boolean = false,
+    @Json(name = "is_urgent") var isUrgent: Boolean,
     @Json(name = "location") val location: String
 )
