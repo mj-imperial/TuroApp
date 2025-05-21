@@ -65,9 +65,6 @@ fun SplashScreen(
                 WindowInfo.WindowType.Expanded -> windowInfo.screenWidth * 0.5f
             }
 
-            val headingSize    = ResponsiveFont.title(windowInfo)
-            val subheadingSize = ResponsiveFont.heading2(windowInfo)
-
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -82,7 +79,7 @@ fun SplashScreen(
 
                 Text(
                     text = stringResource(R.string.TURO),
-                    fontSize = headingSize,
+                    fontSize = ResponsiveFont.title(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alexandria_bold)),
                     color = MainWhite,
                     modifier = Modifier
@@ -92,7 +89,7 @@ fun SplashScreen(
 
                 Text(
                     text = stringResource(R.string.byGSCS),
-                    fontSize = subheadingSize,
+                    fontSize = ResponsiveFont.heading2(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alexandria_bold)),
                     color = MainOrange
                 )

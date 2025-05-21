@@ -84,11 +84,6 @@ fun LoginScreen(
             .background(MainRed)
             .systemBarsPadding()
     ) {
-        val heading1Size = ResponsiveFont.heading1(windowInfo)
-        val heading2Size = ResponsiveFont.heading2(windowInfo)
-        val heading3Size = ResponsiveFont.heading3(windowInfo)
-        val body = ResponsiveFont.body(windowInfo)
-        val subtitle = ResponsiveFont.subtitle(windowInfo)
         val cardHeight = when (windowInfo.screenHeightInfo) {
             WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.4f
             WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.5f
@@ -122,7 +117,7 @@ fun LoginScreen(
                 Column{
                     Text(
                         text = stringResource(R.string.TURO),
-                        fontSize = heading2Size,
+                        fontSize = ResponsiveFont.heading2(windowInfo),
                         fontFamily = FontFamily(Font(R.font.alexandria_bold)),
                         color = MainWhite,
                         textAlign = TextAlign.Start
@@ -130,7 +125,7 @@ fun LoginScreen(
 
                     Text(
                         text = stringResource(R.string.byGSCS),
-                        fontSize = heading3Size,
+                        fontSize = ResponsiveFont.heading3(windowInfo),
                         fontFamily = FontFamily(Font(R.font.alexandria_bold)),
                         color = MainOrange,
                         modifier = Modifier.padding(start = 9.dp)
@@ -154,10 +149,10 @@ fun LoginScreen(
                     onSignIn = viewModel::login,
                     errorMessage = uiState.errorMessage,
                     cardHeight = cardHeight,
-                    heading1Size = heading1Size,
-                    body = body,
-                    heading3Size = heading3Size,
-                    subtitle = subtitle,
+                    heading1Size = ResponsiveFont.heading1(windowInfo),
+                    body = ResponsiveFont.body(windowInfo),
+                    heading3Size = ResponsiveFont.heading3(windowInfo),
+                    subtitle = ResponsiveFont.subtitle(windowInfo),
                     navController = navController
                 )
             }

@@ -64,10 +64,6 @@ fun ChangePasswordScreen(
             .background(MainRed)
             .systemBarsPadding()
     ) {
-        val title = ResponsiveFont.title(windowInfo)
-        val heading3Size = ResponsiveFont.heading3(windowInfo)
-        val body = ResponsiveFont.body(windowInfo)
-        val subtitle = ResponsiveFont.subtitle(windowInfo)
         val cardHeight = when (windowInfo.screenHeightInfo) {
             WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.5f
             WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.6f
@@ -111,10 +107,10 @@ fun ChangePasswordScreen(
                                 errorMessage = uiState.errorMessage,
                                 onEmailChange = viewModel::updateEmail,
                                 onSendCode = viewModel::sendRequestCode,
-                                title = title,
-                                body = body,
-                                heading3Size = heading3Size,
-                                subtitle = subtitle,
+                                title = ResponsiveFont.title(windowInfo),
+                                body = ResponsiveFont.body(windowInfo),
+                                heading3Size = ResponsiveFont.heading3(windowInfo),
+                                subtitle = ResponsiveFont.subtitle(windowInfo),
                                 cooldownRemaining = cooldown
                             )
                         }
@@ -124,18 +120,18 @@ fun ChangePasswordScreen(
                                 errorMessage = uiState.errorMessage,
                                 onCodeChange = viewModel::updateVerificationCode,
                                 onVerifyCode = viewModel::verifyResetCode,
-                                title = title,
-                                body = body,
-                                heading3Size = heading3Size,
+                                title = ResponsiveFont.title(windowInfo),
+                                body = ResponsiveFont.body(windowInfo),
+                                heading3Size = ResponsiveFont.heading3(windowInfo),
                                 cooldownRemaining = cooldown,
-                                subtitle = subtitle
+                                subtitle = ResponsiveFont.subtitle(windowInfo)
                             )
                         }
                         ResetStep.PASSWORD_INPUT -> {
                             PasswordCard(
-                                title = title,
-                                body = body,
-                                heading3Size = heading3Size,
+                                title = ResponsiveFont.title(windowInfo),
+                                body = ResponsiveFont.body(windowInfo),
+                                heading3Size = ResponsiveFont.heading3(windowInfo),
                                 oldPassword = uiState.oldPassword,
                                 onOldPasswordChange = viewModel::updateOldPassword,
                                 loading = uiState.loading,

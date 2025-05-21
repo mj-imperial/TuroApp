@@ -4,12 +4,10 @@ import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.CalendarApiService
 import com.example.turomobileapp.models.CalendarEvent
-import com.example.turomobileapp.models.CalendarEventsResponse
 import com.example.turomobileapp.models.CalendarResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.time.LocalDate
-import java.util.Date
 import javax.inject.Inject
 
 class CalendarRepository @Inject constructor(private val calendarApiService: CalendarApiService) {

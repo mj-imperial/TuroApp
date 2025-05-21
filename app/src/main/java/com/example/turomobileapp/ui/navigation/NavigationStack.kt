@@ -4,11 +4,9 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.turomobileapp.ui.screens.CalendarScreen
 import com.example.turomobileapp.ui.screens.ChangePasswordScreen
 import com.example.turomobileapp.ui.screens.CourseDetailScreen
@@ -16,6 +14,7 @@ import com.example.turomobileapp.ui.screens.DashboardScreen
 import com.example.turomobileapp.ui.screens.LoginScreen
 import com.example.turomobileapp.ui.screens.ProfileScreen
 import com.example.turomobileapp.ui.screens.SplashScreen
+import com.example.turomobileapp.ui.screens.StudentModulesScreen
 import com.example.turomobileapp.ui.screens.TermsAgreementScreen
 import com.example.turomobileapp.viewmodels.SessionManager
 
@@ -54,6 +53,9 @@ fun NavigationStack(
         ) {backStackEntry ->
             val courseId = backStackEntry.arguments?.getString("courseId")
             CourseDetailScreen(navController,courseId.toString(), sessionManager)
+        }
+        composable(Screen.StudentModules.route) {
+            StudentModulesScreen(navController, sessionManager)
         }
     }
 }

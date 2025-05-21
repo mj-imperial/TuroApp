@@ -61,8 +61,6 @@ fun TermsAgreementScreen(
     val windowInfo = rememberWindowInfo()
     val cardHeight = windowInfo.screenHeight * 0.95f
     var cardWidth = windowInfo.screenWidth * 0.9f
-    val heading1 = ResponsiveFont.heading1(windowInfo)
-    val heading2 = ResponsiveFont.heading2(windowInfo)
     val paragraphList = listOf(
         stringResource(R.string.ConfidentialityP1),
         stringResource(R.string.ConfidentialityP2),
@@ -96,8 +94,8 @@ fun TermsAgreementScreen(
         TermsCard(
             cardWidth = cardWidth,
             cardHeight = cardHeight,
-            heading1 = heading1,
-            heading2 = heading2,
+            heading1 = ResponsiveFont.heading1(windowInfo),
+            heading2 = ResponsiveFont.heading2(windowInfo),
             titlePaddings = titlePaddings,
             paragraphList = paragraphList,
             radioList = radioList,

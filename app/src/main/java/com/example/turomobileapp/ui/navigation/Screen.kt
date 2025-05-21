@@ -17,19 +17,20 @@ sealed class Screen(val route: String) {
     object CourseDetail: Screen("course_detail/{courseId}") {
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
-    object CourseTutorials: Screen("course_tutorial/{courseId}"){
+    object CourseTutorials: Screen("course_tutorial_screen/{courseId}"){
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
-    object CourseShortQuizzes: Screen("course_shortQuizzes/{courseId}"){
+    object CourseShortQuizzes: Screen("course_shortQuizzes_screen/{courseId}"){
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
-    object CoursePracticeQuizzes: Screen("course_practiceQuizzes/{courseId}"){
+    object CoursePracticeQuizzes: Screen("course_practiceQuizzes_screen/{courseId}"){
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
-    object CourseLongQuizzes: Screen("course_longQuizzes/{courseId}"){
+    object CourseLongQuizzes: Screen("course_longQuizzes_screen/{courseId}"){
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
-    object CourseScreeningQuizzes: Screen("course_screeningQuizzes/{courseId}"){
+    object CourseScreeningQuizzes: Screen("course_screeningQuizzes_screen/{courseId}"){
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
+    object StudentModules: Screen("student_modules_screen")
 }

@@ -5,11 +5,10 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,7 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -47,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
-import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -110,12 +107,15 @@ fun CourseContent(
 ){
     CourseViewModules(
         windowInfo = windowInfo,
+        onClickViewAllModules = {
+            navController.navigate(Screen.StudentModules.route)
+        }
     )
 
     CourseHeader(
         windowInfo = windowInfo,
         height = height,
-        width = width
+        onClickCurrentModule = { TODO() }
     )
 
     CourseActivities(
@@ -128,14 +128,15 @@ fun CourseContent(
 
 @Composable
 fun CourseViewModules(
-    windowInfo: WindowInfo
+    windowInfo: WindowInfo,
+    onClickViewAllModules: () -> Unit
 ){
     Row(
         horizontalArrangement = Arrangement.End,
         modifier = Modifier
             .padding(top = 10.dp,bottom = 2.dp)
             .fillMaxWidth()
-//            .clickable() TODO add logic
+            .clickable(onClick = onClickViewAllModules)
     ) {
         Text(
             text = stringResource(R.string.ViewModules),
@@ -162,15 +163,11 @@ fun CourseViewModules(
     )
 }
 
-/*
-    SHOWS CURRENT MODULE STUDENT IS CURRENTLY ON
-    TODO add current progress logic
-*/
 @Composable
 fun CourseHeader(
     windowInfo: WindowInfo,
     height: Dp,
-    width: Dp
+    onClickCurrentModule: () -> Unit
 ){
     val modulePlaceholderImage = "https://images.pexels.com/photos/27409729/pexels-photo-27409729/free-photo-of-dice-game-on-black-and-white-background.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
     val progressPercentage = "67%"
@@ -187,7 +184,7 @@ fun CourseHeader(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-//                .clickable() TODO add logic
+                .clickable(onClick = onClickCurrentModule)
         ){
             AsyncImage(
                 model = modulePlaceholderImage,
@@ -222,11 +219,12 @@ fun CourseHeader(
                         fontFamily = FontFamily(Font(R.font.alexandria)),
                         color = MainWhite,
                         maxLines = 2,
-                        softWrap = true
+                        softWrap = true,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     IconButton(
-                        onClick = {/*TODO*/},
+                        onClick = onClickCurrentModule,
                         enabled = true,
                         shape = CircleShape,
                         colors = IconButtonDefaults.iconButtonColors(
@@ -312,8 +310,10 @@ fun CourseActivities(
             Card(
                 modifier = Modifier
                     .width(cardWidth)
-                    .height(cardHeight),
-//                    .clickable() TODO add logic
+                    .height(cardHeight)
+                    .clickable(onClick = {
+                        navController.navigate(activity.route)
+                    }),
                 shape = RoundedCornerShape(10.dp),
                 elevation = CardDefaults.cardElevation(8.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent)

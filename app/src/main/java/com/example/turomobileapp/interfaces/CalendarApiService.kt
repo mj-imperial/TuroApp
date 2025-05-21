@@ -2,7 +2,6 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.CalendarEvent
 import com.example.turomobileapp.models.CalendarEventsResponse
-import com.example.turomobileapp.models.CalendarResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -13,7 +12,6 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 import java.time.LocalDate
-import java.util.Date
 
 interface CalendarApiService {
     @GET("/calendar/events/{eventId}")

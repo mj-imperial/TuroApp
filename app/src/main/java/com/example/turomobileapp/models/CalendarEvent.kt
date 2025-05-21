@@ -4,7 +4,6 @@ import com.example.turomobileapp.enums.EventType
 import com.google.gson.annotations.SerializedName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.time.Instant
 import java.util.Date
 
 @JsonClass(generateAdapter = true)

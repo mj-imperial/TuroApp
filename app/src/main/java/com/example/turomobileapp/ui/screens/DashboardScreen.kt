@@ -69,8 +69,6 @@ fun DashboardScreen(
         WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.15f
     }
     val uiState by viewModel.uiState.collectAsState()
-    val body = ResponsiveFont.body(windowInfo)
-    val subtitle = ResponsiveFont.subtitle(windowInfo)
 
     AppScaffold(
         navController = navController,
@@ -83,8 +81,8 @@ fun DashboardScreen(
                 innerPadding = innerPadding,
                 cardHeight = cardHeight,
                 coursesList = uiState.courses,
-                body = body,
-                subtitle = subtitle,
+                body = ResponsiveFont.body(windowInfo),
+                subtitle = ResponsiveFont.subtitle(windowInfo),
                 navController = navController
             )
         }
