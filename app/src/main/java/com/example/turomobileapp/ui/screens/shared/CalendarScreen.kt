@@ -2,8 +2,11 @@ package com.example.turomobileapp.ui.screens.shared
 
 import AppScaffold
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,31 +17,48 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.models.CalendarResponse
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
+import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.MainWhite
+import com.example.turomobileapp.ui.theme.TextBlack
+import com.example.turomobileapp.ui.theme.calendarEvent
 import com.example.turomobileapp.ui.theme.calendarGray
+import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.shared.CalendarViewModel
 import com.kizitonwose.calendar.compose.ContentHeightMode
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.OutDateStyle
 import com.kizitonwose.calendar.core.daysOfWeek
 import java.time.DayOfWeek
@@ -46,16 +66,32 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarScreen(
     navController: NavController,
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    viewModel: CalendarViewModel = hiltViewModel()
 ){
     val windowInfo = rememberWindowInfo()
     val height = windowInfo.screenHeight
     val width = windowInfo.screenWidth
+
+    val uiState by viewModel.uiState.collectAsState()
+    val rawEvents = uiState.rawEvents
+    val eventsByDate = remember(rawEvents) {
+        rawEvents
+            .mapNotNull { resp ->
+                runCatching {
+                    val date = LocalDate.parse(resp.date)
+                    date to resp
+                }.getOrNull()
+            }
+            .groupBy({ it.first }, { it.second })
+    }
 
     AppScaffold(
         navController = navController,
@@ -66,60 +102,72 @@ fun CalendarScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = { innerPadding ->
-            CalendarContent(
-                innerPadding = innerPadding,
-                height = height,
-                windowInfo = windowInfo,
-                width = width,
-            )
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                CalendarContent(
+                    height = height,
+                    windowInfo = windowInfo,
+                    width = width,
+                    eventsByDate = eventsByDate
+                )
+            }
         }
     )
-
-
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarContent(
-    innerPadding: PaddingValues,
     height: Dp,
     width: Dp,
-    windowInfo: WindowInfo
+    windowInfo: WindowInfo,
+    eventsByDate: Map<LocalDate, List<CalendarResponse>>
 ){
     val currentMonth = remember { YearMonth.now() }
     val firstDayOfWeek = remember { DayOfWeek.SUNDAY }
     val daysOfWeek = daysOfWeek(firstDayOfWeek = firstDayOfWeek)
 
     val state = rememberCalendarState(
-        startMonth = remember { currentMonth.minusMonths(50) },
-        endMonth = remember { currentMonth.plusMonths(50) },
+        startMonth = remember { currentMonth.minusMonths(25) },
+        endMonth = remember { currentMonth.plusMonths(25) },
         firstVisibleMonth = currentMonth,
         firstDayOfWeek = firstDayOfWeek,
         outDateStyle = OutDateStyle.EndOfGrid
     )
 
-    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
-
+    var selectedDate by rememberSaveable { mutableStateOf<LocalDate?>(null) }
+    val eventsList = remember(selectedDate, eventsByDate) {
+        selectedDate?.let { eventsByDate[it].orEmpty() } ?: emptyList()
+    }
     Column(
         modifier = Modifier
-            .padding(innerPadding)
+            .padding(10.dp)
             .fillMaxSize()
     ) {
         Column(modifier = Modifier
             .fillMaxWidth()
-            .height(height * 0.50f)
-            .padding(width * 0.02f)
+            .height(height * 0.5f)
         ) {
             HorizontalCalendar(
                 state = state,
                 calendarScrollPaged = true,
                 userScrollEnabled = true,
                 reverseLayout = false,
-                contentPadding = PaddingValues(10.dp),
                 contentHeightMode = ContentHeightMode.Wrap,
                 dayContent = { day ->
+                    val date = day.date
+                    val list = eventsByDate[date].orEmpty()
                     Day(
-                        day = day
+                        day = day,
+                        isSelected = date == selectedDate,
+                        hasEvent = list.isNotEmpty(),
+                        isUrgent = list.any { it.isUrgent },
+                        onClick = {
+                            selectedDate = it.date
+                        },
                     )
                 },
                 monthHeader = {
@@ -136,23 +184,14 @@ fun CalendarContent(
                 },
                 modifier = Modifier.fillMaxSize()
             )
+            HorizontalDivider(modifier = Modifier.fillMaxWidth(), 0.8.dp,LoginText)
         }
-    }
-}
 
-@Composable
-fun DaysOfWeekTitle(
-    daysOfWeek: List<DayOfWeek>,
-){
-    Row(modifier = Modifier.fillMaxWidth()) {
-        daysOfWeek.forEach { day ->
-            Text(
-                text = day.name,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                fontFamily = FontFamily(Font(R.font.alata)),
-            )
-        }
+        DateEvents(
+            windowInfo = windowInfo,
+            list = eventsList,
+            height = height * 0.5f
+        )
     }
 }
 
@@ -160,10 +199,10 @@ fun DaysOfWeekTitle(
 @Composable
 fun Day(
     day: CalendarDay,
-//    isSelected: Boolean,
-//    hasEvent: Boolean,
-//    isUrgent: Boolean,
-//    onClick: (CalendarDay) -> Unit
+    isSelected: Boolean,
+    hasEvent: Boolean,
+    isUrgent: Boolean,
+    onClick: (CalendarDay) -> Unit
 ){
     Box(
         modifier = Modifier
@@ -171,26 +210,20 @@ fun Day(
             .clip(RectangleShape)
             .padding(3.dp)
             .background(
-//                if (isSelected) {
-//                    green
-//                }else if (hasEvent){
-//                    calendarEvent
-//                }else if (isUrgent){
-//                    TextBlack
-//                }else{
-//                    calendarGray
-//                }
-                calendarGray
+                when {
+                    isUrgent -> TextBlack
+                    hasEvent -> calendarEvent
+                    else -> calendarGray
+                }
             )
-//            .clickable(
-//                enabled = day.position == DayPosition.MonthDate,
-//                onClick = {onClick(day)}
-//            )
+            .clickable(
+                enabled = day.position==DayPosition.MonthDate,onClick = { onClick(day) })
     ){
         Text(
             text = day.date.dayOfMonth.toString(),
             textAlign = TextAlign.Center,
-            fontFamily = FontFamily(Font(R.font.alata))
+            fontFamily = FontFamily(Font(R.font.alata)),
+            color = if (isUrgent) MainWhite else TextBlack
         )
     }
 }
@@ -214,6 +247,57 @@ fun AbbreviatedDaysOfWeek(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
             )
+        }
+    }
+}
+
+@Composable
+fun DateEvents(
+    windowInfo: WindowInfo,
+    list: List<CalendarResponse>,
+    height: Dp
+){
+    if (list.isEmpty()){
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height*0.5f),
+            contentAlignment = Alignment.Center
+        ){
+            Image(
+                painter = painterResource(R.drawable.empty_icon),
+                contentDescription = "No Events",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }else{
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height*0.5f),
+            contentPadding = PaddingValues(5.dp)
+        ) {
+            items(list) {
+                Text(
+                    text = it.title,
+                    fontSize = ResponsiveFont.heading1(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                )
+
+                Text(
+                    text = "Course: ${it.courseCode}",
+                    fontSize = ResponsiveFont.heading2(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    modifier = Modifier.padding(start = 20.dp)
+                )
+
+                Text(
+                    text = "Description: ${it.description.toString()}\nLocation: ${it.location}",
+                    fontSize = ResponsiveFont.body(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    modifier = Modifier.padding(start = 20.dp, bottom = 15.dp)
+                )
+            }
         }
     }
 }

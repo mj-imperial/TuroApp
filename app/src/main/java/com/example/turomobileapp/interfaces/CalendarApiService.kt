@@ -35,14 +35,12 @@ interface CalendarApiService {
         @Path("eventId") eventId: String
     ): Response<ResponseBody>
 
-    @GET("/calendar/users/{userId}/events")
-    suspend fun getCalendarEventsForUser(
-        @Path("userId") userId: String,
-        @Query("page") page: Int = 0,
-        @Query("pageSize") pageSize: Int = 20
-    ): Response<List<CalendarEvent>>
-
     @GET("get_calendar_events.php")
+    suspend fun getCalendarEventsForUser(
+        @Query("user_id") userId: String
+    ): Response<CalendarEventsResponse>
+
+    @GET(".php")
     suspend fun getCalendarEventsByDate(
         @Query("user_id") userId: String,
         @Query("date") date: LocalDate

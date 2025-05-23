@@ -40,12 +40,12 @@ class CalendarRepository @Inject constructor(private val calendarApiService: Cal
         )
     }
 
-    fun getCalendarEventsForUser(userId: String, page: Int = 0, pageSize: Int = 20): Flow<Result<List<CalendarEvent>>> = flow {
-        handleApiResponse(
-            call = { calendarApiService.getCalendarEventsForUser(userId, page, pageSize) },
-            errorMessage = "Failed to get calendar events for user $userId"
+    fun getCalendarEventsForUser(userId: String): Flow<Result<List<CalendarResponse>>> =
+        requestAndMap(
+            call = { calendarApiService.getCalendarEventsForUser(userId) },
+            mapper = {dto -> dto.events}
         )
-    }
+
 
     fun getCalendarEventsByDate(userId: String, date: LocalDate): Flow<Result<List<CalendarResponse>>> =
         requestAndMap(

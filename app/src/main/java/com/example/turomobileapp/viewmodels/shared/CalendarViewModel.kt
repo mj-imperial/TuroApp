@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,22 +23,29 @@ class CalendarViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(CalendarUIState())
     val uiState: StateFlow<CalendarUIState> = _uiState.asStateFlow()
 
-    fun getCalendarEventByDate(date: LocalDate){
+    init {
+        getCalendarEventsForUser()
+    }
+
+    fun getCalendarEventsForUser(){
         viewModelScope.launch {
+            val userId = sessionManager.userId.value
+            if (userId.isNullOrBlank()) {
+                _uiState.update { it.copy(loading = false, errorMessage = "No user ID") }
+                return@launch
+            }
+
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
-            calendarRepository.getCalendarEventsByDate(
-                userId = sessionManager.userId.value.toString(),
-                date = date
-            ).collect {result ->
+            calendarRepository.getCalendarEventsForUser(userId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { events ->
-                        _uiState.update { it.copy(loading = false, events = events) }
+                        _uiState.update { it.copy(loading = false, rawEvents = events) }
                     },
                     onFailure = { err ->
                         _uiState.update { it.copy(loading = false, errorMessage = err) }
-                    }
+                    },
                 )
             }
         }
@@ -49,5 +55,5 @@ class CalendarViewModel @Inject constructor(
 data class CalendarUIState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
-    val events: List<CalendarResponse> = emptyList()
+    val rawEvents: List<CalendarResponse> = emptyList()
 )
