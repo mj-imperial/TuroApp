@@ -1,5 +1,8 @@
 package com.example.turomobileapp.ui.navigation
 
+import com.example.turomobileapp.enums.ActivityType
+import com.example.turomobileapp.enums.QuizType
+
 sealed class Screen(val route: String) {
     object Splash: Screen("splash_screen")
     object Login: Screen("login_screen")
@@ -17,20 +20,11 @@ sealed class Screen(val route: String) {
     object CourseDetail: Screen("course_detail/{courseId}") {
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
-    object CourseTutorials: Screen("course_tutorial_screen/{courseId}"){
-        fun createRoute(courseId: String) = "course_detail/$courseId"
+    object CourseActivity: Screen("course_tutorial_screen/{courseId}/{type}"){
+        fun createRoute(courseId: String, type: ActivityType) = "course_tutorial_screen/$courseId/${type.name}"
     }
-    object CourseShortQuizzes: Screen("course_shortQuizzes_screen/{courseId}"){
-        fun createRoute(courseId: String) = "course_detail/$courseId"
-    }
-    object CoursePracticeQuizzes: Screen("course_practiceQuizzes_screen/{courseId}"){
-        fun createRoute(courseId: String) = "course_detail/$courseId"
-    }
-    object CourseLongQuizzes: Screen("course_longQuizzes_screen/{courseId}"){
-        fun createRoute(courseId: String) = "course_detail/$courseId"
-    }
-    object CourseScreeningQuizzes: Screen("course_screeningQuizzes_screen/{courseId}"){
-        fun createRoute(courseId: String) = "course_detail/$courseId"
+    object CourseQuizzes: Screen("course_quizzes_screen/{courseId}/{type}"){
+        fun createRoute(courseId: String, type: QuizType) = "course_quizzes_screen/$courseId/${type.name}"
     }
     object StudentModules: Screen("student_modules_screen")
 }

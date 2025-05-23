@@ -4,19 +4,25 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.turomobileapp.ui.screens.CalendarScreen
-import com.example.turomobileapp.ui.screens.ChangePasswordScreen
-import com.example.turomobileapp.ui.screens.CourseDetailScreen
-import com.example.turomobileapp.ui.screens.DashboardScreen
-import com.example.turomobileapp.ui.screens.LoginScreen
-import com.example.turomobileapp.ui.screens.ProfileScreen
-import com.example.turomobileapp.ui.screens.SplashScreen
-import com.example.turomobileapp.ui.screens.StudentModulesScreen
-import com.example.turomobileapp.ui.screens.TermsAgreementScreen
+import androidx.navigation.navArgument
+import com.example.turomobileapp.enums.QuizType
+import com.example.turomobileapp.ui.screens.shared.CalendarScreen
+import com.example.turomobileapp.ui.screens.authentication.ChangePasswordScreen
+import com.example.turomobileapp.ui.screens.student.CourseDetailScreen
+import com.example.turomobileapp.ui.screens.shared.DashboardScreen
+import com.example.turomobileapp.ui.screens.authentication.LoginScreen
+import com.example.turomobileapp.ui.screens.shared.ProfileScreen
+import com.example.turomobileapp.ui.screens.authentication.SplashScreen
+import com.example.turomobileapp.ui.screens.shared.StudentModulesScreen
+import com.example.turomobileapp.ui.screens.authentication.TermsAgreementScreen
+import com.example.turomobileapp.ui.screens.student.QuizListScreen
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -56,6 +62,16 @@ fun NavigationStack(
         }
         composable(Screen.StudentModules.route) {
             StudentModulesScreen(navController, sessionManager)
+        }
+        composable(
+            route = Screen.CourseQuizzes.route,
+            arguments = listOf(
+                navArgument(name = "courseId") { type = NavType.StringType },
+                navArgument(name = "type") { type = NavType.StringType }
+            )
+        ) {backStackEntry ->
+            val viewModel: QuizListViewModel = hiltViewModel()
+            QuizListScreen(navController = navController, viewModel = viewModel, sessionManager = sessionManager)
         }
     }
 }

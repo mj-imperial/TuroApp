@@ -4,6 +4,7 @@ import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.Question
 import com.example.turomobileapp.models.Quiz
+import com.example.turomobileapp.models.QuizzesResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -12,6 +13,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface QuizApiService {
     @POST("/modules/{moduleId}/activities/{activityId}/quizzes")
@@ -27,10 +29,10 @@ interface QuizApiService {
         @Body quiz: Quiz
     ): Response<Boolean>
 
-    @GET("/modules/{moduleId}/quizzes")
-    suspend fun getQuizzesInModule(
-        @Path("moduleId") moduleId: String
-    ): Response<List<Quiz>>
+    @GET("get_course_quizzes.php")
+    suspend fun getQuizzesInCourse(
+        @Query("course_id") courseId: String
+    ): Response<QuizzesResponse>
 
     @GET("/quizzes/{quizId}")
     suspend fun getQuiz(

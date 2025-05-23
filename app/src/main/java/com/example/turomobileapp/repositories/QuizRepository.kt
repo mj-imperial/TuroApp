@@ -1,11 +1,13 @@
 package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.helperfunctions.handleApiResponse
+import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.QuizApiService
 import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.Question
 import com.example.turomobileapp.models.Quiz
+import com.example.turomobileapp.models.QuizResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -61,10 +63,10 @@ class QuizRepository @Inject constructor(private val quizApiService: QuizApiServ
         )
     }
 
-    fun getQuizzesInModule(moduleId: String): Flow<Result<List<Quiz>>> = flow {
-        handleApiResponse(
-            call = { quizApiService.getQuizzesInModule(moduleId) },
-            errorMessage = "Failed to get quizzes in module $moduleId"
+    fun getQuizzesInCourse(courseId: String): Flow<Result<List<QuizResponse>>> =
+        requestAndMap(
+            call = { quizApiService.getQuizzesInCourse(courseId) },
+            mapper = { dto -> dto.quizzes }
         )
-    }
+
 }

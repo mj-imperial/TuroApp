@@ -1,4 +1,4 @@
-package com.example.turomobileapp.ui.screens
+package com.example.turomobileapp.ui.screens.authentication
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility

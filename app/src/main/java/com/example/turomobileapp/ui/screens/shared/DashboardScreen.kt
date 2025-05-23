@@ -1,4 +1,4 @@
-package com.example.turomobileapp.ui.screens
+package com.example.turomobileapp.ui.screens.shared
 
 import AppScaffold
 import android.annotation.SuppressLint

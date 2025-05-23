@@ -5,6 +5,7 @@ import com.example.turomobileapp.enums.ContentType
 import com.example.turomobileapp.enums.QuizType
 import com.example.turomobileapp.enums.ScreeningTier
 import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.Date
 
@@ -88,3 +89,25 @@ data class Module(
     @SerializedName("module_description") val moduleDescription: String,
     @SerializedName("activities") val activities: List<Activity> = emptyList()
 )
+
+@JsonClass(generateAdapter = true)
+data class QuizzesResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "quizzes") val quizzes: List<QuizResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class QuizResponse(
+    @Json(name = "activity_id") val quizId: String,
+    @Json(name = "module_name") val moduleName: String,
+    @Json(name = "activity_type") val activityType: String,
+    @Json(name = "activity_name") val quizName: String,
+    @Json(name = "activity_description") val quizDescription: String,
+    @Json(name = "unlock_date") val unlockDate: String,
+    @Json(name = "deadline_date") val deadlineDate: String?,
+    @Json(name = "number_of_attempts") val numberOfAttempts: Int,
+    @Json(name = "quiz_type_name") val quizTypeName: String,
+    @Json(name = "time_limit") val timeLimit: Int,
+    @Json(name = "is_passed") val isPassed: Boolean?,
+)
+

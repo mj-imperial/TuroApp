@@ -1,4 +1,4 @@
-package com.example.turomobileapp.ui.screens
+package com.example.turomobileapp.ui.screens.student
 
 import AppScaffold
 import androidx.annotation.DrawableRes
@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
+import com.example.turomobileapp.enums.ActivityType
+import com.example.turomobileapp.enums.QuizType
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -91,7 +93,8 @@ fun CourseDetailScreen(
                     windowInfo = windowInfo,
                     width = width,
                     height = height,
-                    navController = navController
+                    navController = navController,
+                    courseId = courseId
                 )
             }
         }
@@ -103,7 +106,8 @@ fun CourseContent(
     navController: NavController,
     windowInfo: WindowInfo,
     width: Dp,
-    height: Dp
+    height: Dp,
+    courseId: String
 ){
     CourseViewModules(
         windowInfo = windowInfo,
@@ -122,7 +126,8 @@ fun CourseContent(
         windowInfo = windowInfo,
         height = height,
         navController = navController,
-        width = width
+        width = width,
+        courseId = courseId
     )
 }
 
@@ -249,7 +254,8 @@ fun CourseActivities(
     navController: NavController,
     windowInfo: WindowInfo,
     width: Dp,
-    height: Dp
+    height: Dp,
+    courseId: String
 ){
     val cardWidth = width * 0.7f
     val columnHeight = height * 0.5f
@@ -260,31 +266,31 @@ fun CourseActivities(
         Activities(
             name = R.string.Tutorials,
             icon = R.drawable.tutorial_icon,
-            route = Screen.CourseTutorials.route,
+            route = Screen.CourseActivity.route,
             colors = listOf(tutorial1,tutorial2)
         ),
         Activities(
             name = R.string.ShortQuiz,
             icon = R.drawable.shortquiz_icon,
-            route = Screen.CourseShortQuizzes.route,
+            route = Screen.CourseQuizzes.createRoute(courseId = courseId, type = QuizType.SHORT),
             colors = listOf(shortquiz1,shortquiz2)
         ),
         Activities(
             name = R.string.PracticeQuiz,
             icon = R.drawable.practicequiz_icon,
-            route = Screen.CoursePracticeQuizzes.route,
+            route = Screen.CourseQuizzes.createRoute(courseId = courseId, type = QuizType.PRACTICE),
             colors = listOf(practice1,practice2)
         ),
         Activities(
             name = R.string.LongQuiz,
             icon = R.drawable.longquiz_icon,
-            route = Screen.CourseLongQuizzes.route,
+            route = Screen.CourseQuizzes.createRoute(courseId = courseId, type = QuizType.LONG),
             colors = listOf(longquiz1,longquiz2)
         ),
         Activities(
             name = R.string.ScreeningExam,
             icon = R.drawable.screeningexam_icon,
-            route = Screen.CourseScreeningQuizzes.route,
+            route = Screen.CourseActivity.createRoute(courseId = courseId, type = ActivityType.SCREENING_EXAM),
             colors = listOf(screeningExam1,screeningExam2)
         )
     )
