@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 24, 2025 at 05:25 AM
+-- Generation Time: May 24, 2025 at 02:24 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -469,16 +469,18 @@ CREATE TABLE `quiz` (
   `number_of_attempts` int(11) NOT NULL,
   `quiz_type_id` int(11) NOT NULL,
   `time_limit` int(11) NOT NULL,
-  `is_passed` tinyint(1) DEFAULT NULL
+  `is_passed` tinyint(1) DEFAULT NULL,
+  `number_of_questions` int(11) NOT NULL,
+  `overall_points` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `quiz`
 --
 
-INSERT INTO `quiz` (`activity_id`, `number_of_attempts`, `quiz_type_id`, `time_limit`, `is_passed`) VALUES
-('M101A3', 2, 1, 1800, NULL),
-('M101A4', 1, 3, 3000, NULL);
+INSERT INTO `quiz` (`activity_id`, `number_of_attempts`, `quiz_type_id`, `time_limit`, `is_passed`, `number_of_questions`, `overall_points`) VALUES
+('M101A3', 2, 1, 1800, NULL, 10, 10),
+('M101A4', 1, 3, 3000, NULL, 10, 10);
 
 -- --------------------------------------------------------
 
