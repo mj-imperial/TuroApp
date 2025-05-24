@@ -1,7 +1,6 @@
 package com.example.turomobileapp.ui.screens.student
 
 import AppScaffold
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
@@ -37,15 +35,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
-import com.example.turomobileapp.enums.QuizType
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
+import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
@@ -58,7 +55,8 @@ import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 fun QuizListScreen(
     navController: NavController,
     viewModel: QuizListViewModel = hiltViewModel(),
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    onClickQuiz: (QuizResponse) -> Unit
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
@@ -84,7 +82,9 @@ fun QuizListScreen(
                 QuizListByModule(
                     quizzesByModule = quizzesByModule,
                     quizType = quizType.toString(),
-                    windowInfo = windowInfo
+                    windowInfo = windowInfo,
+                    navController = navController,
+                    onClickQuiz = onClickQuiz
                 )
             }
         }
@@ -96,9 +96,11 @@ fun QuizListScreen(
 * */
 @Composable
 fun QuizListByModule(
+    navController: NavController,
     quizzesByModule: Map<String, List<QuizResponse>>,
     windowInfo: WindowInfo,
-    quizType: String
+    quizType: String,
+    onClickQuiz: (QuizResponse) -> Unit
 ){
     val cardWidth = (windowInfo.screenWidth) * 0.75f
     val cardHeight = (windowInfo.screenHeight) * 0.25f
@@ -137,8 +139,10 @@ fun QuizListByModule(
                     quizName = quiz.quizName,
                     averageScore = 0.0,
                     highestScore = 0.0,
-                    lowestScore = 0.0
-                )
+                    lowestScore = 0.0,
+                ){
+                    onClickQuiz(quiz)
+                }
             }
         }
     }
@@ -152,7 +156,8 @@ fun QuizCard(
     quizName: String,
     averageScore: Double?,
     highestScore: Double?,
-    lowestScore: Double?
+    lowestScore: Double?,
+    onClickQuiz: () -> Unit
 ){
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.Transparent, contentColor = TextBlack),
@@ -162,7 +167,7 @@ fun QuizCard(
             .border(0.2.dp,TextBlack,RoundedCornerShape(5.dp))
             .width(width)
             .height(height)
-//            .clickable()
+            .clickable(onClick = onClickQuiz)
     ) {
         Box(
             modifier = Modifier
@@ -196,15 +201,13 @@ fun QuizCard(
                     CapsuleButton(
                         text = {
                             Text(
-                                text = "TAKE QUIZ",
+                                text = "VIEW QUIZ",
                                 fontFamily = FontFamily(Font(R.font.alata)),
                                 fontSize = ResponsiveFont.body(windowInfo),
                                 color = MainWhite
                             )
                         },
-                        onClick = {
-                            //TODO navigate into quizTakingScreen
-                        },
+                        onClick = onClickQuiz,
                         roundedCornerShape = 5.dp,
                         buttonElevation = ButtonDefaults.buttonElevation(5.dp),
                         buttonColors = ButtonDefaults.buttonColors(green),

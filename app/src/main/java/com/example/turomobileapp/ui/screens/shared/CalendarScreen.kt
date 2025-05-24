@@ -2,7 +2,6 @@ package com.example.turomobileapp.ui.screens.shared
 
 import AppScaffold
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,7 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,7 +49,6 @@ import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.calendarEvent
 import com.example.turomobileapp.ui.theme.calendarGray
-import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.shared.CalendarViewModel
 import com.kizitonwose.calendar.compose.ContentHeightMode
@@ -66,8 +63,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -110,7 +105,6 @@ fun CalendarScreen(
                 CalendarContent(
                     height = height,
                     windowInfo = windowInfo,
-                    width = width,
                     eventsByDate = eventsByDate
                 )
             }
@@ -122,7 +116,6 @@ fun CalendarScreen(
 @Composable
 fun CalendarContent(
     height: Dp,
-    width: Dp,
     windowInfo: WindowInfo,
     eventsByDate: Map<LocalDate, List<CalendarResponse>>
 ){

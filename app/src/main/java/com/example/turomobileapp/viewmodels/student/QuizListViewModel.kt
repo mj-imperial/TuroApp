@@ -1,6 +1,5 @@
 package com.example.turomobileapp.viewmodels.student
 
-import androidx.compose.runtime.MutableState
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +7,6 @@ import com.example.turomobileapp.enums.QuizType
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.repositories.QuizRepository
-import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

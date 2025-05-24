@@ -1,5 +1,6 @@
 package com.example.turomobileapp.models
 
+import android.os.Parcelable
 import com.example.turomobileapp.enums.ActivityType
 import com.example.turomobileapp.enums.ContentType
 import com.example.turomobileapp.enums.QuizType
@@ -7,6 +8,7 @@ import com.example.turomobileapp.enums.ScreeningTier
 import com.google.gson.annotations.SerializedName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 
 @JsonClass(generateAdapter = true)
@@ -96,6 +98,7 @@ data class QuizzesResponse(
     @Json(name = "quizzes") val quizzes: List<QuizResponse>
 )
 
+@Parcelize
 @JsonClass(generateAdapter = true)
 data class QuizResponse(
     @Json(name = "activity_id") val quizId: String,
@@ -109,5 +112,7 @@ data class QuizResponse(
     @Json(name = "quiz_type_name") val quizTypeName: String,
     @Json(name = "time_limit") val timeLimit: Int,
     @Json(name = "is_passed") val isPassed: Boolean?,
-)
+    @Json(name = "number_of_questions") val numberOfQuestions: Int,
+    @Json(name = "overall_points") val overallPoints: Int
+) : Parcelable
 
