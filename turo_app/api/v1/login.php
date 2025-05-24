@@ -47,6 +47,7 @@ try {
             u.requires_password_change,
             u.role_id,
             u.agreed_to_terms,
+            u.profile_pic,
             r.role_name
         FROM `user` AS u
         JOIN `userrole` AS r
@@ -65,6 +66,7 @@ try {
         $requiresPasswordChange,
         $roleId,
         $agreedToTerms,
+        $profilePic,
         $roleName
     );
 
@@ -97,5 +99,6 @@ jsonResponse([
     'role_id'   => $roleId, 
     'agreed_to_terms' => (bool) $agreedToTerms,
     'role'  => $roleName, 
-    'requires_password_change' => (bool) $requiresPasswordChange 
+    'requires_password_change' => (bool) $requiresPasswordChange,
+    'profile_pic' => $profilePic
 ]);

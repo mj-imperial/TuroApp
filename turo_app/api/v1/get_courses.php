@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json');
 $configFile = __DIR__ . '/config.php';
 if (! file_exists($configFile)) {
     http_response_code(500);
@@ -10,12 +11,9 @@ if (! file_exists($configFile)) {
 }
 require_once $configFile;
 
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    http_response_code(405);
-    jsonResponse(['success'=>false,'error'=>'Method Not Allowed'], 405);
-}
-
-if (! empty($_POST)) {
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $input = $_GET;
+} elseif (! empty($_POST)) {
     $input = $_POST;
 } else {
     $raw   = file_get_contents('php://input');
@@ -42,4 +40,7 @@ switch ($input['action']) {
         }
         getTeacherCourses($conn, $input['user_id']);
         break;
+    default:
+        http_response_code(400);
+        jsonResponse([ 'success' => false, 'message' => 'Unknown action' ], 400);
 }

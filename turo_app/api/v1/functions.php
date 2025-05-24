@@ -98,60 +98,73 @@ function changeDefaultPassword(
     $updStmt->close();
 }
 
-function getStudentCourses(mysqli $conn, string $userId){
-    $sql = "SELECT * FROM `Course` AS C INNER JOIN `Enrollment` AS E ON C.course_id = E.course_id WHERE E.student_id = ?";
+function getStudentCourses(mysqli $conn, string $userId) {
+    $sql = "
+      SELECT *
+      FROM `Course` AS C
+      INNER JOIN `Enrollment` AS E
+        ON C.course_id = E.course_id
+      WHERE E.student_id = ?
+    ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $userId);
-    $stmt->execute();
+    if (! $stmt) {
+        http_response_code(500);
+        jsonResponse(['success'=>false,'message'=>'Database prepare failed'],500);
+        return;
+    }
 
+    $stmt->bind_param('s', $userId);
     if (! $stmt->execute()) {
         http_response_code(500);
-        jsonResponse([ 'success' => false, 'message' => 'Failed to get Student Courses' ], 500);
+        jsonResponse(['success'=>false,'message'=>'Database execute failed'],500);
         return;
     }
 
     $courses = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 
-    if (empty($courses)) {
-        http_response_code(404);
-        jsonResponse([
-            'success' => false,
-            'courses' => []
-        ], 404);
-    } else {
-        jsonResponse([
-            'success' => true,
-            'courses' => $courses
-        ]);
-    }
+    header('Content-Type: application/json');
+    echo json_encode([
+      'success' => true,
+      'courses' => $courses
+    ]);
+    exit;
 }
 
 function getTeacherCourses(mysqli $conn, string $userId){
-    $sql = "SELECT * FROM `COURSE` WHERE `teacher_id` = ?";
+    $sql  = "
+      SELECT
+        C.course_id,
+        C.course_code,
+        C.course_name,
+        C.course_description,
+        C.start_date,
+        C.end_date,
+      FROM `Course` AS C
+      WHERE C.teacher_id = ?
+    ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $userId);
-    $stmt->execute();
+    if (! $stmt) {
+        http_response_code(500);
+        jsonResponse(['success'=>false,'message'=>'Database prepare failed'],500);
+        return;
+    }
 
+    $stmt->bind_param('s', $userId);
     if (! $stmt->execute()) {
         http_response_code(500);
-        jsonResponse([ 'success' => false, 'message' => 'Failed to get Student Courses' ], 500);
+        jsonResponse(['success'=>false,'message'=>'Database execute failed'],500);
         return;
     }
 
     $courses = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 
-    if (empty($courses)) {
-        http_response_code(404);
-        jsonResponse([
-            'success' => false,
-            'courses' => []
-        ], 404);
-    } else {
-        jsonResponse([
-            'success' => true,
-            'courses' => $courses
-        ]);
-    }
+    header('Content-Type: application/json');
+    echo json_encode([
+      'success' => true,
+      'courses' => $courses
+    ]);
+    exit;
 }
+
