@@ -38,7 +38,9 @@ try{
             Q.number_of_attempts,
             QT.quiz_type_name,
             Q.time_limit,
-            Q.is_passed
+            Q.is_passed,
+            Q.number_of_questions,
+            Q.overall_points
         FROM `Activity` AS A
         INNER JOIN `Quiz` AS Q
             on A.activity_id = Q.activity_id
