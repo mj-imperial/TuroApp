@@ -139,7 +139,7 @@ function getTeacherCourses(mysqli $conn, string $userId){
         C.course_name,
         C.course_description,
         C.start_date,
-        C.end_date,
+        C.end_date
       FROM `Course` AS C
       WHERE C.teacher_id = ?
     ";
