@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 24, 2025 at 02:24 PM
+-- Generation Time: May 25, 2025 at 02:07 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -411,6 +411,40 @@ CREATE TABLE `options` (
   `is_correct` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `options`
+--
+
+INSERT INTO `options` (`option_id`, `question_id`, `option_text`, `is_correct`) VALUES
+('M101A3Q10O1', 'M101A3Q10', 'True', 1),
+('M101A3Q10O2', 'M101A3Q10', 'False', 0),
+('M101A3Q1O1', 'M101A3Q1', '{1,2}', 0),
+('M101A3Q1O2', 'M101A3Q1', '{3,4}', 1),
+('M101A3Q1O3', 'M101A3Q1', '{5,6}', 0),
+('M101A3Q1O4', 'M101A3Q1', '{1,2,3,4,5,6}', 0),
+('M101A3Q2O1', 'M101A3Q2', '{{a},{b},{a,b}}', 0),
+('M101A3Q2O2', 'M101A3Q2', '{∅,{a},{b},{a,b}}', 1),
+('M101A3Q2O3', 'M101A3Q2', '{{a,b}}', 0),
+('M101A3Q2O4', 'M101A3Q2', '{∅,{a,b}}', 0),
+('M101A3Q3O1', 'M101A3Q3', '{1,3,5}', 1),
+('M101A3Q3O2', 'M101A3Q3', '{2,4}', 0),
+('M101A3Q3O3', 'M101A3Q3', '{1,2,3,4,5}', 0),
+('M101A3Q3O4', 'M101A3Q3', '∅', 0),
+('M101A3Q4O1', 'M101A3Q4', 'Two sets are equal if and only if they have exactly the same elements.', 0),
+('M101A3Q4O2', 'M101A3Q4', 'The order of elements matters in a set.', 1),
+('M101A3Q4O3', 'M101A3Q4', 'Repetition of elements in the roster method doesn’t change the set.', 0),
+('M101A3Q4O4', 'M101A3Q4', 'Every element of the empty set vacuously satisfies any given property.', 0),
+('M101A3Q5O1', 'M101A3Q5', 'True', 1),
+('M101A3Q5O2', 'M101A3Q5', 'False', 0),
+('M101A3Q6O1', 'M101A3Q6', 'True', 1),
+('M101A3Q6O2', 'M101A3Q6', 'False', 0),
+('M101A3Q7O1', 'M101A3Q7', 'True', 1),
+('M101A3Q7O2', 'M101A3Q7', 'False', 0),
+('M101A3Q8O1', 'M101A3Q8', 'True', 0),
+('M101A3Q8O2', 'M101A3Q8', 'False', 1),
+('M101A3Q9O1', 'M101A3Q9', 'True', 1),
+('M101A3Q9O2', 'M101A3Q9', 'False', 0);
+
 -- --------------------------------------------------------
 
 --
@@ -447,6 +481,22 @@ CREATE TABLE `question` (
   `activity_id` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `question`
+--
+
+INSERT INTO `question` (`question_id`, `question_text`, `question_image`, `question_type_id`, `score`, `activity_id`) VALUES
+('M101A3Q1', 'Let 𝐴 = { 1 , 2 , 3 , 4 } and 𝐵 = { 3 , 4 , 5 , 6 }. What is 𝐴 ∩ 𝐵?', NULL, 1, 1, 'M101A3'),
+('M101A3Q10', 'True or False\r\nFor any sets 𝐴 and 𝐵, ∣ 𝐴 ∪ 𝐵 ∣ = ∣ 𝐴 ∣ + ∣ 𝐵 ∣ − ∣ 𝐴 ∩ 𝐵 ∣.', NULL, 1, 1, 'M101A3'),
+('M101A3Q2', 'Which of the following represents the power set of { 𝑎 , 𝑏 }?', NULL, 1, 1, 'M101A3'),
+('M101A3Q3', 'If 𝑈 = { 1 , 2 , 3 , 4 , 5 } is the universal set and 𝐴 = { 2 , 4 }, what is the complement 𝐴𝑐?', NULL, 1, 1, 'M101A3'),
+('M101A3Q4', 'Which statement is false?', NULL, 1, 1, 'M101A3'),
+('M101A3Q5', 'True or False\r\nThe empty set ∅ is a subset of every set.', NULL, 1, 1, 'M101A3'),
+('M101A3Q6', 'True or False\r\n{1,2}⊆{1,2,3} but { 1 , 2 , 3 } ⊈ { 1 , 2 }.', NULL, 1, 1, 'M101A3'),
+('M101A3Q7', 'True or False\r\nIf 𝐴 ⊂ 𝐵 (proper subset), then ∣ 𝐴 ∣ < ∣ 𝐵 ∣.', NULL, 1, 1, 'M101A3'),
+('M101A3Q8', 'True or False\r\nThe union of two disjoint sets is always the empty set.', NULL, 1, 1, 'M101A3'),
+('M101A3Q9', 'True or False\r\n{x:x is an even integer} is an infinite set.', NULL, 1, 1, 'M101A3');
+
 -- --------------------------------------------------------
 
 --
@@ -457,6 +507,14 @@ CREATE TABLE `questiontype` (
   `type_id` int(11) NOT NULL,
   `type_name` enum('MULTIPLE_CHOICE','SHORT_ANSWER') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `questiontype`
+--
+
+INSERT INTO `questiontype` (`type_id`, `type_name`) VALUES
+(1, 'MULTIPLE_CHOICE'),
+(2, 'SHORT_ANSWER');
 
 -- --------------------------------------------------------
 
@@ -1003,7 +1061,7 @@ ALTER TABLE `eventtype`
 -- AUTO_INCREMENT for table `questiontype`
 --
 ALTER TABLE `questiontype`
-  MODIFY `type_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `quiztype`
