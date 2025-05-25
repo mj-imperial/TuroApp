@@ -4,6 +4,9 @@ import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.Question
 import com.example.turomobileapp.models.Quiz
+import com.example.turomobileapp.models.QuizContentResponse
+import com.example.turomobileapp.models.QuizContentResponses
+import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.models.QuizzesResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -34,15 +37,15 @@ interface QuizApiService {
         @Query("course_id") courseId: String
     ): Response<QuizzesResponse>
 
-    @GET("/quizzes/{quizId}")
+    @GET("get_quiz.php")
     suspend fun getQuiz(
-        @Path("quizId") quizId: String
-    ): Response<Quiz>
+        @Query("activity_id") quizId: String
+    ): Response<QuizResponse>
 
-    @GET("/quizzes/{quizId}/questions")
-    suspend fun getQuestionsForQuiz(
-        @Path("quizId") quizId: String
-    ): Response<List<Question>>
+    @GET("get_quiz_content.php")
+    suspend fun getQuizContent(
+        @Query("activity_id") quizId: String
+    ): Response<QuizContentResponses>
 
     @PUT("/quizzes/{quizId}")
     suspend fun updateQuiz(

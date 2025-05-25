@@ -2,19 +2,27 @@ package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.interfaces.AssessmentResultApiService
+import com.example.turomobileapp.models.AnswerUploadRequest
 import com.example.turomobileapp.models.AssessmentResult
+import com.example.turomobileapp.models.AssessmentResultUploadRequest
+import com.example.turomobileapp.models.AssessmentResultUploadResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class AssessmentResultRepository @Inject constructor(private val assessmentResultApiService: AssessmentResultApiService) {
 
-    fun saveAssessmentResult(result: AssessmentResult): Flow<Result<Unit>> = flow {
+    fun saveAssessmentResult(studentId: String, activityId: String, scorePercentage: Double, earnedPoints: Int, answers: List<AnswerUploadRequest>): Flow<Result<AssessmentResultUploadResponse>> =
         handleApiResponse(
-            call = { assessmentResultApiService.saveAssessmentResult(result) },
-            errorMessage = "Failed to save assessment result $result"
+            call = { assessmentResultApiService.saveAssessmentResult(AssessmentResultUploadRequest(
+                studentId = studentId,
+                activityId = activityId,
+                scorePercentage = scorePercentage,
+                earnedPoints = earnedPoints,
+                answers = answers,
+            )) },
+            errorMessage = "Failed to save assessment result"
         )
-    }
 
     fun getAssessmentResultsForQuizAndStudent(studentId: String, quizId: String): Flow<Result<List<AssessmentResult>>> = flow {
         handleApiResponse(

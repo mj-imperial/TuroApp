@@ -1,0 +1,425 @@
+package com.example.turomobileapp.ui.screens.student
+
+import AppScaffold
+import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults.colors
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.turomobileapp.R
+import com.example.turomobileapp.enums.QuestionType
+import com.example.turomobileapp.models.QuestionResponse
+import com.example.turomobileapp.models.QuizResponse
+import com.example.turomobileapp.ui.components.CapsuleButton
+import com.example.turomobileapp.ui.components.CapsuleTextField
+import com.example.turomobileapp.ui.components.ResponsiveFont
+import com.example.turomobileapp.ui.components.WindowInfo
+import com.example.turomobileapp.ui.components.rememberWindowInfo
+import com.example.turomobileapp.ui.navigation.Screen
+import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.MainOrange
+import com.example.turomobileapp.ui.theme.MainWhite
+import com.example.turomobileapp.ui.theme.SoftGray
+import com.example.turomobileapp.ui.theme.TextBlack
+import com.example.turomobileapp.ui.theme.green
+import com.example.turomobileapp.ui.theme.quizDetail1
+import com.example.turomobileapp.ui.theme.quizDetail2
+import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.student.Answer
+import com.example.turomobileapp.viewmodels.student.QuizAttemptEvent
+import com.example.turomobileapp.viewmodels.student.QuizAttemptUIState
+import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
+import kotlinx.coroutines.delay
+
+@SuppressLint("DefaultLocale")
+@Composable
+fun QuizAttemptScreen(
+    navController: NavController,
+    sessionManager: SessionManager,
+    quizId: String,
+    viewModel: QuizAttemptViewModel,
+) {
+    val ctx = LocalContext.current
+    BackHandler {
+        Toast.makeText(ctx,"You can’t go back during the quiz",Toast.LENGTH_SHORT).show()
+    }
+
+    val windowInfo = rememberWindowInfo()
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(viewModel.events) {
+        viewModel.events.collect { ev ->
+            when (ev) {
+                is QuizAttemptEvent.SubmitSuccess ->
+//                    navController.navigate(Screen.QuizResult.createRoute(ev.response.resultId))
+                    navController.navigate(Screen.QuizResult.route)
+
+                is QuizAttemptEvent.SubmitError -> Toast.makeText(
+                    ctx,
+                    ev.errorMessage,
+                    Toast.LENGTH_LONG
+                ).show()
+
+                else -> {}
+            }
+        }
+    }
+
+    if (uiState.loading) {
+        Box(
+            Modifier.fillMaxSize(),contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    if (uiState.content.isEmpty()) {
+        Box(
+            Modifier.fillMaxSize(),contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "No questions available",style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        return
+    }
+
+    LaunchedEffect(uiState.timeLimit) {
+        if (uiState.timeLimit > 0) {
+            viewModel.startTimer(uiState.timeLimit)
+        }
+    }
+
+    val minutes = uiState.timeRemaining / 60
+    val seconds = uiState.timeRemaining % 60
+    val timerText = String.format("%02d:%02d",minutes,seconds)
+
+    AppScaffold(
+        navController = navController,
+        canNavigateBack = false,
+        windowInfo = windowInfo,
+        sessionManager = sessionManager,
+        content = { innerPadding ->
+            Column(
+                modifier = Modifier.fillMaxSize().padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceAround,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    QuizAttemptMainContent(
+                        windowInfo = windowInfo,
+                        uiState = uiState,
+                        onShortAnswerEntered = viewModel::onShortAnswerEntered,
+                        onOptionSelected = viewModel::onOptionSelected,
+                        onNextClicked = viewModel::onNextClicked,
+                        onSubmitClicked = viewModel::onSubmitClicked,
+                    )
+
+                    Text(
+                        text = timerText,
+                        color = LoginText,
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun QuizAttemptMainContent(
+    windowInfo: WindowInfo,
+    uiState: QuizAttemptUIState,
+    onShortAnswerEntered: (String) -> Unit,
+    onOptionSelected: (QuestionResponse) -> Unit,
+    onNextClicked: () -> Unit,
+    onSubmitClicked: () -> Unit
+){
+    val question = uiState.content[uiState.currentIndex]
+    val options = question.options
+
+    QuizAttemptHeader(
+        height = windowInfo.screenHeight * 0.15f,
+        windowInfo = windowInfo,
+        quizType = uiState.quizType,
+        quizName = uiState.quizName
+    )
+
+    QuestionBox(
+        uiState = uiState,
+        windowInfo = windowInfo,
+        questionNumber = uiState.currentIndex + 1,
+        questionText = question.questionText,
+        questionImage = question.questionImage,
+        questionType = QuestionType.valueOf(question.questionTypeName),
+        options = options,
+        onShortAnswerEntered = onShortAnswerEntered,
+        onOptionSelected = onOptionSelected,
+        onNextClicked = onNextClicked,
+        onSubmitClicked = onSubmitClicked,
+    )
+}
+
+@Composable
+fun QuizAttemptHeader(
+    height: Dp,
+    windowInfo: WindowInfo,
+    quizType: String,
+    quizName: String
+){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+            .padding(vertical = 30.dp, horizontal = 20.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(R.drawable.quiz_detail_icon),
+            contentDescription = "Quiz Icon",
+            modifier = Modifier.size(height * 0.8f)
+        )
+
+        Column {
+            Text(
+                text = "$quizType QUIZ",
+                fontSize = ResponsiveFont.heading1(windowInfo),
+                fontFamily = FontFamily(Font(R.font.alata))
+            )
+
+            Text(
+                text = quizName,
+                fontSize = ResponsiveFont.heading3(windowInfo),
+                fontFamily = FontFamily(Font(R.font.alata))
+            )
+        }
+    }
+}
+
+@Composable
+fun QuestionBox(
+    uiState: QuizAttemptUIState,
+    windowInfo: WindowInfo,
+    questionNumber: Int,
+    questionText: String,
+    questionImage: String?,
+    questionType: QuestionType,
+    options: List<QuestionResponse>,
+    onShortAnswerEntered: (String) -> Unit,
+    onOptionSelected: (QuestionResponse) -> Unit,
+    onNextClicked: () -> Unit,
+    onSubmitClicked: () -> Unit
+){
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent, contentColor = TextBlack),
+        elevation = CardDefaults.cardElevation(3.dp),
+        shape = RoundedCornerShape(5.dp),
+        modifier = Modifier.fillMaxWidth().height(windowInfo.screenHeight * 0.45f)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            quizDetail1,quizDetail2
+                        )
+                    )
+                )
+        ){
+            Column(
+                modifier = Modifier.fillMaxSize().padding(20.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = "Q$questionNumber of ${uiState.content.size}",
+                    fontSize = ResponsiveFont.heading2(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.albert_sans_thin)),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(bottom = 5.dp)
+                )
+
+                Text(
+                    text = "QUESTION $questionNumber",
+                    fontSize = ResponsiveFont.heading1(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.albert_sans_thin)),
+                    fontWeight = FontWeight.Bold
+                )
+
+                if (questionImage != null){
+                    AsyncImage(
+                        model = questionImage,
+                        modifier = Modifier
+                            .size(windowInfo.screenWidth * 0.5f)
+                            .padding(bottom = 10.dp),
+                        contentDescription = "Question Image",
+                        alignment = Alignment.Center,
+                        contentScale = ContentScale.Crop,
+                        clipToBounds = true
+                    )
+                }
+
+                Text(
+                    text = questionText,
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.albert_sans_thin)),
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
+
+                if (questionType == QuestionType.SHORT_ANSWER){
+                    CapsuleTextField(
+                        value = (uiState.answers[uiState.currentIndex] as? Answer.TextAnswer)?.text.orEmpty(),
+                        onValueChange = {
+                            onShortAnswerEntered(it)
+                        },
+                        isSingleLine = true,
+                        roundedCornerShape = 3.dp,
+                        colors = colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = SoftGray,
+                            disabledContainerColor = Color.Transparent,
+                            cursorColor = MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier.width(windowInfo.screenWidth * 0.4f),
+                        enabled = true,
+                        textStyle = LocalTextStyle.current
+                    )
+                }else{
+                    val index = uiState.currentIndex
+                    val selAnswer = uiState.answers[index] as? Answer.OptionAnswer
+                    val selectedOptionId = selAnswer?.optionId
+
+                    options.forEachIndexed { optionIndex, option ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(onClick = { onOptionSelected(option) }),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = option.optionId == selectedOptionId,
+                                onClick = {
+                                    onOptionSelected(option)
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = green,
+                                    unselectedColor = LoginText
+                                )
+                            )
+                            Text(
+                                text = option.optionText,
+                                fontSize = ResponsiveFont.heading3(windowInfo),
+                                fontFamily = FontFamily(Font(R.font.alata))
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.End,
+        modifier = Modifier.padding(20.dp).fillMaxWidth()
+    ) {
+        if (uiState.currentIndex < uiState.content.size - 1){
+            CapsuleButton(
+                text = {
+                    Text(
+                        text = "NEXT",
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading2(windowInfo),
+                        color = MainWhite
+                    )
+                },
+                onClick = onNextClicked,
+                modifier = Modifier.width(windowInfo.screenWidth*0.35f),
+                roundedCornerShape = 5.dp,
+                buttonElevation = ButtonDefaults.buttonElevation(5.dp),
+                contentPadding = PaddingValues(5.dp),
+                buttonColors = ButtonDefaults.buttonColors(green),
+                enabled = true
+            )
+        }
+        CapsuleButton(
+            text = {
+                Text(
+                    text = "SUBMIT",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading2(windowInfo),
+                    color = TextBlack
+                )
+            },
+            onClick = onSubmitClicked,
+            modifier = Modifier.width(windowInfo.screenWidth*0.35f).padding(bottom = 10.dp),
+            roundedCornerShape = 5.dp,
+            buttonElevation = ButtonDefaults.buttonElevation(5.dp),
+            contentPadding = PaddingValues(5.dp),
+            buttonColors = ButtonDefaults.buttonColors(LoginText),
+            enabled = true
+        )
+    }
+}
+
+

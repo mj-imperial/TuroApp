@@ -1,7 +1,8 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.AssessmentResult
-import okhttp3.ResponseBody
+import com.example.turomobileapp.models.AssessmentResultUploadRequest
+import com.example.turomobileapp.models.AssessmentResultUploadResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -10,10 +11,10 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface AssessmentResultApiService {
-    @POST("/assessmentResults")
+    @POST("save_assessment_result.php")
     suspend fun saveAssessmentResult(
-        @Body result: AssessmentResult
-    ): Response<ResponseBody>
+        @Body request: AssessmentResultUploadRequest
+    ): Response<AssessmentResultUploadResponse>
 
     @GET("/students/{studentId}/assessmentResults")
     suspend fun getAssessmentResultsForStudent(

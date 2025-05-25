@@ -3,6 +3,7 @@ package com.example.turomobileapp.models
 import com.example.turomobileapp.enums.QuestionType
 import com.example.turomobileapp.enums.ScreeningTier
 import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.Date
 
@@ -47,3 +48,51 @@ data class AssessmentResult(
     @SerializedName("correct_answers") val correctAnswers: List<Answers>,
     @SerializedName("wrong_answers") val wrongAnswers: List<Answers>
 )
+
+@JsonClass(generateAdapter = true)
+data class AssessmentResultUploadResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "message") val message: String,
+)
+
+@JsonClass(generateAdapter = true)
+data class AssessmentResultUploadRequest(
+    @Json(name = "student_id") val studentId: String,
+    @Json(name = "activity_id") val activityId: String,
+    @Json(name = "score_percentage") val scorePercentage: Double,
+    @Json(name = "earned_points") val earnedPoints: Int,
+    @Json(name = "answers") val answers: List<AnswerUploadRequest>,
+    @Json(name= "tier_level_id") val tierLevelId: Int? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class AnswerUploadRequest(
+    @Json(name = "question_id") val questionId: String,
+    @Json(name = "option_id") val optionId: String,
+    @Json(name = "is_correct") val isCorrect: Boolean
+)
+
+@JsonClass(generateAdapter = true)
+data class QuizContentResponses(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "questions") val questions: List<QuizContentResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class QuizContentResponse(
+    @Json(name = "question_id") val questionId: String,
+    @Json(name = "question_text") val questionText: String,
+    @Json(name = "question_image") val questionImage: String?,
+    @Json(name = "type_name") val questionTypeName: String,
+    @Json(name = "score") val score: Int,
+    @Json(name = "options") val options: List<QuestionResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class QuestionResponse(
+    @Json(name = "option_id") val optionId: String,
+    @Json(name = "option_text") val optionText: String,
+    @Json(name = "is_correct") val isCorrectInt: Int
+){
+    val isCorrect: Boolean get() = isCorrectInt != 0
+}

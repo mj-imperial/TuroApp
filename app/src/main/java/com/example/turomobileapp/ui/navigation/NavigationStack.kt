@@ -1,5 +1,6 @@
 package com.example.turomobileapp.ui.navigation
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
@@ -22,11 +23,15 @@ import com.example.turomobileapp.ui.screens.shared.DashboardScreen
 import com.example.turomobileapp.ui.screens.shared.ProfileScreen
 import com.example.turomobileapp.ui.screens.shared.StudentModulesScreen
 import com.example.turomobileapp.ui.screens.student.CourseDetailScreen
+import com.example.turomobileapp.ui.screens.student.QuizAttemptScreen
 import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizListScreen
+import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 
+@SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationStack(
@@ -101,7 +106,38 @@ fun NavigationStack(
                     ?.remove<QuizResponse>("quizResponse")
             }
 
-            QuizDetailScreen(navController, sessionManager, quiz)
+            QuizDetailScreen(
+                navController = navController,
+                sessionManager = sessionManager,
+                quiz = quiz,
+                onClickTakeQuiz = {
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("quizResponse", it)
+                    navController.navigate(Screen.QuizAttempt.createRoute(quiz.quizId))
+                }
+            )
+        }
+        composable(
+            route = Screen.QuizAttempt.route,
+            arguments = listOf(
+                navArgument("quizId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val quizId = backStackEntry.arguments!!.getString("quizId")!!
+            val viewModel: QuizAttemptViewModel = hiltViewModel(backStackEntry)
+
+            QuizAttemptScreen(
+                navController = navController,
+                sessionManager = sessionManager,
+                viewModel = viewModel,
+                quizId = quizId
+            )
+        }
+        composable(
+            route = Screen.QuizResult.route
+        ) {
+            QuizResultScreen()
         }
     }
 }

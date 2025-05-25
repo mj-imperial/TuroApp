@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.models.Quiz
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.ResponsiveFont
@@ -55,7 +56,8 @@ import java.time.format.DateTimeFormatter
 fun QuizDetailScreen(
     navController: NavController,
     sessionManager: SessionManager,
-    quiz: QuizResponse
+    quiz: QuizResponse,
+    onClickTakeQuiz: (QuizResponse) -> Unit
 ){
     val windowInfo = rememberWindowInfo()
 
@@ -78,7 +80,8 @@ fun QuizDetailScreen(
             ) {
                 QuizDetailContent(
                     quiz = quiz,
-                    windowInfo = windowInfo
+                    windowInfo = windowInfo,
+                    onClickTakeQuiz = onClickTakeQuiz
                 )
             }
         }
@@ -89,7 +92,8 @@ fun QuizDetailScreen(
 @Composable
 fun QuizDetailContent(
     quiz: QuizResponse?,
-    windowInfo: WindowInfo
+    windowInfo: WindowInfo,
+    onClickTakeQuiz: (QuizResponse) -> Unit
 ){
     val contentPadding = (windowInfo.screenWidth) * 0.09f
     val titleHeight = windowInfo.screenHeight
@@ -141,9 +145,7 @@ fun QuizDetailContent(
         QuizBody(
             windowInfo = windowInfo,
             description = quiz?.quizDescription,
-            onTakeQuizClick = {
-                //TODO navigate to quiz taking screen
-            }
+            onTakeQuizClick = { onClickTakeQuiz(quiz!!) }
         )
 
         HorizontalDivider(
@@ -308,7 +310,9 @@ fun PreviousNextButton(
             },
             onClick = onClickPrevious,
             roundedCornerShape = 5.dp,
-            modifier = Modifier.width(buttonWidth).border(1.dp, green, RoundedCornerShape(5.dp)),
+            modifier = Modifier
+                .width(buttonWidth)
+                .border(1.dp,green,RoundedCornerShape(5.dp)),
             buttonElevation = ButtonDefaults.buttonElevation(0.dp),
             contentPadding = PaddingValues(vertical = 10.dp),
             buttonColors = ButtonDefaults.buttonColors(Color.Transparent),
@@ -326,7 +330,9 @@ fun PreviousNextButton(
             },
             onClick = onClickNext,
             roundedCornerShape = 5.dp,
-            modifier = Modifier.width(buttonWidth).border(1.dp, green, RoundedCornerShape(5.dp)),
+            modifier = Modifier
+                .width(buttonWidth)
+                .border(1.dp,green,RoundedCornerShape(5.dp)),
             buttonElevation = ButtonDefaults.buttonElevation(0.dp),
             contentPadding = PaddingValues(10.dp),
             buttonColors = ButtonDefaults.buttonColors(Color.Transparent),

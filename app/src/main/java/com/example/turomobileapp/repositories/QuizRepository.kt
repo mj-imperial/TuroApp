@@ -7,6 +7,7 @@ import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.Question
 import com.example.turomobileapp.models.Quiz
+import com.example.turomobileapp.models.QuizContentResponse
 import com.example.turomobileapp.models.QuizResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -28,19 +29,18 @@ class QuizRepository @Inject constructor(private val quizApiService: QuizApiServ
         )
     }
 
-    fun getQuiz(quizId: String): Flow<Result<Quiz>> = flow {
+    fun getQuiz(quizId: String): Flow<Result<QuizResponse>> =
         handleApiResponse(
             call = { quizApiService.getQuiz(quizId) },
             errorMessage = "Failed to get quiz $quizId"
         )
-    }
 
-    fun getQuestionsForQuiz(quizId: String): Flow<Result<List<Question>>> = flow {
-        handleApiResponse(
-            call = { quizApiService.getQuestionsForQuiz(quizId) },
-            errorMessage = "Failed to get questions for quiz $quizId"
+    fun getQuizContent(quizId: String): Flow<Result<List<QuizContentResponse>>> =
+        requestAndMap(
+            call = { quizApiService.getQuizContent(quizId) },
+            mapper = { dto -> dto.questions }
         )
-    }
+
 
     fun updateQuiz(quizId: String, quiz: Quiz): Flow<Result<Unit>> = flow {
         handleApiResponse(
