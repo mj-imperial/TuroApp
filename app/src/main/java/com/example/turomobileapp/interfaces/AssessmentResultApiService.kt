@@ -3,6 +3,7 @@ package com.example.turomobileapp.interfaces
 import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.AssessmentResultUploadRequest
 import com.example.turomobileapp.models.AssessmentResultUploadResponse
+import com.example.turomobileapp.models.AssessmentResultsResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -16,9 +17,15 @@ interface AssessmentResultApiService {
         @Body request: AssessmentResultUploadRequest
     ): Response<AssessmentResultUploadResponse>
 
-    @GET("/students/{studentId}/assessmentResults")
+    @GET("get_assessment_result_for_student_and_quiz.php")
+    suspend fun getAssessmentResultsForActivityAndStudent(
+        @Query("student_id") studentId: String,
+        @Query("activity_id") activityId: String
+    ): Response<AssessmentResultsResponse>
+
+    @GET("")
     suspend fun getAssessmentResultsForStudent(
-        @Path("studentId") studentId: String
+        @Query("student_id") studentId: String
     ): Response<List<AssessmentResult>>
 
     @GET("/assessmentResults/{assessmentResultId}")
@@ -42,11 +49,7 @@ interface AssessmentResultApiService {
         @Query("quizId") quizId: String
     ): Response<List<AssessmentResult>>
 
-    @GET("/students/{studentId}/quizzes/{quizId}/assessmentResults")
-    suspend fun getAssessmentResultsForQuizAndStudent(
-        @Path("studentId") studentId: String,
-        @Query("quizId") quizId: String
-    ): Response<List<AssessmentResult>>
+
 
     @GET("/modules/{moduleId}/assessmentResults")
     suspend fun getAssessmentResultsForModule(

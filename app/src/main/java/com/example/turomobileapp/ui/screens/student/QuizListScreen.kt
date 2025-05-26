@@ -106,7 +106,9 @@ fun QuizListByModule(
     val cardHeight = (windowInfo.screenHeight) * 0.25f
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp,vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         quizzesByModule.forEach { moduleName, quizzes ->
@@ -140,6 +142,9 @@ fun QuizListByModule(
                     averageScore = 0.0,
                     highestScore = 0.0,
                     lowestScore = 0.0,
+                    onClickQuiz = {
+                        navController.navigate(Screen.QuizResult.createRoute(quiz.quizId))
+                    },
                 ){
                     onClickQuiz(quiz)
                 }
@@ -157,7 +162,8 @@ fun QuizCard(
     averageScore: Double?,
     highestScore: Double?,
     lowestScore: Double?,
-    onClickQuiz: () -> Unit
+    onClickQuiz: () -> Unit,
+    onClickStatistics: () -> Unit
 ){
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.Transparent, contentColor = TextBlack),
@@ -221,7 +227,7 @@ fun QuizCard(
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.subtitle(windowInfo),
                         textDecoration = TextDecoration.Underline,
-//                        modifier = Modifier.clickable()
+                        modifier = Modifier.clickable(onClick = onClickStatistics)
                     )
                 }
             }

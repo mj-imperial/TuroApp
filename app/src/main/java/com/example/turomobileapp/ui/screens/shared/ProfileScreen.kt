@@ -10,7 +10,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,17 +25,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,12 +51,12 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.ui.components.CapsuleButton
+import com.example.turomobileapp.ui.components.PopupWithImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -65,8 +65,6 @@ import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.SideRed
-import com.example.turomobileapp.ui.theme.green
-import com.example.turomobileapp.ui.theme.savePic
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.authentication.LoginViewModel
 import com.example.turomobileapp.viewmodels.shared.ProfileUIState
@@ -235,7 +233,7 @@ fun ProfileContent(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(2.dp, MainRed, RoundedCornerShape(28.dp)),
+                        .border(2.dp,MainRed,RoundedCornerShape(28.dp)),
                     roundedCornerShape = 28.dp,
                     buttonElevation = ButtonDefaults.buttonElevation(8.dp),
                     buttonColors = ButtonDefaults.buttonColors(
@@ -288,56 +286,27 @@ fun ProfileContent(
             }
         }
 
-        uiState.pickedImageUri?.let { uri ->
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .zIndex(1f)
-                    .background(savePic)
-                    .clickable { onClearClick() },
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                AsyncImage(
-                    model = uri,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(screenHeight * 0.3f)
-                        .clip(CircleShape),
-                    contentDescription = "Preview"
-                )
-                Spacer(Modifier.height(12.dp))
-                CapsuleButton(
-                    text = {
-                        if (uiState.loading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text(
-                                text = "SAVE",
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                color = MainWhite
-                            )
-                        }
-                    },
-                    onClick = onSaveClick,
-                    roundedCornerShape = 10.dp,
-                    buttonElevation = ButtonDefaults.buttonElevation(8.dp),
-                    buttonColors = ButtonColors(
-                        containerColor = green,
-                        contentColor = MainWhite,
-                        disabledContainerColor = Color.DarkGray,
-                        disabledContentColor = Color.DarkGray,
-                    ),
-                    enabled = !uiState.loading
-                )
+        var openAlertDialog by remember { mutableStateOf(false) }
 
-                uiState.errorMessage?.let { err ->
-                    Spacer(Modifier.height(8.dp))
-                    Text("Error: $err",color = Color.Red)
-                }
+        uiState.pickedImageUri?.let { uri ->
+            Column{
+                PopupWithImage(
+                    onDismissRequest = {
+                        openAlertDialog = false
+                        onClearClick()
+                    },
+                    onConfirmation = {
+                        openAlertDialog = false
+                        onSaveClick()
+                    },
+                    uri = uri,
+                    imageDescription = "Are you sure you want to change your profile picture?",
+                    height = screenHeight * 0.4f,
+                    width = screenHeight * 0.5f,
+                    padding = 20.dp,
+                    roundedCornerShape = 10.dp,
+                    errorMessage = uiState.errorMessage
+                )
             }
         }
     }

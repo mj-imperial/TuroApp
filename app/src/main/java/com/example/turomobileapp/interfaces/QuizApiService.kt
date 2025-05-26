@@ -2,9 +2,7 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
-import com.example.turomobileapp.models.Question
 import com.example.turomobileapp.models.Quiz
-import com.example.turomobileapp.models.QuizContentResponse
 import com.example.turomobileapp.models.QuizContentResponses
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.models.QuizzesResponse

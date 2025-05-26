@@ -113,6 +113,9 @@ data class QuizResponse(
     @Json(name = "time_limit") val timeLimit: Int,
     @Json(name = "is_passed") val isPassed: Boolean?,
     @Json(name = "number_of_questions") val numberOfQuestions: Int,
-    @Json(name = "overall_points") val overallPoints: Int
-) : Parcelable
+    @Json(name = "overall_points") val overallPoints: Int,
+    @Json(name = "has_answers_shown") val hasAnswersShownInt: Int
+) : Parcelable{
+    val hasAnswersShown: Boolean get() = hasAnswersShownInt != 0
+}
 

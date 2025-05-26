@@ -28,6 +28,7 @@ import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizListScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 
@@ -135,9 +136,13 @@ fun NavigationStack(
             )
         }
         composable(
-            route = Screen.QuizResult.route
+            route = Screen.QuizResult.route,
+            arguments = listOf(
+                navArgument("quizId") { type = NavType.StringType }
+            )
         ) {
-            QuizResultScreen()
+            val viewModel: AssessmentResultViewModel = hiltViewModel()
+            QuizResultScreen(navController, sessionManager, viewModel)
         }
     }
 }

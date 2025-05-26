@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.AnswerUploadRequest
-import com.example.turomobileapp.models.AssessmentResultUploadRequest
 import com.example.turomobileapp.models.AssessmentResultUploadResponse
 import com.example.turomobileapp.models.QuestionResponse
 import com.example.turomobileapp.models.QuizContentResponse

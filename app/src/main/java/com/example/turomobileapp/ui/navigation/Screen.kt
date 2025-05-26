@@ -31,5 +31,7 @@ sealed class Screen(val route: String) {
     object QuizAttempt: Screen("quiz_attempt_screen/{quizId}"){
         fun createRoute(quizId: String) = "quiz_attempt_screen/$quizId"
     }
-    object QuizResult: Screen("quiz_result_screen")
+    object QuizResult: Screen("quiz_result_screen/{quizId}"){
+        fun createRoute(quizId: String) = "quiz_result_screen/$quizId"
+    }
 }

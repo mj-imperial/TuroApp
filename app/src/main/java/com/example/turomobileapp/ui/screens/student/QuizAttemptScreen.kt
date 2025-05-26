@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
@@ -36,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,15 +56,15 @@ import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.enums.QuestionType
 import com.example.turomobileapp.models.QuestionResponse
-import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
+import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
-import com.example.turomobileapp.ui.theme.MainOrange
+import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.SoftGray
 import com.example.turomobileapp.ui.theme.TextBlack
@@ -78,7 +76,6 @@ import com.example.turomobileapp.viewmodels.student.Answer
 import com.example.turomobileapp.viewmodels.student.QuizAttemptEvent
 import com.example.turomobileapp.viewmodels.student.QuizAttemptUIState
 import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
-import kotlinx.coroutines.delay
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -99,16 +96,12 @@ fun QuizAttemptScreen(
     LaunchedEffect(viewModel.events) {
         viewModel.events.collect { ev ->
             when (ev) {
-                is QuizAttemptEvent.SubmitSuccess ->
-//                    navController.navigate(Screen.QuizResult.createRoute(ev.response.resultId))
-                    navController.navigate(Screen.QuizResult.route)
-
-                is QuizAttemptEvent.SubmitError -> Toast.makeText(
-                    ctx,
-                    ev.errorMessage,
-                    Toast.LENGTH_LONG
-                ).show()
-
+                is QuizAttemptEvent.SubmitSuccess -> {
+                    navController.navigate(Screen.QuizResult.createRoute(quizId))
+                }
+                is QuizAttemptEvent.SubmitError -> {
+                    Toast.makeText(ctx,ev.errorMessage,Toast.LENGTH_LONG).show()
+                }
                 else -> {}
             }
         }
@@ -151,7 +144,9 @@ fun QuizAttemptScreen(
         sessionManager = sessionManager,
         content = { innerPadding ->
             Column(
-                modifier = Modifier.fillMaxSize().padding(innerPadding)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
             ) {
                 Column(
@@ -174,7 +169,9 @@ fun QuizAttemptScreen(
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.heading3(windowInfo),
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 5.dp)
                     )
                 }
             }
@@ -227,7 +224,7 @@ fun QuizAttemptHeader(
         modifier = Modifier
             .fillMaxWidth()
             .height(height)
-            .padding(vertical = 30.dp, horizontal = 20.dp),
+            .padding(vertical = 30.dp,horizontal = 20.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -271,7 +268,9 @@ fun QuestionBox(
         colors = CardDefaults.cardColors(containerColor = Color.Transparent, contentColor = TextBlack),
         elevation = CardDefaults.cardElevation(3.dp),
         shape = RoundedCornerShape(5.dp),
-        modifier = Modifier.fillMaxWidth().height(windowInfo.screenHeight * 0.45f)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(windowInfo.screenHeight * 0.45f)
     ) {
         Box(
             modifier = Modifier
@@ -285,7 +284,9 @@ fun QuestionBox(
                 )
         ){
             Column(
-                modifier = Modifier.fillMaxSize().padding(20.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ) {
@@ -381,8 +382,12 @@ fun QuestionBox(
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.End,
-        modifier = Modifier.padding(20.dp).fillMaxWidth()
+        modifier = Modifier
+            .padding(20.dp)
+            .fillMaxWidth()
     ) {
+        var openAlertDialog by remember { mutableStateOf(false) }
+
         if (uiState.currentIndex < uiState.content.size - 1){
             CapsuleButton(
                 text = {
@@ -411,14 +416,62 @@ fun QuestionBox(
                     color = TextBlack
                 )
             },
-            onClick = onSubmitClicked,
-            modifier = Modifier.width(windowInfo.screenWidth*0.35f).padding(bottom = 10.dp),
+            onClick = {
+                openAlertDialog = true
+            },
+            modifier = Modifier
+                .width(windowInfo.screenWidth * 0.35f)
+                .padding(bottom = 10.dp),
             roundedCornerShape = 5.dp,
             buttonElevation = ButtonDefaults.buttonElevation(5.dp),
             contentPadding = PaddingValues(5.dp),
             buttonColors = ButtonDefaults.buttonColors(LoginText),
             enabled = true
         )
+
+        if (openAlertDialog){
+            PopupAlertWithActions(
+                onDismissRequest = {
+                    openAlertDialog = false
+                },
+                onConfirmation = {
+                    onSubmitClicked
+                },
+                icon = painterResource(R.drawable.screeningexam_icon),
+                title = {
+                    Text(
+                        text = "SUBMIT QUIZ",
+                        fontSize = ResponsiveFont.title(windowInfo),
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        color = TextBlack
+                    )
+                },
+                dialogText = {
+                    Text(
+                        text = "Are you sure you want to submit the Quiz?",
+                        fontSize = ResponsiveFont.heading2(windowInfo),
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        color = TextBlack
+                    )
+                },
+                confirmText = {
+                    Text(
+                        text = "CONFIRM",
+                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        color = green
+                    )
+                },
+                dismissText = {
+                    Text(
+                        text = "DISMISS",
+                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        color = MainRed
+                    )
+                }
+            )
+        }
     }
 }
 

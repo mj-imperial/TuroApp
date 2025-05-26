@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -45,11 +46,13 @@ import androidx.compose.ui.unit.dp
 import com.example.turomobileapp.R
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
+import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.theme.LoginText
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.SoftGray
+import com.example.turomobileapp.ui.theme.green
 
 @Composable
 fun PasswordCard(
@@ -68,6 +71,7 @@ fun PasswordCard(
     requiresPasswordChange: Boolean?
 ){
     val passwordFocusRequester = remember { FocusRequester() }
+    var openAlertDialog by remember { mutableStateOf(false) }
 
     Text(
         text = stringResource(R.string.ChangeDefaultPassword),
@@ -117,13 +121,10 @@ fun PasswordCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = 10.dp,
-                    shape = RoundedCornerShape(28.dp),
-                    clip = false
+                    elevation = 10.dp,shape = RoundedCornerShape(28.dp),clip = false
                 )
                 .background(
-                    color = SoftGray,
-                    shape = RoundedCornerShape(28.dp)
+                    color = SoftGray,shape = RoundedCornerShape(28.dp)
                 )
                 .then(if (!loading) Modifier else Modifier.alpha(0.5f)),
             enabled = !loading
@@ -170,13 +171,10 @@ fun PasswordCard(
             .fillMaxWidth()
             .focusRequester(passwordFocusRequester)
             .shadow(
-                elevation = 10.dp,
-                shape = RoundedCornerShape(28.dp),
-                clip = false
+                elevation = 10.dp,shape = RoundedCornerShape(28.dp),clip = false
             )
             .background(
-                color = SoftGray,
-                shape = RoundedCornerShape(28.dp)
+                color = SoftGray,shape = RoundedCornerShape(28.dp)
             )
             .then(if (!loading) Modifier else Modifier.alpha(0.5f)),
         enabled = !loading
@@ -209,7 +207,9 @@ fun PasswordCard(
         ),
         visualTransformation = PasswordVisualTransformation(),
         keyboardActions = KeyboardActions(
-            onDone = { onChangePassword() }
+            onDone = {
+                openAlertDialog = true
+            }
         ),
         roundedCornerShape = 28.dp,
         colors = colors(
@@ -222,13 +222,10 @@ fun PasswordCard(
             .fillMaxWidth()
             .focusRequester(passwordFocusRequester)
             .shadow(
-                elevation = 10.dp,
-                shape = RoundedCornerShape(28.dp),
-                clip = false
+                elevation = 10.dp,shape = RoundedCornerShape(28.dp),clip = false
             )
             .background(
-                color = SoftGray,
-                shape = RoundedCornerShape(28.dp)
+                color = SoftGray,shape = RoundedCornerShape(28.dp)
             )
             .then(if (!loading) Modifier else Modifier.alpha(0.5f)),
         enabled = !loading
@@ -262,7 +259,9 @@ fun PasswordCard(
                 )
             }
         },
-        onClick = { onChangePassword() },
+        onClick = {
+            openAlertDialog = true
+        },
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
@@ -278,6 +277,46 @@ fun PasswordCard(
         ),
         enabled = !loading
     )
+
+    if (openAlertDialog){
+        PopupAlertWithActions(
+            onDismissRequest = {
+                openAlertDialog = false
+            },
+            onConfirmation = onChangePassword,
+            icon = painterResource(R.drawable.fullname_icon),
+            title = {
+                Text(
+                    text = "Change Password?",
+                    fontSize = heading3Size,
+                    fontFamily = FontFamily(Font(R.font.alata))
+                )
+            },
+            dialogText = {
+                Text(
+                    text = "Are you sure you about your new password? This action is irreversible.",
+                    fontSize = heading3Size,
+                    fontFamily = FontFamily(Font(R.font.alata))
+                )
+            },
+            confirmText = {
+                Text(
+                    text = "CONFIRM",
+                    fontSize = body,
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = green
+                )
+            },
+            dismissText = {
+                Text(
+                    text = "DISMISS",
+                    fontSize = body,
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = MainRed
+                )
+            }
+        )
+    }
 }
 
 @SuppressLint("DefaultLocale")
@@ -348,13 +387,10 @@ fun EmailStep(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 10.dp,
-                shape = RoundedCornerShape(28.dp),
-                clip = false
+                elevation = 10.dp,shape = RoundedCornerShape(28.dp),clip = false
             )
             .background(
-                color = SoftGray,
-                shape = RoundedCornerShape(28.dp)
+                color = SoftGray,shape = RoundedCornerShape(28.dp)
             )
             .then(if (!loading) Modifier else Modifier.alpha(0.5f)),
         enabled = !loading

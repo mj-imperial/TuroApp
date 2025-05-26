@@ -1,9 +1,11 @@
 package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.helperfunctions.handleApiResponse
+import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.AssessmentResultApiService
 import com.example.turomobileapp.models.AnswerUploadRequest
 import com.example.turomobileapp.models.AssessmentResult
+import com.example.turomobileapp.models.AssessmentResultResponse
 import com.example.turomobileapp.models.AssessmentResultUploadRequest
 import com.example.turomobileapp.models.AssessmentResultUploadResponse
 import kotlinx.coroutines.flow.Flow
@@ -24,17 +26,12 @@ class AssessmentResultRepository @Inject constructor(private val assessmentResul
             errorMessage = "Failed to save assessment result"
         )
 
-    fun getAssessmentResultsForQuizAndStudent(studentId: String, quizId: String): Flow<Result<List<AssessmentResult>>> = flow {
-        handleApiResponse(
-            call = {
-                assessmentResultApiService.getAssessmentResultsForQuizAndStudent(
-                    studentId,
-                    quizId
-                )
-            },
-            errorMessage = "Failed to get assessment result for quiz $quizId and student $studentId"
+    fun getAssessmentResultsForQuizAndStudent(studentId: String, activityId: String): Flow<Result<List<AssessmentResultResponse>>> =
+        requestAndMap(
+            call = { assessmentResultApiService.getAssessmentResultsForActivityAndStudent(studentId,activityId) },
+            mapper = { dto -> dto.results }
         )
-    }
+
 
     fun getAssessmentResultsForStudent(studentId: String): Flow<Result<List<AssessmentResult>>> = flow {
         handleApiResponse(

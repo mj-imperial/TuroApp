@@ -22,8 +22,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,22 +34,21 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
-import com.example.turomobileapp.models.Quiz
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.ui.components.CapsuleButton
+import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
+import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
-import com.example.turomobileapp.ui.theme.SideRed1
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
-import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -81,7 +82,8 @@ fun QuizDetailScreen(
                 QuizDetailContent(
                     quiz = quiz,
                     windowInfo = windowInfo,
-                    onClickTakeQuiz = onClickTakeQuiz
+                    onClickTakeQuiz = onClickTakeQuiz,
+                    navController = navController
                 )
             }
         }
@@ -91,6 +93,7 @@ fun QuizDetailScreen(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun QuizDetailContent(
+    navController: NavController,
     quiz: QuizResponse?,
     windowInfo: WindowInfo,
     onClickTakeQuiz: (QuizResponse) -> Unit
@@ -145,7 +148,10 @@ fun QuizDetailContent(
         QuizBody(
             windowInfo = windowInfo,
             description = quiz?.quizDescription,
-            onTakeQuizClick = { onClickTakeQuiz(quiz!!) }
+            onTakeQuizClick = { onClickTakeQuiz(quiz!!) },
+            onViewStatistics = {
+                navController.navigate(Screen.QuizResult.createRoute(quiz!!.quizId))
+            },
         )
 
         HorizontalDivider(
@@ -242,8 +248,11 @@ fun QuizHeader(
 fun QuizBody(
     windowInfo: WindowInfo,
     description: String?,
-    onTakeQuizClick: () -> Unit
+    onTakeQuizClick: () -> Unit,
+    onViewStatistics: () -> Unit
 ){
+    var openAlertDialog by remember { mutableStateOf(false) }
+
     Text(
         text = "General Instructions",
         fontSize = ResponsiveFont.heading1(windowInfo),
@@ -263,7 +272,7 @@ fun QuizBody(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         CapsuleButton(
             text = {
@@ -274,12 +283,75 @@ fun QuizBody(
                     color = MainWhite
                 )
             },
-            onClick = onTakeQuizClick,
+            onClick = onViewStatistics,
             roundedCornerShape = 10.dp,
             buttonElevation = ButtonDefaults.buttonElevation(8.dp),
             contentPadding = PaddingValues(10.dp),
             buttonColors = ButtonDefaults.buttonColors(green),
             enabled = true
+        )
+
+        CapsuleButton(
+            text = {
+                Text(
+                    text = "View Statistics",
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = MainWhite
+                )
+            },
+            onClick = {
+
+            },
+            roundedCornerShape = 10.dp,
+            buttonElevation = ButtonDefaults.buttonElevation(8.dp),
+            contentPadding = PaddingValues(10.dp),
+            buttonColors = ButtonDefaults.buttonColors(green),
+            enabled = true
+        )
+    }
+
+    if (openAlertDialog){
+        PopupAlertWithActions(
+            onDismissRequest = {
+                openAlertDialog = false
+            },
+            onConfirmation = {
+                onTakeQuizClick
+            },
+            icon = painterResource(R.drawable.screeningexam_icon),
+            title = {
+                Text(
+                    text = "TAKE QUIZ",
+                    fontSize = ResponsiveFont.title(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = TextBlack
+                )
+            },
+            dialogText = {
+                Text(
+                    text = "Are you sure you want to take the Quiz?",
+                    fontSize = ResponsiveFont.heading2(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = TextBlack
+                )
+            },
+            confirmText = {
+                Text(
+                    text = "CONFIRM",
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = green
+                )
+            },
+            dismissText = {
+                Text(
+                    text = "DISMISS",
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = MainRed
+                )
+            }
         )
     }
 }
