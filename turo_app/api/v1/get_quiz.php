@@ -45,7 +45,8 @@ try{
             Q.time_limit,
             Q.is_passed,
             Q.number_of_questions,
-            Q.overall_points
+            Q.overall_points,
+            Q.has_answers_shown
         FROM `Activity` AS A
         INNER JOIN `Quiz` AS Q
             on A.activity_id = Q.activity_id
