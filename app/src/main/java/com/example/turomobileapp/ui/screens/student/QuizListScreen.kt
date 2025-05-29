@@ -179,7 +179,8 @@ fun QuizCard(
                     text = quizName.capitalize(),
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontSize = ResponsiveFont.heading3(windowInfo),
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(bottom = 10.dp)
                 )
 
                 Row(

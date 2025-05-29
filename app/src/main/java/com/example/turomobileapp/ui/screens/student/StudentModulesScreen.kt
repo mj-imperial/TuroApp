@@ -1,4 +1,4 @@
-package com.example.turomobileapp.ui.screens.shared
+package com.example.turomobileapp.ui.screens.student
 
 import AppScaffold
 import androidx.compose.runtime.Composable
