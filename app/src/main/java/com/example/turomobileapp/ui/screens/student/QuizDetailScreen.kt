@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +23,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.models.AssessmentScoreResponse
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
@@ -49,6 +52,7 @@ import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -57,10 +61,26 @@ import java.time.format.DateTimeFormatter
 fun QuizDetailScreen(
     navController: NavController,
     sessionManager: SessionManager,
-    quiz: QuizResponse,
-    onClickTakeQuiz: (QuizResponse) -> Unit
+    onClickTakeQuiz: (QuizResponse) -> Unit,
+    viewModel: QuizDetailViewModel
 ){
     val windowInfo = rememberWindowInfo()
+    val uiState by viewModel.uiState.collectAsState()
+    val quiz = uiState.quiz
+    val scoresList = uiState.scores.sortedBy { it.attemptNumber }
+
+    val dateFormatterIn = DateTimeFormatter.ISO_DATE
+    val dateFormatterOut = DateTimeFormatter.ofPattern("MMM d, yyyy")
+
+    val dueDateFormatted = quiz?.deadlineDate
+        ?.substringBefore(" ")
+        ?.let { LocalDate.parse(it, dateFormatterIn).format(dateFormatterOut) }
+        ?: "—"
+
+    val unlockDateFormatted = quiz?.unlockDate
+        ?.substringBefore(" ")
+        ?.let { LocalDate.parse(it, dateFormatterIn).format(dateFormatterOut) }
+        ?: "—"
 
     AppScaffold(
         navController = navController,
@@ -79,100 +99,81 @@ fun QuizDetailScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                QuizDetailContent(
-                    quiz = quiz,
-                    windowInfo = windowInfo,
-                    onClickTakeQuiz = onClickTakeQuiz,
-                    navController = navController
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(windowInfo.screenWidth * 0.09f),
+                    verticalArrangement = Arrangement.SpaceAround
+                ) {
+                    QuizTitle(
+                        height = windowInfo.screenHeight * 0.2f,
+                        windowInfo = windowInfo,
+                        quizTypeName = quiz?.quizTypeName.toString(),
+                        quizName = quiz?.quizName.toString()
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)
+                            .padding(vertical = 15.dp),
+                        thickness =  1.dp,
+                        color = LoginText
+                    )
+
+                    QuizHeader(
+                        windowInfo = windowInfo,
+                        dueDate = dueDateFormatted,
+                        unlockDate = unlockDateFormatted,
+                        timeLimit = quiz?.timeLimit,
+                        allowedAttempts = quiz?.numberOfAttempts,
+                        questionSize = quiz?.numberOfQuestions,
+                        points = quiz?.overallPoints,
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)
+                            .padding(vertical = 15.dp),
+                        thickness =  1.dp,
+                        color = LoginText
+                    )
+
+                    QuizBody(
+                        windowInfo = windowInfo,
+                        description = quiz?.quizDescription,
+                        onTakeQuizClick = { quiz?.let { onClickTakeQuiz(it) } },
+                        onViewStatistics = {
+                            navController.navigate(Screen.QuizResult.createRoute(quiz?.quizId ?: "", false))
+                        },
+                        scoresList = scoresList,
+                        attemptNumber = quiz?.numberOfAttempts ?: 0,
+                        deadline = dueDateFormatted
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)
+                            .padding(vertical = 30.dp),
+                        thickness =  1.dp,
+                        color = LoginText
+                    )
+
+                    PreviousNextButton(
+                        windowInfo = windowInfo,
+                        onClickPrevious = {
+                            //TODO
+                        },
+                        onClickNext = {
+                            //TODO
+                        }
+                    )
+                }
             }
         }
     )
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun QuizDetailContent(
-    navController: NavController,
-    quiz: QuizResponse?,
-    windowInfo: WindowInfo,
-    onClickTakeQuiz: (QuizResponse) -> Unit
-){
-    val contentPadding = (windowInfo.screenWidth) * 0.09f
-    val titleHeight = windowInfo.screenHeight
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding),
-        verticalArrangement = Arrangement.SpaceAround
-    ) {
-        QuizTitle(
-            height = titleHeight * 0.2f,
-            windowInfo = windowInfo,
-            quizTypeName = quiz?.quizTypeName.toString(),
-            quizName = quiz?.quizName.toString()
-        )
-
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(vertical = 15.dp),
-            thickness =  1.dp,
-            color = LoginText
-        )
-
-        val dueDateFormatted = LocalDate.parse(quiz?.deadlineDate?.substringBefore(" ")).format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
-        val unlockDateFormatted = LocalDate.parse(quiz?.unlockDate?.substringBefore(" ")).format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
-
-        QuizHeader(
-            windowInfo = windowInfo,
-            dueDate = dueDateFormatted,
-            unlockDate = unlockDateFormatted,
-            timeLimit = quiz?.timeLimit,
-            allowedAttempts = quiz?.numberOfAttempts,
-            questionSize = quiz?.numberOfQuestions,
-            points = quiz?.overallPoints,
-        )
-
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(vertical = 15.dp),
-            thickness =  1.dp,
-            color = LoginText
-        )
-
-        QuizBody(
-            windowInfo = windowInfo,
-            description = quiz?.quizDescription,
-            onTakeQuizClick = { onClickTakeQuiz(quiz!!) },
-            onViewStatistics = {
-                navController.navigate(Screen.QuizResult.createRoute(quiz!!.quizId))
-            },
-        )
-
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(vertical = 30.dp),
-            thickness =  1.dp,
-            color = LoginText
-        )
-
-        PreviousNextButton(
-            windowInfo = windowInfo,
-            onClickPrevious = {
-                //TODO
-            },
-            onClickNext = {
-                //TODO
-            }
-        )
-    }
 }
 
 @Composable
@@ -241,17 +242,25 @@ fun QuizHeader(
     }
 }
 
-/*
-* TODO implement attempt history, make enabled false after attempts is 0
-* */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun QuizBody(
     windowInfo: WindowInfo,
     description: String?,
     onTakeQuizClick: () -> Unit,
-    onViewStatistics: () -> Unit
+    onViewStatistics: () -> Unit,
+    scoresList: List<AssessmentScoreResponse>,
+    attemptNumber: Int,
+    deadline: String?
 ){
     var openAlertDialog by remember { mutableStateOf(false) }
+    val today = LocalDate.now()
+    val deadlineDate = deadline
+        ?.substringBefore(" ")
+        ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+    val beforeDeadline = deadlineDate?.let { today <= it } ?: true
+    val hasAttemptsLeft = scoresList.size < attemptNumber
+    val canTake = hasAttemptsLeft && beforeDeadline
 
     Text(
         text = "General Instructions",
@@ -269,6 +278,36 @@ fun QuizBody(
         modifier = Modifier.padding(bottom = 20.dp)
     )
 
+    Text(
+        text = "Attempt History",
+        fontSize = ResponsiveFont.heading3(windowInfo),
+        fontFamily = FontFamily(Font(R.font.alata)),
+    )
+
+    scoresList.forEach {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Text(
+                text = "Attempt ${it.attemptNumber}:  ",
+                fontSize = ResponsiveFont.body(windowInfo),
+                fontFamily = FontFamily(Font(R.font.alata))
+            )
+
+            Text(
+                text = "${it.scorePercentage}%",
+                fontSize = ResponsiveFont.body(windowInfo),
+                fontFamily = FontFamily(Font(R.font.alata))
+            )
+        }
+    }
+
+    Spacer(Modifier.height(15.dp))
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -283,6 +322,23 @@ fun QuizBody(
                     color = MainWhite
                 )
             },
+            onClick = onTakeQuizClick,
+            roundedCornerShape = 10.dp,
+            buttonElevation = ButtonDefaults.buttonElevation(8.dp),
+            contentPadding = PaddingValues(10.dp),
+            buttonColors = ButtonDefaults.buttonColors(green),
+            enabled = canTake
+        )
+
+        CapsuleButton(
+            text = {
+                Text(
+                    text = "View History",
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = MainWhite
+                )
+            },
             onClick = onViewStatistics,
             roundedCornerShape = 10.dp,
             buttonElevation = ButtonDefaults.buttonElevation(8.dp),
@@ -290,24 +346,19 @@ fun QuizBody(
             buttonColors = ButtonDefaults.buttonColors(green),
             enabled = true
         )
+    }
 
-        CapsuleButton(
-            text = {
-                Text(
-                    text = "View Statistics",
-                    fontSize = ResponsiveFont.heading3(windowInfo),
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    color = MainWhite
-                )
-            },
-            onClick = {
-
-            },
-            roundedCornerShape = 10.dp,
-            buttonElevation = ButtonDefaults.buttonElevation(8.dp),
-            contentPadding = PaddingValues(10.dp),
-            buttonColors = ButtonDefaults.buttonColors(green),
-            enabled = true
+    if (!beforeDeadline){
+        Text(
+            text = "Deadline date has passed.",
+            fontSize = ResponsiveFont.body(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata))
+        )
+    }else if (!hasAttemptsLeft){
+        Text(
+            text = "No more attempts available.",
+            fontSize = ResponsiveFont.body(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata))
         )
     }
 

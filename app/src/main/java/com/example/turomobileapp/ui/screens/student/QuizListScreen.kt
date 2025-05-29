@@ -103,7 +103,6 @@ fun QuizListByModule(
     onClickQuiz: (QuizResponse) -> Unit
 ){
     val cardWidth = (windowInfo.screenWidth) * 0.75f
-    val cardHeight = (windowInfo.screenHeight) * 0.25f
 
     LazyColumn(
         modifier = Modifier
@@ -137,17 +136,12 @@ fun QuizListByModule(
                 QuizCard(
                     windowInfo = windowInfo,
                     width = cardWidth,
-                    height = cardHeight,
                     quizName = quiz.quizName,
-                    averageScore = 0.0,
-                    highestScore = 0.0,
-                    lowestScore = 0.0,
-                    onClickQuiz = {
-                        navController.navigate(Screen.QuizResult.createRoute(quiz.quizId))
+                    onClickQuiz = { onClickQuiz(quiz) },
+                    onClickStatistics = {
+                        navController.navigate(Screen.QuizResult.createRoute(quiz.quizId, false))
                     },
-                ){
-                    onClickQuiz(quiz)
-                }
+                )
             }
         }
     }
@@ -157,11 +151,7 @@ fun QuizListByModule(
 fun QuizCard(
     windowInfo: WindowInfo,
     width: Dp,
-    height: Dp,
     quizName: String,
-    averageScore: Double?,
-    highestScore: Double?,
-    lowestScore: Double?,
     onClickQuiz: () -> Unit,
     onClickStatistics: () -> Unit
 ){
@@ -172,14 +162,13 @@ fun QuizCard(
         modifier = Modifier
             .border(0.2.dp,TextBlack,RoundedCornerShape(5.dp))
             .width(width)
-            .height(height)
             .clickable(onClick = onClickQuiz)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Brush.horizontalGradient(colors = listOf(quiz1,quiz2)))
-                .padding(15.dp),
+                .padding(20.dp),
             contentAlignment = Alignment.Center
         ){
             Column(
@@ -191,12 +180,6 @@ fun QuizCard(
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontSize = ResponsiveFont.heading3(windowInfo),
                     overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = "AVERAGE SCORE: $averageScore% \nHIGHEST SCORE: $highestScore%\nLOWEST SCORE: $lowestScore%",
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.subtitle(windowInfo)
                 )
 
                 Row(
@@ -223,7 +206,7 @@ fun QuizCard(
                     )
 
                     Text(
-                        text = "VIEW STATISTICS",
+                        text = "VIEW HISTORY",
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.subtitle(windowInfo),
                         textDecoration = TextDecoration.Underline,

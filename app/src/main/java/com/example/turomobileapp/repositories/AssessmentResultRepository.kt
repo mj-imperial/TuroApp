@@ -8,6 +8,8 @@ import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.AssessmentResultResponse
 import com.example.turomobileapp.models.AssessmentResultUploadRequest
 import com.example.turomobileapp.models.AssessmentResultUploadResponse
+import com.example.turomobileapp.models.AssessmentScoreResponse
+import com.example.turomobileapp.models.AssessmentScoresResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -30,6 +32,12 @@ class AssessmentResultRepository @Inject constructor(private val assessmentResul
         requestAndMap(
             call = { assessmentResultApiService.getAssessmentResultsForActivityAndStudent(studentId,activityId) },
             mapper = { dto -> dto.results }
+        )
+
+    fun getScoresForStudentAndQuiz(studentId: String, activityId: String): Flow<Result<List<AssessmentScoreResponse>>> =
+        requestAndMap(
+            call = { assessmentResultApiService.getScoresForStudentAndQuiz(studentId, activityId) },
+            mapper = { dto -> dto.scores }
         )
 
 

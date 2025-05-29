@@ -68,6 +68,19 @@ data class AssessmentResultResponse(
 )
 
 @JsonClass(generateAdapter = true)
+data class AssessmentScoresResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "scores") val scores: List<AssessmentScoreResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class AssessmentScoreResponse(
+    @Json(name = "result_id") val resultId: String,
+    @Json(name = "attempt_number") val attemptNumber: Int,
+    @Json(name = "score_percentage") val scorePercentage: Double
+)
+
+@JsonClass(generateAdapter = true)
 data class AssessmentResultUploadResponse(
     @Json(name = "success") val success: Boolean,
     @Json(name = "message") val message: String,

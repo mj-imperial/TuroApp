@@ -4,8 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.AssessmentResultResponse
-import com.example.turomobileapp.models.QuizContentResponse
+import com.example.turomobileapp.models.AssessmentScoreResponse
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.repositories.AssessmentResultRepository
 import com.example.turomobileapp.repositories.QuizRepository
@@ -21,29 +20,30 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AssessmentResultViewModel @Inject constructor(
-    private val assessmentResultRepository: AssessmentResultRepository,
+class QuizDetailViewModel @Inject constructor(
     private val quizRepository: QuizRepository,
-    private val sessionManager: SessionManager,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val assessmentResultRepository: AssessmentResultRepository,
+    private val sessionManager: SessionManager
 ): ViewModel(){
 
     private val _quizId: String = checkNotNull(savedStateHandle["quizId"])
 
-    private val _uiState = MutableStateFlow(AssessmentResultUIState())
-    val uiState: StateFlow<AssessmentResultUIState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(QuizDetailUIState())
+    val uiState: StateFlow<QuizDetailUIState> = _uiState.asStateFlow()
 
     init {
-        loadMetadata()
-        loadAssessmentResults()
+        loadQuizMetadata()
+        loadAttemptHistory()
     }
 
-    private fun loadMetadata() {
+    private fun loadQuizMetadata(){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true,errorMessage = null) }
-            val quizResult = quizRepository.getQuiz(_quizId).first()
+
+            val quiz = quizRepository.getQuiz(_quizId).first()
             handleResult(
-                result = quizResult,
+                result = quiz,
                 onSuccess = { quiz ->
                     _uiState.update { it.copy(loading = false, quiz = quiz) }
                 },
@@ -51,45 +51,34 @@ class AssessmentResultViewModel @Inject constructor(
                     _uiState.update { it.copy(errorMessage = err,loading = false) }
                 },
             )
-
-            val quizContent = quizRepository.getQuizContent(_quizId).first()
-            handleResult(
-                result = quizContent,
-                onSuccess = { content ->
-                    _uiState.update { it.copy(loading = false,content = content) }
-                },
-                onFailure = { err ->
-                    _uiState.update { it.copy(loading = false, errorMessage = err) }
-                },
-            )
         }
     }
 
-    private fun loadAssessmentResults(){
+    private fun loadAttemptHistory(){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
-            assessmentResultRepository.getAssessmentResultsForQuizAndStudent(studentId, _quizId).collect { result ->
+            assessmentResultRepository.getScoresForStudentAndQuiz(studentId, _quizId).collect { result ->
                 handleResult(
                     result = result,
-                    onSuccess = {  results ->
-                        _uiState.update { it.copy(loading = false, results = results) }
+                    onSuccess = { scores ->
+                        _uiState.update { it.copy(loading = false, scores = scores) }
                     },
                     onFailure = {  err ->
                         _uiState.update { it.copy(loading = false, errorMessage = err) }
-                    }
+                    },
                 )
             }
         }
     }
 }
 
-data class AssessmentResultUIState(
+data class QuizDetailUIState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
-    val results: List<AssessmentResultResponse> = emptyList(),
+    val quizName: String = "",
     val quiz: QuizResponse? = null,
-    val content: List<QuizContentResponse> = emptyList(),
+    val scores: List<AssessmentScoreResponse> = emptyList()
 )

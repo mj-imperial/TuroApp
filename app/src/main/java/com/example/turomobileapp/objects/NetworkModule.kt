@@ -31,6 +31,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -39,49 +40,53 @@ object NetworkModule{
 
     @Provides
     @Singleton
-    //change base url if transferring to online database
-    fun provideBaseUrl(): String = "http://10.0.2.2/turo_app/api/v1/"
+    fun provideBaseUrl(): String =
+        // change this to your production URL when you go live
+        "http://10.0.2.2/turo_app/api/v1/"
 
     @Provides
     @Singleton
-    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor().apply {
+    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor =
+        HttpLoggingInterceptor { message ->
+            Log.d("OKHTTP", message)
+        }.apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
-    }
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
-        return OkHttpClient.Builder()
+    fun provideOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor
+    ): OkHttpClient =
+        OkHttpClient.Builder()
+            // logging
             .addInterceptor(loggingInterceptor)
+            // generous timeouts
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
             .build()
-    }
 
     @Provides
     @Singleton
-    fun provideMoshi(): Moshi {
-        return Moshi.Builder()
+    fun provideMoshi(): Moshi =
+        Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
-    }
-
-    val logger = HttpLoggingInterceptor { msg -> Log.d("OKHTTP", msg) }
-        .apply { level = HttpLoggingInterceptor.Level.BODY }
-
-    val client = OkHttpClient.Builder()
-        .addInterceptor(logger)
-        .build()
 
     @Provides
     @Singleton
-    fun provideRetrofit(baseUrl: String, moshi: Moshi): Retrofit {
-        return Retrofit.Builder()
+    fun provideRetrofit(
+        baseUrl: String,
+        client: OkHttpClient,
+        moshi: Moshi
+    ): Retrofit =
+        Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
-    }
+
 
     @Provides
     @Singleton

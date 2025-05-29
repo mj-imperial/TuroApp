@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -97,7 +99,7 @@ fun QuizAttemptScreen(
         viewModel.events.collect { ev ->
             when (ev) {
                 is QuizAttemptEvent.SubmitSuccess -> {
-                    navController.navigate(Screen.QuizResult.createRoute(quizId))
+                    navController.navigate(Screen.QuizResult.createRoute(quizId, true))
                 }
                 is QuizAttemptEvent.SubmitError -> {
                     Toast.makeText(ctx,ev.errorMessage,Toast.LENGTH_LONG).show()
@@ -270,7 +272,6 @@ fun QuestionBox(
         shape = RoundedCornerShape(5.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(windowInfo.screenHeight * 0.45f)
     ) {
         Box(
             modifier = Modifier
@@ -434,10 +435,8 @@ fun QuestionBox(
                 onDismissRequest = {
                     openAlertDialog = false
                 },
-                onConfirmation = {
-                    onSubmitClicked
-                },
-                icon = painterResource(R.drawable.screeningexam_icon),
+                onConfirmation = onSubmitClicked,
+                icon = painterResource(R.drawable.quiz),
                 title = {
                     Text(
                         text = "SUBMIT QUIZ",

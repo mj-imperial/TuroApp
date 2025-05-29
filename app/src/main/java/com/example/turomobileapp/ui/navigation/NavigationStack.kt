@@ -30,6 +30,7 @@ import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
+import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -85,36 +86,23 @@ fun NavigationStack(
                 viewModel = viewModel,
                 sessionManager = sessionManager,
                 onClickQuiz = { quiz ->
-                    navController.currentBackStackEntry?.savedStateHandle?.set("quizResponse", quiz)
-                    navController.navigate(Screen.QuizDetail.route)
+                    navController.navigate(Screen.QuizDetail.createRoute(quiz.quizId))
                 }
             )
         }
         composable(
             route = Screen.QuizDetail.route,
+            arguments = listOf(
+                navArgument("quizId"){ type = NavType.StringType }
+            )
         ) {  backStackEntry ->
-            val quiz: QuizResponse = remember {
-                navController
-                    .previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.get<QuizResponse>("quizResponse")
-                    ?: error("No QuizResponse passed!")
-            }
-
-            LaunchedEffect(Unit) {
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.remove<QuizResponse>("quizResponse")
-            }
+            val viewModel: QuizDetailViewModel = hiltViewModel()
 
             QuizDetailScreen(
-                navController = navController,
-                sessionManager = sessionManager,
-                quiz = quiz,
-                onClickTakeQuiz = {
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("quizResponse", it)
+                viewModel       = viewModel,
+                navController   = navController,
+                sessionManager  = sessionManager,
+                onClickTakeQuiz = { quiz ->
                     navController.navigate(Screen.QuizAttempt.createRoute(quiz.quizId))
                 }
             )
@@ -138,11 +126,14 @@ fun NavigationStack(
         composable(
             route = Screen.QuizResult.route,
             arguments = listOf(
-                navArgument("quizId") { type = NavType.StringType }
+                navArgument("quizId")    { type = NavType.StringType },
+                navArgument("fromSubmit"){ type = NavType.BoolType    }
             )
-        ) {
+        ) { backStackEntry ->
+            val fromSubmit = backStackEntry.arguments?.getBoolean("fromSubmit") ?: false
+
             val viewModel: AssessmentResultViewModel = hiltViewModel()
-            QuizResultScreen(navController, sessionManager, viewModel)
+            QuizResultScreen(navController, sessionManager, viewModel, fromSubmit)
         }
     }
 }

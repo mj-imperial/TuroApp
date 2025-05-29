@@ -27,11 +27,13 @@ sealed class Screen(val route: String) {
         fun createRoute(courseId: String, type: QuizType) = "course_quizzes_screen/$courseId/${type.name}"
     }
     object StudentModules: Screen("student_modules_screen")
-    object QuizDetail: Screen("quiz_detail_screen")
+    object QuizDetail: Screen("quiz_detail/{quizId}"){
+        fun createRoute(quizId: String) = "quiz_detail/$quizId"
+    }
     object QuizAttempt: Screen("quiz_attempt_screen/{quizId}"){
         fun createRoute(quizId: String) = "quiz_attempt_screen/$quizId"
     }
-    object QuizResult: Screen("quiz_result_screen/{quizId}"){
-        fun createRoute(quizId: String) = "quiz_result_screen/$quizId"
+    object QuizResult: Screen("quiz_result_screen/{quizId}/{fromSubmit}"){
+        fun createRoute(quizId: String, fromSubmit: Boolean) = "quiz_result_screen/$quizId/$fromSubmit"
     }
 }

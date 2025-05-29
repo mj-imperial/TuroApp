@@ -5,12 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.enums.QuizType
 import com.example.turomobileapp.helperfunctions.handleResult
+import com.example.turomobileapp.models.AssessmentScoreResponse
 import com.example.turomobileapp.models.QuizResponse
+import com.example.turomobileapp.repositories.AssessmentResultRepository
 import com.example.turomobileapp.repositories.QuizRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,6 +23,7 @@ import javax.inject.Inject
 class QuizListViewModel @Inject constructor(
     private val quizRepository: QuizRepository,
     private val savedStateHandle: SavedStateHandle,
+    private val assessmentResultRepository: AssessmentResultRepository
 ): ViewModel(){
 
     private val _courseId: String = checkNotNull(savedStateHandle["courseId"])
@@ -29,11 +34,13 @@ class QuizListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(QuizListUIState(quizType = quizType))
     val uiState: StateFlow<QuizListUIState> = _uiState.asStateFlow()
 
+    val attemptHistory: List<AssessmentScoreResponse> = emptyList()
+
     init {
         loadQuizList()
     }
 
-    fun loadQuizList(){
+    private fun loadQuizList(){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 

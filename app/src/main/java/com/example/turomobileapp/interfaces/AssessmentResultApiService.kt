@@ -4,6 +4,7 @@ import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.AssessmentResultUploadRequest
 import com.example.turomobileapp.models.AssessmentResultUploadResponse
 import com.example.turomobileapp.models.AssessmentResultsResponse
+import com.example.turomobileapp.models.AssessmentScoresResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -22,6 +23,12 @@ interface AssessmentResultApiService {
         @Query("student_id") studentId: String,
         @Query("activity_id") activityId: String
     ): Response<AssessmentResultsResponse>
+
+    @GET("get_scores_for_student_and_quiz.php")
+    suspend fun getScoresForStudentAndQuiz(
+        @Query("student_id") studentId: String,
+        @Query("activity_id") activityId: String
+    ): Response<AssessmentScoresResponse>
 
     @GET("")
     suspend fun getAssessmentResultsForStudent(
@@ -48,8 +55,6 @@ interface AssessmentResultApiService {
     suspend fun getAssessmentResultsForQuiz(
         @Query("quizId") quizId: String
     ): Response<List<AssessmentResult>>
-
-
 
     @GET("/modules/{moduleId}/assessmentResults")
     suspend fun getAssessmentResultsForModule(
