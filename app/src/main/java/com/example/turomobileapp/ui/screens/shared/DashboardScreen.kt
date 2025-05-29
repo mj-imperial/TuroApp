@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +18,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.Font
@@ -50,6 +53,7 @@ fun DashboardScreen(
     sessionManager: SessionManager,
     viewModel: DashboardViewModel = hiltViewModel()
 ){
+    val uiState by viewModel.uiState.collectAsState()
     val userId by sessionManager.userId.collectAsState(initial = "")
     val roleStr by sessionManager.role.collectAsState(initial = "")
     val role = if (roleStr == "STUDENT") UserRole.STUDENT else UserRole.TEACHER
@@ -68,7 +72,6 @@ fun DashboardScreen(
         WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.20f
         WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.15f
     }
-    val uiState by viewModel.uiState.collectAsState()
 
     AppScaffold(
         navController = navController,
@@ -77,14 +80,28 @@ fun DashboardScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = { innerPadding ->
-            DashboardContent(
-                innerPadding = innerPadding,
-                cardHeight = cardHeight,
-                coursesList = uiState.courses,
-                body = ResponsiveFont.body(windowInfo),
-                subtitle = ResponsiveFont.subtitle(windowInfo),
-                navController = navController
-            )
+            when {
+                uiState.loading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                uiState.errorMessage != null -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Error: ${uiState.errorMessage}")
+                    }
+                }
+                else -> {
+                    DashboardContent(
+                        innerPadding = innerPadding,
+                        cardHeight = cardHeight,
+                        coursesList = uiState.courses,
+                        body = ResponsiveFont.body(windowInfo),
+                        subtitle = ResponsiveFont.subtitle(windowInfo),
+                        navController = navController
+                    )
+                }
+            }
         }
     )
 }
@@ -114,7 +131,7 @@ fun DashboardContent(
                 coursePic = course.coursePicture,
                 cardHeight = cardHeight,
                 onCardClick = {
-                    navController.navigate(Screen.CourseDetail.createRoute(course.courseId))
+                    navController.navigate(Screen.StudentCourseDetail.createRoute(course.courseId, course.coursePicture))
                 },
                 body = body,
                 subtitle = subtitle

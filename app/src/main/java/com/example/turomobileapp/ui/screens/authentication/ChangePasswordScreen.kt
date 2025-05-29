@@ -42,7 +42,7 @@ fun ChangePasswordScreen(
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
-    val requiresPasswordChange by viewModel.requiresChange.collectAsState()
+    val requiresPasswordChange = uiState.requiresChange
     val cooldown by viewModel.cooldownRemaining.collectAsState()
 
     if (uiState.resetStep == ResetStep.LOADING) {

@@ -71,22 +71,22 @@ class LoginViewModel @Inject constructor(
                                 loginSuccess = true
                             )
                         }
-                        sessionManager.startSession(
-                            user.userId,
-                            user.agreedToTerms,
-                            user.requiresPasswordChange,
-                            user.email,
-                            user.firstName,
-                            user.lastName,
-                            user.profilePic.toString(),
-                            user.role.toString()
-                        )
                         _eventFlow.tryEmit(LoginEvent.ShowToast("Login successful"))
-                        if (sessionManager.requiresPasswordChange.value == true) {
+                        if (user.requiresPasswordChange){
                             _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,user.email,true))
-                        } else if (sessionManager.agreedToTerms.value == false) {
+                        } else if(!user.agreedToTerms){
                             _eventFlow.tryEmit(LoginEvent.NavigateToTermsAgreement(user.userId, user.agreedToTerms))
-                        }else{
+                        } else{
+                            sessionManager.startSession(
+                                user.userId,
+                                user.agreedToTerms,
+                                user.requiresPasswordChange,
+                                user.email,
+                                user.firstName,
+                                user.lastName,
+                                user.profilePic.toString(),
+                                user.role.toString()
+                            )
                             _eventFlow.tryEmit(LoginEvent.NavigateToDashboard(user.userId))
                         }
                     },

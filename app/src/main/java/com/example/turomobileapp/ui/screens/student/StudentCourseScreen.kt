@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
@@ -64,12 +66,14 @@ import com.example.turomobileapp.ui.theme.shortquiz2
 import com.example.turomobileapp.ui.theme.tutorial1
 import com.example.turomobileapp.ui.theme.tutorial2
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.shared.DashboardViewModel
 
 @Composable
 fun CourseDetailScreen(
     navController: NavController,
     courseId: String,
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    coursePic: String
 ){
     val windowInfo = rememberWindowInfo()
     val width = windowInfo.screenWidth
@@ -89,45 +93,29 @@ fun CourseDetailScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.SpaceAround
             ) {
-                CourseContent(
+                CourseViewModules(
                     windowInfo = windowInfo,
-                    width = width,
+                    onClickViewAllModules = {
+                        navController.navigate(Screen.StudentModules.route)
+                    }
+                )
+
+                CourseHeader(
+                    windowInfo = windowInfo,
+                    height = height,
+                    onClickCurrentModule = { TODO() },
+                    coursePic = coursePic
+                )
+
+                CourseActivities(
+                    windowInfo = windowInfo,
                     height = height,
                     navController = navController,
+                    width = width,
                     courseId = courseId
                 )
             }
         }
-    )
-}
-
-@Composable
-fun CourseContent(
-    navController: NavController,
-    windowInfo: WindowInfo,
-    width: Dp,
-    height: Dp,
-    courseId: String
-){
-    CourseViewModules(
-        windowInfo = windowInfo,
-        onClickViewAllModules = {
-            navController.navigate(Screen.StudentModules.route)
-        }
-    )
-
-    CourseHeader(
-        windowInfo = windowInfo,
-        height = height,
-        onClickCurrentModule = { TODO() }
-    )
-
-    CourseActivities(
-        windowInfo = windowInfo,
-        height = height,
-        navController = navController,
-        width = width,
-        courseId = courseId
     )
 }
 
@@ -168,11 +156,15 @@ fun CourseViewModules(
     )
 }
 
+/*
+* TODO add logic for progress percentage and module name placeholder
+* */
 @Composable
 fun CourseHeader(
     windowInfo: WindowInfo,
     height: Dp,
-    onClickCurrentModule: () -> Unit
+    onClickCurrentModule: () -> Unit,
+    coursePic: String
 ){
     val modulePlaceholderImage = "https://images.pexels.com/photos/27409729/pexels-photo-27409729/free-photo-of-dice-game-on-black-and-white-background.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
     val progressPercentage = "67%"
@@ -192,11 +184,11 @@ fun CourseHeader(
                 .clickable(onClick = onClickCurrentModule)
         ){
             AsyncImage(
-                model = modulePlaceholderImage,
+                model = if (coursePic.isNotEmpty()) coursePic else modulePlaceholderImage,
                 contentDescription = "Module Image",
                 contentScale = ContentScale.Crop,
                 clipToBounds = true,
-                alpha = 0.9f,
+                alpha = 0.6f,
                 modifier = Modifier.clip(RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp))
             )
 
@@ -266,31 +258,31 @@ fun CourseActivities(
         Activities(
             name = R.string.Tutorials,
             icon = R.drawable.tutorial_icon,
-            route = Screen.CourseActivity.route,
+            route = Screen.StudentCourseActivity.route,
             colors = listOf(tutorial1,tutorial2)
         ),
         Activities(
             name = R.string.ShortQuiz,
             icon = R.drawable.shortquiz_icon,
-            route = Screen.CourseQuizzes.createRoute(courseId = courseId, type = QuizType.SHORT),
+            route = Screen.StudentCourseQuizzes.createRoute(courseId = courseId, type = QuizType.SHORT),
             colors = listOf(shortquiz1,shortquiz2)
         ),
         Activities(
             name = R.string.PracticeQuiz,
             icon = R.drawable.practicequiz_icon,
-            route = Screen.CourseQuizzes.createRoute(courseId = courseId, type = QuizType.PRACTICE),
+            route = Screen.StudentCourseQuizzes.createRoute(courseId = courseId, type = QuizType.PRACTICE),
             colors = listOf(practice1,practice2)
         ),
         Activities(
             name = R.string.LongQuiz,
             icon = R.drawable.longquiz_icon,
-            route = Screen.CourseQuizzes.createRoute(courseId = courseId, type = QuizType.LONG),
+            route = Screen.StudentCourseQuizzes.createRoute(courseId = courseId, type = QuizType.LONG),
             colors = listOf(longquiz1,longquiz2)
         ),
         Activities(
             name = R.string.ScreeningExam,
             icon = R.drawable.screeningexam_icon,
-            route = Screen.CourseActivity.createRoute(courseId = courseId, type = ActivityType.SCREENING_EXAM),
+            route = Screen.StudentCourseActivity.createRoute(courseId = courseId, type = ActivityType.SCREENING_EXAM),
             colors = listOf(screeningExam1,screeningExam2)
         )
     )

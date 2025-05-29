@@ -145,7 +145,7 @@ fun QuizDetailScreen(
                         description = quiz?.quizDescription,
                         onTakeQuizClick = { quiz?.let { onClickTakeQuiz(it) } },
                         onViewStatistics = {
-                            navController.navigate(Screen.QuizResult.createRoute(quiz?.quizId ?: "", false))
+                            navController.navigate(Screen.StudentQuizResult.createRoute(quiz?.quizId ?: "", false))
                         },
                         scoresList = scoresList,
                         attemptNumber = quiz?.numberOfAttempts ?: 0,

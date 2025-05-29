@@ -166,15 +166,12 @@ fun LoginScreen(
                 is LoginEvent.ShowToast ->
                     Toast.makeText(ctx, event.message, Toast.LENGTH_SHORT).show()
                 is LoginEvent.NavigateToChangeDefaultPassword -> {
-                    navController.navigate(Screen.ChangePassword.route) {
+                    navController.navigate(Screen.ChangePassword.createRoute(event.userId, event.email, event.requiresChange)) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                     viewModel.clearLoginSuccess()
                 }
                 is LoginEvent.NavigateToDashboard -> {
-                    navController.navigate(Screen.Dashboard.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
                     viewModel.clearLoginSuccess()
                 }
                 is LoginEvent.NavigateToTermsAgreement -> {

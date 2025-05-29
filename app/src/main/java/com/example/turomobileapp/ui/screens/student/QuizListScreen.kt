@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -139,7 +138,7 @@ fun QuizListByModule(
                     quizName = quiz.quizName,
                     onClickQuiz = { onClickQuiz(quiz) },
                     onClickStatistics = {
-                        navController.navigate(Screen.QuizResult.createRoute(quiz.quizId, false))
+                        navController.navigate(Screen.StudentQuizResult.createRoute(quiz.quizId, false))
                     },
                 )
             }

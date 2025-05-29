@@ -34,6 +34,7 @@ import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 import androidx.compose.runtime.getValue
+import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -43,26 +44,41 @@ fun NavigationStack(
     sessionManager: SessionManager
 ) {
     val navController = rememberNavController()
-    val roleState by sessionManager.role.collectAsState(initial = null)
-    val roleString = roleState
+    val roleStr by sessionManager.role.collectAsState(initial = null)
+    val role = roleStr?.let { UserRole.valueOf(it) }
 
-    val userRole: UserRole? = roleString?.let { runCatching { UserRole.valueOf(it) }.getOrNull() }
+    when (role) {
+        null -> AuthNavHost()
+        UserRole.STUDENT -> StudentNavHost(sessionManager)
+        UserRole.TEACHER -> TeacherNavHost(sessionManager)
+    }
+}
 
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Splash.route
-    ) {
-
+@Composable
+fun AuthNavHost() {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = Screen.Splash.route) {
         authNavGraph(navController)
+    }
+}
 
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun StudentNavHost(sessionManager: SessionManager) {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = Screen.Dashboard.route) {
         commonNavGraph(navController, sessionManager)
+        studentNavGraph(navController, sessionManager)
+    }
+}
 
-        userRole?.let { role ->
-            when (role) {
-                UserRole.STUDENT -> studentNavGraph(navController, sessionManager)
-                UserRole.TEACHER -> teacherNavGraph(navController, sessionManager)
-            }
-        }
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun TeacherNavHost(sessionManager: SessionManager) {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = Screen.Dashboard.route) {
+        commonNavGraph(navController, sessionManager)
+        teacherNavGraph(navController, sessionManager)
     }
 }
 
@@ -75,7 +91,14 @@ fun NavGraphBuilder.authNavGraph(
     composable(Screen.Login.route) {
         LoginScreen(navController = navController)
     }
-    composable(Screen.ChangePassword.route) {
+    composable(
+        route = Screen.ChangePassword.route,
+        arguments = listOf(
+            navArgument("userId") { type = NavType.StringType },
+            navArgument("email")  { type = NavType.StringType },
+            navArgument("requiresChange") { type = NavType.BoolType }
+        )
+    ) { backStack ->
         ChangePasswordScreen(navController)
     }
     composable(Screen.TermsAgreement.route) {
@@ -88,15 +111,14 @@ fun NavGraphBuilder.commonNavGraph(
     navController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composable(Screen.Dashboard.route) {
-        DashboardScreen(navController, sessionManager)
-    }
     composable(Screen.Profile.route) {
         ProfileScreen(navController, sessionManager)
     }
-
     composable(Screen.Calendar.route) {
         CalendarScreen(navController, sessionManager)
+    }
+    composable(route = Screen.Dashboard.route) {
+        DashboardScreen(navController, sessionManager)
     }
 }
 
@@ -105,17 +127,24 @@ fun NavGraphBuilder.studentNavGraph(
     navController: NavHostController,
     sessionManager: SessionManager
 ) {
+    commonNavGraph(navController, sessionManager)
+
     composable(
-        route = Screen.CourseDetail.route
+        route = Screen.StudentCourseDetail.route,
+        arguments = listOf(
+            navArgument("courseId") { type = NavType.StringType },
+            navArgument("coursePic") { type = NavType.StringType }
+        )
     ) {backStackEntry ->
         val courseId = backStackEntry.arguments?.getString("courseId")
-        CourseDetailScreen(navController,courseId.toString(), sessionManager)
+        val coursePic = backStackEntry.arguments?.getString("coursePic")
+        CourseDetailScreen(navController,courseId.toString(), sessionManager,coursePic.toString())
     }
     composable(Screen.StudentModules.route) {
         StudentModulesScreen(navController, sessionManager)
     }
     composable(
-        route = Screen.CourseQuizzes.route,
+        route = Screen.StudentCourseQuizzes.route,
         arguments = listOf(
             navArgument(name = "courseId") { type = NavType.StringType },
             navArgument(name = "type") { type = NavType.StringType }
@@ -127,12 +156,12 @@ fun NavGraphBuilder.studentNavGraph(
             viewModel = viewModel,
             sessionManager = sessionManager,
             onClickQuiz = { quiz ->
-                navController.navigate(Screen.QuizDetail.createRoute(quiz.quizId))
+                navController.navigate(Screen.StudentQuizDetail.createRoute(quiz.quizId))
             }
         )
     }
     composable(
-        route = Screen.QuizDetail.route,
+        route = Screen.StudentQuizDetail.route,
         arguments = listOf(
             navArgument("quizId"){ type = NavType.StringType }
         )
@@ -144,12 +173,12 @@ fun NavGraphBuilder.studentNavGraph(
             navController   = navController,
             sessionManager  = sessionManager,
             onClickTakeQuiz = { quiz ->
-                navController.navigate(Screen.QuizAttempt.createRoute(quiz.quizId))
+                navController.navigate(Screen.StudentQuizAttempt.createRoute(quiz.quizId))
             }
         )
     }
     composable(
-        route = Screen.QuizAttempt.route,
+        route = Screen.StudentQuizAttempt.route,
         arguments = listOf(
             navArgument("quizId") { type = NavType.StringType }
         )
@@ -165,7 +194,7 @@ fun NavGraphBuilder.studentNavGraph(
         )
     }
     composable(
-        route = Screen.QuizResult.route,
+        route = Screen.StudentQuizResult.route,
         arguments = listOf(
             navArgument("quizId")    { type = NavType.StringType },
             navArgument("fromSubmit"){ type = NavType.BoolType    }
@@ -178,9 +207,22 @@ fun NavGraphBuilder.studentNavGraph(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun NavGraphBuilder.teacherNavGraph(
     navController: NavHostController,
     sessionManager: SessionManager
 ) {
+    commonNavGraph(navController, sessionManager)
 
+    composable(
+        route = Screen.TeacherCourseDetail.route,
+        arguments = listOf(
+            navArgument("courseId") { type = NavType.StringType },
+            navArgument("coursePic") { type = NavType.StringType }
+        )
+    ) {backStackEntry ->
+        val courseId = backStackEntry.arguments?.getString("courseId")
+        val coursePic = backStackEntry.arguments?.getString("coursePic")
+        TeacherCourseScreen(navController,courseId.toString(), sessionManager, coursePic)
+    }
 }

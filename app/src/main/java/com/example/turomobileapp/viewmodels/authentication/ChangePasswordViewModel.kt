@@ -1,5 +1,6 @@
 package com.example.turomobileapp.viewmodels.authentication
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.enums.ResetStep
@@ -19,32 +20,34 @@ import javax.inject.Inject
 @HiltViewModel
 class ChangePasswordViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _cooldownRemaining = MutableStateFlow(0)
     val cooldownRemaining: StateFlow<Int> = _cooldownRemaining.asStateFlow()
 
-    //Read the nav‐arg into a simple Boolean
-    val requiresChange: StateFlow<Boolean?> = sessionManager.requiresPasswordChange
+    private val _email:  String = checkNotNull(savedStateHandle["email"])
+    private val _requiresChange: Boolean = checkNotNull(savedStateHandle.get<Boolean>("requiresChange"))
 
-    private val _initialEmail = sessionManager.email
+    private val _initialEmail = _email
 
     // Seed UI state’s first screen
     private val _uiState = MutableStateFlow(
         ChangePasswordUiState(
-            resetStep = if (requiresChange.value == true) {
+            resetStep = if (_requiresChange == true) {
                 ResetStep.PASSWORD_INPUT    // old→new→confirm
             } else {
                 ResetStep.EMAIL_INPUT       // email→code→new→confirm
-            }
+            },
+            requiresChange = if (_requiresChange) true else false
         )
     )
     val uiState: StateFlow<ChangePasswordUiState> = _uiState.asStateFlow()
 
     init {
-        if (requiresChange.value == true) {
-            _uiState.update { it.copy(email = _initialEmail.value.toString()) }
+        if (_requiresChange == true) {
+            _uiState.update { it.copy(email = _initialEmail) }
         }
     }
 
@@ -225,5 +228,6 @@ data class ChangePasswordUiState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
     val resetStep: ResetStep = ResetStep.PASSWORD_INPUT,
-    val coolDown: Int = 0
+    val coolDown: Int = 0,
+    val requiresChange: Boolean
 )

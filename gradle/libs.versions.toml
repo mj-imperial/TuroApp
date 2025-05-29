@@ -1,6 +1,6 @@
 [versions]
 accompanistPermissions = "0.24.7-alpha"
-agp = "8.10.0"
+agp = "8.10.1"
 calendar = "1.7.0"
 coilCompose = "3.0.0-alpha01"
 converterGson = "2.9.0"
