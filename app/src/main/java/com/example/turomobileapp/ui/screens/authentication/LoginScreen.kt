@@ -384,7 +384,7 @@ fun LoginCard(
                         .clickable(
                             enabled = true,
                             onClick = {
-                                navController.navigate(Screen.ChangePassword.route)
+                                navController.navigate(Screen.ForgotPassword.route)
                             }
                         )
                 )

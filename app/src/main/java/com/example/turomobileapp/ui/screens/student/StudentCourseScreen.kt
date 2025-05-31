@@ -189,7 +189,7 @@ fun CourseHeader(
                 contentScale = ContentScale.Crop,
                 clipToBounds = true,
                 alpha = 0.6f,
-                modifier = Modifier.clip(RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp))
+                modifier = Modifier.clip(RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp)).fillMaxWidth()
             )
 
             Column(

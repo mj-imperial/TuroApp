@@ -124,7 +124,6 @@ data class QuizResponse(
     @Json(name = "number_of_attempts") val numberOfAttempts: Int,
     @Json(name = "quiz_type_name") val quizTypeName: String,
     @Json(name = "time_limit") val timeLimit: Int,
-    @Json(name = "is_passed") val isPassed: Boolean?,
     @Json(name = "number_of_questions") val numberOfQuestions: Int,
     @Json(name = "overall_points") val overallPoints: Int,
     @Json(name = "has_answers_shown") val hasAnswersShownInt: Int

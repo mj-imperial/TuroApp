@@ -93,6 +93,50 @@ fun QuizAttemptScreen(
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
 
+    var openAlertDialog by remember { mutableStateOf(false) }
+
+    if (openAlertDialog){
+        PopupAlertWithActions(
+            onDismissRequest = {
+                openAlertDialog = false
+            },
+            onConfirmation = viewModel::onSubmitClicked,
+            icon = painterResource(R.drawable.quiz),
+            title = {
+                Text(
+                    text = "SUBMIT QUIZ",
+                    fontSize = ResponsiveFont.title(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = TextBlack
+                )
+            },
+            dialogText = {
+                Text(
+                    text = "Are you sure you want to submit the Quiz?",
+                    fontSize = ResponsiveFont.heading2(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = TextBlack
+                )
+            },
+            confirmText = {
+                Text(
+                    text = "CONFIRM",
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = green
+                )
+            },
+            dismissText = {
+                Text(
+                    text = "DISMISS",
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = MainRed
+                )
+            }
+        )
+    }
+
     LaunchedEffect(viewModel.events) {
         viewModel.events.collect { ev ->
             when (ev) {
@@ -154,13 +198,30 @@ fun QuizAttemptScreen(
                     verticalArrangement = Arrangement.SpaceAround,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    QuizAttemptMainContent(
+                    val question = uiState.content[uiState.currentIndex]
+                    val options = question.options
+
+                    QuizAttemptHeader(
+                        height = windowInfo.screenHeight * 0.15f,
                         windowInfo = windowInfo,
+                        quizType = uiState.quizType,
+                        quizName = uiState.quizName
+                    )
+
+                    QuestionBox(
                         uiState = uiState,
+                        windowInfo = windowInfo,
+                        questionNumber = uiState.currentIndex + 1,
+                        questionText = question.questionText,
+                        questionImage = question.questionImage,
+                        questionType = QuestionType.valueOf(question.questionTypeName),
+                        options = options,
                         onShortAnswerEntered = viewModel::onShortAnswerEntered,
                         onOptionSelected = viewModel::onOptionSelected,
                         onNextClicked = viewModel::onNextClicked,
-                        onSubmitClicked = viewModel::onSubmitClicked,
+                        onOpenAlertDialog = {
+                            openAlertDialog = true
+                        }
                     )
 
                     Text(
@@ -176,40 +237,6 @@ fun QuizAttemptScreen(
                 }
             }
         }
-    )
-}
-
-@Composable
-fun QuizAttemptMainContent(
-    windowInfo: WindowInfo,
-    uiState: QuizAttemptUIState,
-    onShortAnswerEntered: (String) -> Unit,
-    onOptionSelected: (QuestionResponse) -> Unit,
-    onNextClicked: () -> Unit,
-    onSubmitClicked: () -> Unit
-){
-    val question = uiState.content[uiState.currentIndex]
-    val options = question.options
-
-    QuizAttemptHeader(
-        height = windowInfo.screenHeight * 0.15f,
-        windowInfo = windowInfo,
-        quizType = uiState.quizType,
-        quizName = uiState.quizName
-    )
-
-    QuestionBox(
-        uiState = uiState,
-        windowInfo = windowInfo,
-        questionNumber = uiState.currentIndex + 1,
-        questionText = question.questionText,
-        questionImage = question.questionImage,
-        questionType = QuestionType.valueOf(question.questionTypeName),
-        options = options,
-        onShortAnswerEntered = onShortAnswerEntered,
-        onOptionSelected = onOptionSelected,
-        onNextClicked = onNextClicked,
-        onSubmitClicked = onSubmitClicked,
     )
 }
 
@@ -262,7 +289,7 @@ fun QuestionBox(
     onShortAnswerEntered: (String) -> Unit,
     onOptionSelected: (QuestionResponse) -> Unit,
     onNextClicked: () -> Unit,
-    onSubmitClicked: () -> Unit
+    onOpenAlertDialog: () -> Unit
 ){
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.Transparent, contentColor = TextBlack),
@@ -385,7 +412,6 @@ fun QuestionBox(
             .padding(20.dp)
             .fillMaxWidth()
     ) {
-        var openAlertDialog by remember { mutableStateOf(false) }
 
         if (uiState.currentIndex < uiState.content.size - 1){
             CapsuleButton(
@@ -415,9 +441,7 @@ fun QuestionBox(
                     color = TextBlack
                 )
             },
-            onClick = {
-                openAlertDialog = true
-            },
+            onClick = onOpenAlertDialog,
             modifier = Modifier
                 .width(windowInfo.screenWidth * 0.35f)
                 .padding(bottom = 10.dp),
@@ -428,47 +452,7 @@ fun QuestionBox(
             enabled = true
         )
 
-        if (openAlertDialog){
-            PopupAlertWithActions(
-                onDismissRequest = {
-                    openAlertDialog = false
-                },
-                onConfirmation = onSubmitClicked,
-                icon = painterResource(R.drawable.quiz),
-                title = {
-                    Text(
-                        text = "SUBMIT QUIZ",
-                        fontSize = ResponsiveFont.title(windowInfo),
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        color = TextBlack
-                    )
-                },
-                dialogText = {
-                    Text(
-                        text = "Are you sure you want to submit the Quiz?",
-                        fontSize = ResponsiveFont.heading2(windowInfo),
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        color = TextBlack
-                    )
-                },
-                confirmText = {
-                    Text(
-                        text = "CONFIRM",
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        color = green
-                    )
-                },
-                dismissText = {
-                    Text(
-                        text = "DISMISS",
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        color = MainRed
-                    )
-                }
-            )
-        }
+
     }
 }
 

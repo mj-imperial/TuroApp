@@ -12,6 +12,7 @@ sealed class Screen(val route: String) {
         fun createRoute(userId: String,email: String,requiresChange: Boolean)
             = "change_password/$userId/$email/$requiresChange"
     }
+    object ForgotPassword : Screen("forgot_password/{userId}")
     object TermsAgreement: Screen("terms_agreement_screen")
 
     //shared

@@ -27,10 +27,11 @@ class ChangePasswordViewModel @Inject constructor(
     private val _cooldownRemaining = MutableStateFlow(0)
     val cooldownRemaining: StateFlow<Int> = _cooldownRemaining.asStateFlow()
 
-    private val _email:  String = checkNotNull(savedStateHandle["email"])
-    private val _requiresChange: Boolean = checkNotNull(savedStateHandle.get<Boolean>("requiresChange"))
+    private val _initialEmail: String = savedStateHandle.get<String>("email") ?: ""
 
-    private val _initialEmail = _email
+    private val _requiresChange: Boolean = savedStateHandle.get<Boolean>("requiresChange") ?: false
+
+    private val _userId: String = savedStateHandle.get<String>("userId") ?: ""
 
     // Seed UI state’s first screen
     private val _uiState = MutableStateFlow(

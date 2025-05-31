@@ -103,6 +103,9 @@ fun NavGraphBuilder.authNavGraph(
     ) { backStack ->
         ChangePasswordScreen(navController)
     }
+    composable(Screen.ForgotPassword.route) {
+        ChangePasswordScreen(navController)
+    }
     composable(Screen.TermsAgreement.route) {
         TermsAgreementScreen(navController)
     }

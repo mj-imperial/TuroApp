@@ -170,16 +170,18 @@ class QuizAttemptViewModel @Inject constructor(
                 }
             }
 
-            val score = answersList.sumOf {
-                if (it.isCorrect){
+            val score = answersList.sumOf { answer ->
+                if (answer.isCorrect) {
                     uiState.value.content
-                        .first { q -> q.questionId == it.questionId }
+                        .first { q -> q.questionId == answer.questionId }
                         .score
-                } else 0
+                } else {
+                    0
+                }
             }
             val maxScore = uiState.value.content.sumOf { it.score }
             val scorePercentage: Double = if (maxScore > 0) {
-                (score.toDouble() / (maxScore * 100).toDouble())
+                (score.toDouble() / maxScore.toDouble()) * 100.0
             } else {
                 0.0
             }

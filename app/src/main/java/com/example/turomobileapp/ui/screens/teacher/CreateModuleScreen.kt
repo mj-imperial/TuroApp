@@ -82,7 +82,7 @@ fun CreateModuleScreen(
         PopupAlertWithActions(
             onDismissRequest = { openAlertDialog = false },
             onConfirmation = {
-                viewModel::createModule
+                viewModel.createModule()
                 openAlertDialog = false
             },
             icon = painterResource(R.drawable.save_icon),
@@ -238,7 +238,7 @@ fun CreateModuleScreen(
                         buttonElevation = ButtonDefaults.buttonElevation(8.dp),
                         contentPadding = PaddingValues(10.dp),
                         buttonColors = ButtonDefaults.buttonColors(MainOrange),
-                        enabled = true
+                        enabled = uiState.isCreationEnabled
                     )
                 }
 

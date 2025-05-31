@@ -26,6 +26,7 @@ class CourseActionsViewModel @Inject constructor(
 
     fun updateModuleName(newModuleName: String){
         _uiState.update { it.copy(moduleName = newModuleName) }
+        validateInput()
     }
 
     fun updateModuleDescription(newModuleDescription: String){
