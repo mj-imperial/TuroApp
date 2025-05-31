@@ -223,10 +223,12 @@ fun QuizHeader(
     questionSize: Int?,
     points: Int?
 ){
+    val timeLimitMinutes = timeLimit?.div(60)
+
     val textList = mapOf(
         "Deadline Date" to dueDate,
         "Unlocks At" to unlockDate,
-        "Time Limit" to timeLimit,
+        "Time Limit (Minutes)" to timeLimitMinutes,
         "Allowed Attempts" to allowedAttempts,
         "Questions" to questionSize,
         "Points" to points

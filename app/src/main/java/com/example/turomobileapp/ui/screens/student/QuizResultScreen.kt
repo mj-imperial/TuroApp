@@ -150,6 +150,9 @@ fun QuizResultScreen(
     val scoreList = remember(orderedResults) {
         orderedResults.map { it.scorePercentage }
     }
+    val keptScore: Double = remember(orderedResults) {
+        orderedResults.first { it.isKept }.scorePercentage
+    }
     val selectedResult = orderedResults.first { it.attemptNumber == selectedAttempt }
 
     var openAlertDialog by remember { mutableStateOf(fromSubmit) }
@@ -188,14 +191,15 @@ fun QuizResultScreen(
                     QuizResultHeader(
                         quizName = uiState.quiz!!.quizName,
                         attemptSize = quiz?.numberOfAttempts,
-                        numOfQuestion = uiState.quiz!!.numberOfQuestions,
+                        totalPoints = uiState.quiz!!.overallPoints,
                         scoreList = scoreList,
                         windowInfo = windowInfo,
                         onClickAttempt = { num ->
                             selectedAttempt = num
                         },
                         selectedAttempt = selectedAttempt,
-                        earnedPoints = selectedResult.earnedPoints
+                        earnedPoints = selectedResult.earnedPoints,
+                        keptScore = keptScore
                     )
                 }
 
@@ -227,13 +231,15 @@ fun QuizResultHeader(
     windowInfo: WindowInfo,
     quizName: String,
     attemptSize: Int?,
-    numOfQuestion: Int,
+    totalPoints: Int,
     scoreList: List<Double>,
     selectedAttempt: Int,
     onClickAttempt: (Int) -> Unit,
-    earnedPoints: Int
+    earnedPoints: Int,
+    keptScore: Double
 ){
-    val scoreInt: List<Int> = scoreList.map { it -> ((it/100) * numOfQuestion).toInt() }
+    val scoreInt: List<Int> = scoreList.map { it -> ((it/100) * totalPoints).toInt() }
+    val keptScoreInt = ((keptScore/100) * totalPoints).toInt()
 
     Column(
         modifier = Modifier
@@ -282,7 +288,7 @@ fun QuizResultHeader(
                 attemptSize?.let {
                     for (i in 1..it.toInt()) {
                         val hasResult = i <= scoreInt.size
-                        val scoreText = if (hasResult) "${scoreInt[i - 1]}/$numOfQuestion" else "--/$numOfQuestion"
+                        val scoreText = if (hasResult) "${scoreInt[i - 1]}/$totalPoints" else "--/$totalPoints"
 
                         Text(
                             text = "ATTEMPT $i: $scoreText",
@@ -316,9 +322,15 @@ fun QuizResultHeader(
                     fontSize = ResponsiveFont.heading3(windowInfo),
                     fontWeight = FontWeight.Medium
                 )
+                Spacer(Modifier.height(5.dp))
+                Text(
+                    text = "KEPT SCORE: $keptScoreInt/$totalPoints",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
-
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), 2.dp, LoginText)
     }
 }

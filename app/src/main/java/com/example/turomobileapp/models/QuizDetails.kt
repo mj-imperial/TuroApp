@@ -64,8 +64,11 @@ data class AssessmentResultResponse(
     @Json(name = "attempt_number") val attemptNumber: Int,
     @Json(name = "tier_name") val tierName: String?,
     @Json(name = "earned_points") val earnedPoints: Int,
-    @Json(name = "answers") val answers: List<AnswerUploadRequest>
-)
+    @Json(name = "answers") val answers: List<AnswerUploadRequest>,
+    @Json(name = "is_kept") val isKeptInt: Int
+){
+    val isKept: Boolean get() = isKeptInt != 0
+}
 
 @JsonClass(generateAdapter = true)
 data class AssessmentScoresResponse(

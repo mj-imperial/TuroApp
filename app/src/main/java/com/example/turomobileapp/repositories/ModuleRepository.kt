@@ -4,18 +4,19 @@ import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.interfaces.ModuleApiService
 import com.example.turomobileapp.models.Activity
 import com.example.turomobileapp.models.Module
+import com.example.turomobileapp.models.ModuleResultUploadResponse
+import com.example.turomobileapp.models.ModuleUploadRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class ModuleRepository @Inject constructor(private val moduleApiService: ModuleApiService) {
 
-    fun createModule(courseId:String, module: Module): Flow<Result<Module>> = flow {
+    fun createModule(courseId:String, moduleName: String, moduleDescription: String): Flow<Result<ModuleResultUploadResponse>> =
         handleApiResponse(
-            call = { moduleApiService.createModule(courseId, module) },
-            errorMessage = "Failed to create module $module for course $courseId"
+            call = { moduleApiService.createModule(ModuleUploadRequest(courseId, moduleName, moduleDescription)) },
+            errorMessage = "Failed to create module"
         )
-    }
 
     fun isModuleDuplicate(courseId: String, module: Module): Flow<Result<Boolean>> = flow {
         handleApiResponse(

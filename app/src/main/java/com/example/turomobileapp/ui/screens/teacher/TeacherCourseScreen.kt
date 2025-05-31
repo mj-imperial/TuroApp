@@ -97,6 +97,11 @@ fun TeacherCourseScreen(
                         }),
                 )
 
+                CourseHeader(
+                    height = windowInfo.screenHeight,
+                    coursePic = coursePic
+                )
+
                 Column(
                     modifier = Modifier.fillMaxSize().padding(20.dp)
                 ) {
@@ -106,11 +111,6 @@ fun TeacherCourseScreen(
                         width = windowInfo.screenWidth,
                         height = windowInfo.screenHeight,
                         courseId = courseId
-                    )
-
-                    CourseHeader(
-                        height = windowInfo.screenHeight,
-                        coursePic = coursePic
                     )
                 }
             }
@@ -164,7 +164,7 @@ fun CourseActivities(
         Activities(
             name = R.string.TeacherModules,
             icon = R.drawable.viewallmodules,
-            route = Screen.TeacherViewAllModules.route,
+            route = Screen.TeacherViewAllModules.createRoute(courseId),
             colors = listOf(shortquiz1,shortquiz2)
         ),
         Activities(

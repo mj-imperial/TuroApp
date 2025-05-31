@@ -93,6 +93,19 @@ data class Module(
 )
 
 @JsonClass(generateAdapter = true)
+data class ModuleUploadRequest(
+    @Json(name = "course_id") val courseId: String,
+    @Json(name = "module_name") val moduleName: String,
+    @Json(name = "module_description") val moduleDescription: String
+)
+
+@JsonClass(generateAdapter = true)
+data class ModuleResultUploadResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "message") val message: String,
+)
+
+@JsonClass(generateAdapter = true)
 data class QuizzesResponse(
     @Json(name = "success") val success: Boolean,
     @Json(name = "quizzes") val quizzes: List<QuizResponse>

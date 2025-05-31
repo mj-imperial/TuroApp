@@ -179,7 +179,7 @@ class QuizAttemptViewModel @Inject constructor(
             }
             val maxScore = uiState.value.content.sumOf { it.score }
             val scorePercentage: Double = if (maxScore > 0) {
-                score.toDouble() / maxScore * 100
+                (score.toDouble() / (maxScore * 100).toDouble())
             } else {
                 0.0
             }

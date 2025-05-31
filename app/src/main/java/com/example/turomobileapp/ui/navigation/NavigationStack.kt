@@ -34,7 +34,9 @@ import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 import androidx.compose.runtime.getValue
+import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
+import com.example.turomobileapp.viewmodels.teacher.CourseActionsViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -223,6 +225,16 @@ fun NavGraphBuilder.teacherNavGraph(
     ) {backStackEntry ->
         val courseId = backStackEntry.arguments?.getString("courseId")
         val coursePic = backStackEntry.arguments?.getString("coursePic")
-        TeacherCourseScreen(navController,courseId.toString(), sessionManager, coursePic)
+        TeacherCourseScreen(navController,courseId.toString(), sessionManager,coursePic.toString())
+    }
+
+    composable(
+        route = Screen.TeacherViewAllModules.route,
+        arguments = listOf(
+            navArgument("courseId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel: CourseActionsViewModel = hiltViewModel()
+        CreateModuleScreen(navController, sessionManager, viewModel)
     }
 }

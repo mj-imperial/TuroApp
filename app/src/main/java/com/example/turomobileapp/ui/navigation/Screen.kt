@@ -50,10 +50,15 @@ sealed class Screen(val route: String) {
     }
 
     //teacher
-    object TeacherCourseDetail: Screen("course_detail/{courseId}") {
-        fun createRoute(courseId: String) = "course_detail/$courseId"
+    object TeacherCourseDetail: Screen("course_detail/{courseId}/{coursePic}") {
+        fun createRoute(courseId: String, coursePic: String): String {
+            val encodedPic = Uri.encode(coursePic)
+            return "course_detail/$courseId/$encodedPic"
+        }
     }
-    object TeacherViewAllModules: Screen("teacher_viewAllModules")
+    object TeacherViewAllModules: Screen("teacher_viewAllModules/{courseId}"){
+        fun createRoute(courseId: String) = "teacher_viewAllModules/$courseId"
+    }
     object TeacherTutorials: Screen("teacher_tutorials")
     object TeacherCreateQuiz: Screen("teacher_createQuiz")
     object TeacherCreateScreeningQuiz: Screen("teacher_createScreeningQuiz")

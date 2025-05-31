@@ -98,7 +98,8 @@ fun DashboardScreen(
                         coursesList = uiState.courses,
                         body = ResponsiveFont.body(windowInfo),
                         subtitle = ResponsiveFont.subtitle(windowInfo),
-                        navController = navController
+                        navController = navController,
+                        role = role
                     )
                 }
             }
@@ -113,7 +114,8 @@ fun DashboardContent(
     coursesList: List<CourseResponse>,
     body: TextUnit,
     subtitle: TextUnit,
-    navController: NavController
+    navController: NavController,
+    role: UserRole
 ){
     LazyVerticalGrid(
         modifier = Modifier
@@ -131,7 +133,11 @@ fun DashboardContent(
                 coursePic = course.coursePicture,
                 cardHeight = cardHeight,
                 onCardClick = {
-                    navController.navigate(Screen.StudentCourseDetail.createRoute(course.courseId, course.coursePicture))
+                    if (role == UserRole.STUDENT){
+                        navController.navigate(Screen.StudentCourseDetail.createRoute(course.courseId, course.coursePicture))
+                    }else if (role ==UserRole.TEACHER){
+                        navController.navigate(Screen.TeacherCourseDetail.createRoute(course.courseId, course.coursePicture))
+                    }
                 },
                 body = body,
                 subtitle = subtitle

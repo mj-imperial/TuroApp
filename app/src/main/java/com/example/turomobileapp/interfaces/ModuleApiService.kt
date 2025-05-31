@@ -2,6 +2,8 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Activity
 import com.example.turomobileapp.models.Module
+import com.example.turomobileapp.models.ModuleResultUploadResponse
+import com.example.turomobileapp.models.ModuleUploadRequest
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -30,11 +32,10 @@ interface ModuleApiService {
         @Path("moduleId") moduleId: String
     ): Response<List<Activity>>
 
-    @POST("/course/{courseId}/modules")
+    @POST("create_module.php")
     suspend fun createModule(
-        @Path("courseId") courseId: String,
-        @Body module: Module
-    ): Response<Module>
+        @Body request: ModuleUploadRequest
+    ): Response<ModuleResultUploadResponse>
 
     @POST("/course/{courseId}/modules/validateDuplication")
     suspend fun isModuleDuplicate(
