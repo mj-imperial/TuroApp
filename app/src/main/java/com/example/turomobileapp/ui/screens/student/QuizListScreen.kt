@@ -90,9 +90,6 @@ fun QuizListScreen(
     )
 }
 
-/*
-* TODO after doing the quiz taking and assessment result code add it here to show user avg.score, highest and lowest score
-* */
 @Composable
 fun QuizListByModule(
     navController: NavController,

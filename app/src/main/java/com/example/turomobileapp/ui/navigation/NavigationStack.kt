@@ -34,6 +34,7 @@ import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 import androidx.compose.runtime.getValue
+import com.example.turomobileapp.ui.screens.student.LeaderboardScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.teacher.CourseActionsViewModel
@@ -209,6 +210,10 @@ fun NavGraphBuilder.studentNavGraph(
 
         val viewModel: AssessmentResultViewModel = hiltViewModel()
         QuizResultScreen(navController, sessionManager, viewModel, fromSubmit)
+    }
+
+    composable(Screen.Leaderboard.route) {
+        LeaderboardScreen(navController, sessionManager)
     }
 }
 

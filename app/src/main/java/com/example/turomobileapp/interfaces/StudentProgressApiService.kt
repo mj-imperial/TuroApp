@@ -1,6 +1,7 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.StudentProgress
+import com.example.turomobileapp.models.StudentProgressResponses
 import com.example.turomobileapp.models.UpdateStudentCourseProgressRequest
 import com.example.turomobileapp.models.UpdateStudentModuleProgressRequest
 import okhttp3.ResponseBody
@@ -9,12 +10,13 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface StudentProgressApiService {
-    @GET("/students/{studentId}/progress/courses")
-    suspend fun getAllStudentCourseProgress(
-        @Path("studentId") studentId: String
-    ): Response<List<StudentProgress>>
+    @GET("get_leaderboard.php")
+    suspend fun getLeaderboardCourse(
+        @Query("student_id") studentId: String
+    ): Response<StudentProgressResponses>
 
     @GET("/students/{studentId}/progress/courses/{courseId}")
     suspend fun getStudentCourseProgress(

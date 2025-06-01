@@ -1,6 +1,7 @@
 package com.example.turomobileapp.models
 
 import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -41,4 +42,20 @@ data class UpdateModuleProgressRequest(
     val tierPassed: String? = null,
     val screeningExamAttempts: Int? = null,
     val screeningExamFailedCount: Int? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class StudentProgressResponses(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "progresses") val progresses: List<StudentProgressResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class StudentProgressResponse(
+    @Json(name = "first_name") val firstName: String,
+    @Json(name = "last_name") val lastName: String,
+    @Json(name = "course_name") val courseName: String,
+    @Json(name = "profile_pic") val profilePic: String?,
+    @Json(name = "total_points") val totalPoints: Int,
+    @Json(name = "average_score") val averageScore: Double
 )
