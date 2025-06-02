@@ -27,7 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +42,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
@@ -66,7 +64,6 @@ import com.example.turomobileapp.ui.theme.shortquiz2
 import com.example.turomobileapp.ui.theme.tutorial1
 import com.example.turomobileapp.ui.theme.tutorial2
 import com.example.turomobileapp.viewmodels.SessionManager
-import com.example.turomobileapp.viewmodels.shared.DashboardViewModel
 
 @Composable
 fun CourseDetailScreen(

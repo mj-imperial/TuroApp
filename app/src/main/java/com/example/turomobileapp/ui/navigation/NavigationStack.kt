@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
@@ -23,20 +24,19 @@ import com.example.turomobileapp.ui.screens.shared.CalendarScreen
 import com.example.turomobileapp.ui.screens.shared.DashboardScreen
 import com.example.turomobileapp.ui.screens.shared.ProfileScreen
 import com.example.turomobileapp.ui.screens.student.CourseDetailScreen
+import com.example.turomobileapp.ui.screens.student.LeaderboardScreen
 import com.example.turomobileapp.ui.screens.student.QuizAttemptScreen
 import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizListScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.ui.screens.student.StudentModulesScreen
+import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
+import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
-import androidx.compose.runtime.getValue
-import com.example.turomobileapp.ui.screens.student.LeaderboardScreen
-import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
-import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.teacher.CourseActionsViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")

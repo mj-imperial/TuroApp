@@ -9,7 +9,6 @@ import com.example.turomobileapp.models.AssessmentResultResponse
 import com.example.turomobileapp.models.AssessmentResultUploadRequest
 import com.example.turomobileapp.models.AssessmentResultUploadResponse
 import com.example.turomobileapp.models.AssessmentScoreResponse
-import com.example.turomobileapp.models.AssessmentScoresResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

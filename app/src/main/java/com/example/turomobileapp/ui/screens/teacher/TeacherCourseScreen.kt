@@ -51,8 +51,6 @@ import com.example.turomobileapp.ui.theme.practice1
 import com.example.turomobileapp.ui.theme.practice2
 import com.example.turomobileapp.ui.theme.quiz1
 import com.example.turomobileapp.ui.theme.quiz2
-import com.example.turomobileapp.ui.theme.screeningExam1
-import com.example.turomobileapp.ui.theme.screeningExam2
 import com.example.turomobileapp.ui.theme.shortquiz1
 import com.example.turomobileapp.ui.theme.shortquiz2
 import com.example.turomobileapp.ui.theme.tutorial1

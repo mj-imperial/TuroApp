@@ -1,9 +1,13 @@
 package com.example.turomobileapp
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -20,11 +24,19 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject lateinit var sessionManager: SessionManager
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
         splash.setKeepOnScreenCondition {false}
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        val notificationChannel = NotificationChannel(
+            "turo_notification",
+            "Turo",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(notificationChannel)
         enableEdgeToEdge()
         setContent {
             TuroMobileAppTheme {
