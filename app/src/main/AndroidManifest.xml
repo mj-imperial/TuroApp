@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:ignore="SelectedPhotoAccess" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     
     <application
@@ -35,9 +34,17 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="turo" />
-                <data android:host="quiz_result_screen" />
-                <data android:host="calendar_screen"/>
+                <data
+                    android:scheme="turo"
+                    android:host="quiz_result_screen" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="turo"
+                    android:host="calendar_screen" />
             </intent-filter>
         </activity>
         <meta-data

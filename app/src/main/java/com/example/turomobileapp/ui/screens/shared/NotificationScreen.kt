@@ -2,6 +2,7 @@ package com.example.turomobileapp.ui.screens.shared
 
 import AppScaffold
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,14 +17,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -87,7 +97,7 @@ fun NotificationScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
@@ -97,19 +107,63 @@ fun NotificationScreen(
                                 fontFamily = FontFamily(Font(R.font.alata)),
                                 fontSize = ResponsiveFont.heading1(windowInfo),
                                 color = TextBlack,
-                                modifier = Modifier.padding(bottom = 10.dp)
+                                modifier = Modifier.padding(10.dp)
                             )
                         }
 
-                        items(notifications.value) { notification ->
-                            NotificationCard(
-                                windowInfo = windowInfo,
-                                notification = notification,
-                                minHeight = windowInfo.screenHeight * 0.08f,
-                                onClickNotification = {
-                                    navController.navigate(notification.route)
+                        items(
+                            items = notifications.value,
+                            key = { it.id }
+                        ) { notification ->
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                confirmValueChange = { dismissValue ->
+                                    if (dismissValue == SwipeToDismissBoxValue.StartToEnd ||
+                                        dismissValue == SwipeToDismissBoxValue.EndToStart
+                                    ) {
+                                        viewmodel.delete(notification)
+                                        true
+                                    } else {
+                                        false
+                                    }
                                 }
                             )
+
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                backgroundContent = {
+                                    val color = when (dismissState.targetValue) {
+                                        SwipeToDismissBoxValue.Settled -> Color.Transparent
+                                        else -> MainRed
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(color)
+                                            .padding(horizontal = 20.dp)
+                                            .clip(RoundedCornerShape(10.dp)),
+                                        contentAlignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd)
+                                            Alignment.CenterStart else Alignment.CenterEnd
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete",
+                                            tint = Color.White
+                                        )
+                                    }
+                                },
+                                enableDismissFromStartToEnd = true,
+                                enableDismissFromEndToStart = true,
+                                gesturesEnabled = true
+                            ) {
+                                NotificationCard(
+                                    windowInfo = windowInfo,
+                                    notification = notification,
+                                    minHeight = windowInfo.screenHeight * 0.06f,
+                                    onClickNotification = {
+                                        navController.navigate(notification.route)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -131,7 +185,8 @@ private fun NotificationCard(
             .heightIn(min = minHeight)
             .clickable(onClick = onClickNotification),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        colors = CardDefaults.cardColors(containerColor = MainWhite)
+        colors = CardDefaults.cardColors(containerColor = MainWhite),
+        shape = RoundedCornerShape(10.dp)
     ) {
         Column(
             modifier = Modifier

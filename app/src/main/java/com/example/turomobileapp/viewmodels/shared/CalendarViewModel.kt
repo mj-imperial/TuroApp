@@ -1,32 +1,57 @@
 package com.example.turomobileapp.viewmodels.shared
 
+import android.annotation.SuppressLint
+import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.CalendarResponse
 import com.example.turomobileapp.repositories.CalendarRepository
+import com.example.turomobileapp.ui.notifications.EventNotificationWorker
+import com.example.turomobileapp.ui.notifications.TuroNotificationService
 import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
     private val calendarRepository: CalendarRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val notificationService: TuroNotificationService,
+    @ApplicationContext private val context: Context
 ): ViewModel(){
 
     private val _uiState = MutableStateFlow(CalendarUIState())
     val uiState: StateFlow<CalendarUIState> = _uiState.asStateFlow()
 
+    private val prefs: SharedPreferences = context.getSharedPreferences("calendar_prefs", Context.MODE_PRIVATE)
+
+    private var notifiedIds: MutableSet<String> = prefs.getStringSet("notified_event_ids", emptySet())!!.toMutableSet()
+
     init {
         getCalendarEventsForUser()
     }
 
+    @SuppressLint("UseKtx")
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getCalendarEventsForUser(){
         viewModelScope.launch {
             val userId = sessionManager.userId.value
@@ -42,6 +67,36 @@ class CalendarViewModel @Inject constructor(
                     result = result,
                     onSuccess = { events ->
                         _uiState.update { it.copy(loading = false, rawEvents = events) }
+
+                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+                        events.forEach {
+                            if (notifiedIds.contains(it.eventId)) {
+                                return@forEach
+                            }
+                            val parsedDate = try {
+                                LocalDate.parse(it.date, formatter)
+                            } catch (e: Exception) {
+                                null
+                            }
+
+                            val title = "Reminder: ${it.title}"
+                            val text = if (parsedDate != null) {
+                                "You have an event on ${it.date}"
+                            } else {
+                                "You have an upcoming event"
+                            }
+                            notificationService.showNotification(
+                                notificationTitle = title,
+                                notificationText = text,
+                                route = "calendar_screen"
+                            )
+
+                            notifiedIds.add(it.eventId)
+                            prefs.edit()
+                                .putStringSet("notified_event_ids", notifiedIds)
+                                .apply()
+                        }
                     },
                     onFailure = { err ->
                         _uiState.update { it.copy(loading = false, errorMessage = err) }

@@ -4,17 +4,16 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.example.turomobileapp.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 import javax.inject.Inject
 import javax.inject.Singleton
-import androidx.core.net.toUri
+import kotlin.random.Random
 
 @Singleton
 class TuroNotificationService @Inject constructor(

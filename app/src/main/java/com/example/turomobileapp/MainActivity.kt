@@ -24,7 +24,8 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject lateinit var sessionManager: SessionManager
 
-    @RequiresApi(Build.VERSION_CODES.O)
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
         super.onCreate(savedInstanceState)

@@ -10,7 +10,6 @@ import com.example.turomobileapp.models.QuestionResponse
 import com.example.turomobileapp.models.QuizContentResponse
 import com.example.turomobileapp.repositories.AssessmentResultRepository
 import com.example.turomobileapp.repositories.QuizRepository
-import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.notifications.TuroNotificationService
 import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -212,7 +211,7 @@ class QuizAttemptViewModel @Inject constructor(
                         notificationService.showNotification(
                             notificationTitle = "Quiz Submitted",
                             notificationText = "You have completed ${_uiState.value.quizName} attempt. Tap to see your results.",
-                            route = Screen.StudentQuizResult.createRoute(_quizId, false)
+                            route = "quiz_result_screen/${_quizId}/false"
                         )
                         _events.trySend(QuizAttemptEvent.SubmitSuccess(response))
                     },

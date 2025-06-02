@@ -159,8 +159,8 @@ fun QuizResultScreen(
     if (openAlertDialog){
         PopupMinimal(
             onDismissRequest = { openAlertDialog = false },
-            width = windowInfo.screenWidth * 0.6f,
-            height = windowInfo.screenHeight * 0.3f,
+            width = windowInfo.screenWidth * 0.7f,
+            height = windowInfo.screenHeight * 0.2f,
             padding = 15.dp,
             roundedCornerShape = 10.dp,
             dialogText = "You got ${selectedResult.earnedPoints} for scoring ${selectedResult.scorePercentage} on your latest attempt.",

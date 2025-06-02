@@ -122,7 +122,12 @@ fun NavGraphBuilder.commonNavGraph(
     composable(Screen.Profile.route) {
         ProfileScreen(navController, sessionManager)
     }
-    composable(Screen.Calendar.route) {
+    composable(
+        route = Screen.Calendar.route,
+        deepLinks = listOf(
+            navDeepLink { uriPattern = "turo://calendar_screen" }
+        )
+    ) {
         CalendarScreen(navController, sessionManager)
     }
     composable(Screen.Dashboard.route) {

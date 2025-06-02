@@ -5,21 +5,29 @@ import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.ui.notifications.NotificationEntity
 import com.example.turomobileapp.ui.notifications.NotificationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
-    repository: NotificationRepository
+    private val repository: NotificationRepository
 ) : ViewModel() {
+
     val notifications: StateFlow<List<NotificationEntity>> =
         repository.streamNotifications()
-            .map { it }
             .stateIn(
                 scope = viewModelScope,
-                started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5_000),
+                started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
+
+    fun delete(notification: NotificationEntity) {
+        viewModelScope.launch {
+            repository.deleteNotification(notification)
+        }
+    }
 }

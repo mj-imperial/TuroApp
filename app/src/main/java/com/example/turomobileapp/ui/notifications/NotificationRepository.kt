@@ -22,4 +22,8 @@ class NotificationRepository @Inject constructor(
     suspend fun clearAll() {
         dao.clearAll()
     }
+
+    suspend fun deleteNotification(notification: NotificationEntity) {
+        dao.delete(notification)
+    }
 }
