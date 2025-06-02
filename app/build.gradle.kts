@@ -3,8 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.dagger.hilt.android")
-    kotlin("kapt")
     id("kotlin-parcelize")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -75,13 +75,13 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.moshi.kotlin)
-    //noinspection KaptUsageInsteadOfKsp
-    kapt(libs.moshi.kotlin.codegen)
+
+    ksp(libs.moshi.kotlin.codegen)
     implementation(libs.converter.moshi)
 
     // Hilt
     implementation(libs.hilt.android)
-    kapt(libs.dagger.hilt.compiler)
+    ksp(libs.dagger.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Navigation
@@ -108,6 +108,8 @@ dependencies {
     // The compose calendar library for Android
     implementation("com.kizitonwose.calendar:compose:2.7.0")
 
+    //room database
+    implementation("androidx.room:room-runtime:2.7.0")
+    implementation("androidx.room:room-ktx:2.7.0")
+    ksp("androidx.room:room-compiler:2.7.0")
 }
-
-kapt { correctErrorTypes = true }

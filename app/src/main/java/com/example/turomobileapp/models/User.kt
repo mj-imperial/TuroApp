@@ -70,10 +70,3 @@ data class ApiResponse(
     @Json(name="success") val success: Boolean,
     @Json(name="message")val message: String
 )
-
-@JsonClass(generateAdapter = true)
-data class UploadResponse(
-    @Json(name = "success") val success: Boolean,
-    @Json(name = "message") val message: String? = null,
-    @Json(name = "profile_pic_url") val profilePicUrl: String? = null,
-)

@@ -1,11 +1,6 @@
 package com.example.turomobileapp.ui.screens.shared
 
 import AppScaffold
-import android.net.Uri
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -29,14 +24,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +35,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -56,7 +46,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.ui.components.CapsuleButton
-import com.example.turomobileapp.ui.components.PopupWithImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -64,34 +53,21 @@ import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
-import com.example.turomobileapp.ui.theme.SideRed
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.authentication.LoginViewModel
-import com.example.turomobileapp.viewmodels.shared.ProfileUIState
-import com.example.turomobileapp.viewmodels.shared.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
     navController: NavController,
     sessionManager: SessionManager,
-    viewModel: ProfileViewModel = hiltViewModel(),
     loginViewModel: LoginViewModel = hiltViewModel()
 ){
-    val uiState by viewModel.uiState.collectAsState()
 
     val windowInfo = rememberWindowInfo()
     val screenHeight = windowInfo.screenHeight
     val headerHeight = screenHeight * 0.25f
     val imageSize = headerHeight * 0.70f
     val imageOverlap = imageSize / 2f
-
-    val context = LocalContext.current
-
-    val pickMediaLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        uri?.let { viewModel.onImagePicked(it) }
-    }
 
     AppScaffold(
         navController = navController,
@@ -107,24 +83,11 @@ fun ProfileScreen(
                 imageOverlap = imageOverlap,
                 imageSize = imageSize,
                 sessionManager = sessionManager,
-                onSaveClick = {
-                    uiState.pickedImageUri?.let { uri ->
-                        context.contentResolver.openInputStream(uri)?.use { stream ->
-                            val bytes = stream.readBytes()
-                            val mime = context.contentResolver.getType(uri) ?: "image/jpeg"
-                            viewModel.uploadImage(bytes, mime)
-                        }
-                    }
-                },
-                uiState = uiState,
-                onClearClick = viewModel::clearPickedImageUri,
-                screenHeight = screenHeight,
                 onLogOut = {
                     loginViewModel.logout()
                     navController.navigate(Screen.Login.route)
                 },
                 windowInfo = windowInfo,
-                pickMediaLauncher = pickMediaLauncher
             )
         },
     )
@@ -137,13 +100,8 @@ fun ProfileContent(
     imageSize: Dp,
     imageOverlap: Dp,
     sessionManager: SessionManager,
-    uiState: ProfileUIState,
-    onSaveClick: () -> Unit,
-    onClearClick: () -> Unit,
-    screenHeight: Dp,
     onLogOut: () -> Unit,
     windowInfo: WindowInfo,
-    pickMediaLauncher:  ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>
 ) {
     val firstName by sessionManager.firstName.collectAsState(initial = "")
     val lastName by sessionManager.lastName.collectAsState(initial = "")
@@ -254,7 +212,7 @@ fun ProfileContent(
                 .offset(y = imageOverlap)
         ) {
             AsyncImage(
-                model = uiState.currentPicUrl,
+                model = sessionManager.profilePicUrl,
                 placeholder = painterResource(R.drawable.default_account),
                 error = painterResource(R.drawable.default_account),
                 contentDescription = "Profile picture",
@@ -264,50 +222,6 @@ fun ProfileContent(
                     .border(4.dp,MainOrange,CircleShape)
                     .clip(CircleShape)
             )
-
-            IconButton(
-                onClick = {
-                    pickMediaLauncher.launch(PickVisualMediaRequest(
-                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                    ))
-                },
-                modifier = Modifier
-                    .size(imageSize * 0.3f)
-                    .align(Alignment.BottomEnd)
-                    .background(SideRed,CircleShape)
-                    .clip(CircleShape)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.edit_icon),
-                    contentDescription = "Edit profile picture",
-                    tint = MainWhite,
-                    modifier = Modifier.fillMaxSize(0.6f),
-                )
-            }
-        }
-
-        var openAlertDialog by remember { mutableStateOf(false) }
-
-        uiState.pickedImageUri?.let { uri ->
-            Column{
-                PopupWithImage(
-                    onDismissRequest = {
-                        openAlertDialog = false
-                        onClearClick()
-                    },
-                    onConfirmation = {
-                        openAlertDialog = false
-                        onSaveClick()
-                    },
-                    uri = uri,
-                    imageDescription = "Are you sure you want to change your profile picture?",
-                    height = screenHeight * 0.4f,
-                    width = screenHeight * 0.5f,
-                    padding = 20.dp,
-                    roundedCornerShape = 10.dp,
-                    errorMessage = uiState.errorMessage
-                )
-            }
         }
     }
 }

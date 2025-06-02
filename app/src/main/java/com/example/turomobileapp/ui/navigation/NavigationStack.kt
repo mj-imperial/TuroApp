@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.ui.screens.authentication.ChangePasswordScreen
 import com.example.turomobileapp.ui.screens.authentication.LoginScreen
@@ -22,6 +23,7 @@ import com.example.turomobileapp.ui.screens.authentication.SplashScreen
 import com.example.turomobileapp.ui.screens.authentication.TermsAgreementScreen
 import com.example.turomobileapp.ui.screens.shared.CalendarScreen
 import com.example.turomobileapp.ui.screens.shared.DashboardScreen
+import com.example.turomobileapp.ui.screens.shared.NotificationScreen
 import com.example.turomobileapp.ui.screens.shared.ProfileScreen
 import com.example.turomobileapp.ui.screens.student.CourseDetailScreen
 import com.example.turomobileapp.ui.screens.student.LeaderboardScreen
@@ -40,7 +42,7 @@ import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 import com.example.turomobileapp.viewmodels.teacher.CourseActionsViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun NavigationStack(
     modifier: Modifier = Modifier,
@@ -65,7 +67,7 @@ fun AuthNavHost() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun StudentNavHost(sessionManager: SessionManager) {
     val navController = rememberNavController()
@@ -75,7 +77,7 @@ fun StudentNavHost(sessionManager: SessionManager) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun TeacherNavHost(sessionManager: SessionManager) {
     val navController = rememberNavController()
@@ -112,7 +114,7 @@ fun NavGraphBuilder.authNavGraph(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun NavGraphBuilder.commonNavGraph(
     navController: NavHostController,
     sessionManager: SessionManager
@@ -123,12 +125,15 @@ fun NavGraphBuilder.commonNavGraph(
     composable(Screen.Calendar.route) {
         CalendarScreen(navController, sessionManager)
     }
-    composable(route = Screen.Dashboard.route) {
+    composable(Screen.Dashboard.route) {
         DashboardScreen(navController, sessionManager)
+    }
+    composable(Screen.Notification.route) {
+        NotificationScreen(navController, sessionManager)
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun NavGraphBuilder.studentNavGraph(
     navController: NavHostController,
     sessionManager: SessionManager
@@ -204,6 +209,9 @@ fun NavGraphBuilder.studentNavGraph(
         arguments = listOf(
             navArgument("quizId")    { type = NavType.StringType },
             navArgument("fromSubmit"){ type = NavType.BoolType    }
+        ),
+        deepLinks = listOf(
+            navDeepLink { uriPattern = "turo://quiz_result_screen/{quizId}/{fromSubmit}" }
         )
     ) { backStackEntry ->
         val fromSubmit = backStackEntry.arguments?.getBoolean("fromSubmit") ?: false
@@ -217,7 +225,7 @@ fun NavGraphBuilder.studentNavGraph(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun NavGraphBuilder.teacherNavGraph(
     navController: NavHostController,
     sessionManager: SessionManager

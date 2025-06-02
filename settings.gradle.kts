@@ -1,12 +1,11 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()  // for KSP, Kotlin, Hilt plugins
         google()
         mavenCentral()
+        gradlePluginPortal()  // for KSP, Kotlin, Hilt plugins
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()

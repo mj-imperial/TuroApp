@@ -1,8 +1,14 @@
 package com.example.turomobileapp.ui.screens.shared
 
 import AppScaffold
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,28 +30,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.models.CourseResponse
+import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
+import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.TextBlack
+import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.shared.DashboardViewModel
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun DashboardScreen(
@@ -53,6 +69,75 @@ fun DashboardScreen(
     sessionManager: SessionManager,
     viewModel: DashboardViewModel = hiltViewModel()
 ){
+    val windowInfo = rememberWindowInfo()
+
+    val context = LocalContext.current
+    var hasRequestedNotification by remember { mutableStateOf(false) }
+    var openAlertDialog by remember { mutableStateOf(false) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            openAlertDialog = true
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!hasRequestedNotification) {
+            hasRequestedNotification = true
+            val alreadyGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!alreadyGranted) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+    
+    if (openAlertDialog){
+        PopupAlertWithActions(
+            onDismissRequest = { openAlertDialog = false },
+            onConfirmation = {
+                openAlertDialog = false
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            },
+            icon = painterResource(R.drawable.notification),
+            title = {
+                Text(
+                    text = "Notifications Disabled",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.title(windowInfo)
+                )
+            },
+            dialogText = {
+                Text(
+                    text = "We need notification permission so we can alert you \nabout important updates. Please enable it in settings.",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading2(windowInfo)
+                )
+            },
+            confirmText = {
+                Text(
+                    text = "YES",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    color = green
+                )
+            },
+            dismissText = {
+                Text(
+                    text = "NO",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    color = MainRed
+                )
+            }
+        )
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     val userId by sessionManager.userId.collectAsState(initial = "")
     val roleStr by sessionManager.role.collectAsState(initial = "")
@@ -66,7 +151,6 @@ fun DashboardScreen(
         }
     }
 
-    val windowInfo = rememberWindowInfo()
     val cardHeight = when (windowInfo.screenHeightInfo) {
         WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.25f
         WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.20f

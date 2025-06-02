@@ -1,5 +1,6 @@
 package com.example.turomobileapp.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -19,7 +20,7 @@ fun PopupAlertWithActions(
 ) {
     AlertDialog(
         icon = {
-            Icon(
+            Image(
                 painter = icon,
                 contentDescription = "Icon"
             )

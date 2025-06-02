@@ -324,7 +324,7 @@ fun QuizBody(
                     color = MainWhite
                 )
             },
-            onClick = onTakeQuizClick,
+            onClick = { openAlertDialog = true },
             roundedCornerShape = 10.dp,
             buttonElevation = ButtonDefaults.buttonElevation(8.dp),
             contentPadding = PaddingValues(10.dp),
@@ -369,9 +369,7 @@ fun QuizBody(
             onDismissRequest = {
                 openAlertDialog = false
             },
-            onConfirmation = {
-                onTakeQuizClick
-            },
+            onConfirmation = onTakeQuizClick,
             icon = painterResource(R.drawable.screeningexam_icon),
             title = {
                 Text(

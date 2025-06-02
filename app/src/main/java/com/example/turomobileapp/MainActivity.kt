@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         splash.setKeepOnScreenCondition {false}
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
         val notificationChannel = NotificationChannel(
             "turo_notification",
             "Turo",
@@ -37,6 +38,7 @@ class MainActivity : ComponentActivity() {
         )
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(notificationChannel)
+
         enableEdgeToEdge()
         setContent {
             TuroMobileAppTheme {
