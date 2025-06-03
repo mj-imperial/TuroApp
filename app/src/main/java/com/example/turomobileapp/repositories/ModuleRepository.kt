@@ -1,10 +1,12 @@
 package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.helperfunctions.handleApiResponse
+import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.ModuleApiService
-import com.example.turomobileapp.models.Activity
 import com.example.turomobileapp.models.Module
-import com.example.turomobileapp.models.ModuleResultUploadResponse
+import com.example.turomobileapp.models.ModuleActivityResponse
+import com.example.turomobileapp.models.ModuleResponse
+import com.example.turomobileapp.models.ModuleResultResponse
 import com.example.turomobileapp.models.ModuleUploadRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -12,10 +14,28 @@ import javax.inject.Inject
 
 class ModuleRepository @Inject constructor(private val moduleApiService: ModuleApiService) {
 
-    fun createModule(courseId:String, moduleName: String, moduleDescription: String): Flow<Result<ModuleResultUploadResponse>> =
+    fun createModule(courseId:String, moduleName: String, moduleDescription: String): Flow<Result<ModuleResultResponse>> =
         handleApiResponse(
             call = { moduleApiService.createModule(ModuleUploadRequest(courseId, moduleName, moduleDescription)) },
             errorMessage = "Failed to create module"
+        )
+
+    fun getModulesForCourse(courseId: String): Flow<Result<List<ModuleResponse>>> =
+        requestAndMap(
+            call = { moduleApiService.getModulesForCourse(courseId) },
+            mapper = { dto -> dto.modules }
+        )
+
+    fun getActivitiesForModule(moduleId: String): Flow<Result<List<ModuleActivityResponse>>> =
+        requestAndMap(
+            call = { moduleApiService.getActivitiesInModule(moduleId) },
+            mapper = { dto -> dto.activities }
+        )
+
+    fun deleteModule(moduleId: String): Flow<Result<ModuleResultResponse>> =
+        handleApiResponse(
+            call = { moduleApiService.deleteModule(moduleId) },
+            errorMessage = "Failed to delete module $moduleId"
         )
 
     fun isModuleDuplicate(courseId: String, module: Module): Flow<Result<Boolean>> = flow {
@@ -39,13 +59,6 @@ class ModuleRepository @Inject constructor(private val moduleApiService: ModuleA
         )
     }
 
-    fun getActivitiesForModule(moduleId: String): Flow<Result<List<Activity>>> = flow {
-        handleApiResponse(
-            call = { moduleApiService.getActivitiesInModule(moduleId) },
-            errorMessage = "Failed to get activities for module $moduleId"
-        )
-    }
-
     fun updateModule(moduleId: String, module: Module): Flow<Result<Unit>> = flow {
         handleApiResponse(
             call = { moduleApiService.updateModule(moduleId, module) },
@@ -53,17 +66,4 @@ class ModuleRepository @Inject constructor(private val moduleApiService: ModuleA
         )
     }
 
-    fun deleteModule(moduleId: String): Flow<Result<Unit>> = flow {
-        handleApiResponse(
-            call = { moduleApiService.deleteModule(moduleId) },
-            errorMessage = "Failed to delete module $moduleId"
-        )
-    }
-
-    fun getModulesForCourse(courseId: String): Flow<Result<List<Module>>> = flow {
-        handleApiResponse(
-            call = { moduleApiService.getModulesForCourse(courseId) },
-            errorMessage = "Failed to get modules for course $courseId"
-        )
-    }
 }

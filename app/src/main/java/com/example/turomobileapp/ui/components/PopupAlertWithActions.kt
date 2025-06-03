@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
+import com.example.turomobileapp.ui.theme.MainWhite
 
 @Composable
 fun PopupAlertWithActions(
@@ -18,6 +19,7 @@ fun PopupAlertWithActions(
     dismissText: @Composable () -> Unit = { Text("") }
 ) {
     AlertDialog(
+        containerColor = MainWhite,
         icon = {
             Image(
                 painter = icon,

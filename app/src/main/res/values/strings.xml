@@ -44,10 +44,8 @@
     <string name="PracticeQuiz">PRACTICE QUIZ</string>
     <string name="LongQuiz">LONG QUIZ</string>
     <string name="ScreeningExam">SCREENING EXAM</string>
-    <string name="TeacherTutorials">UPLOAD TUTORIAL/LECTURE</string>
     <string name="TeacherModules">CREATE MODULES</string>
-    <string name="TeacherQuiz">CREATE QUIZ</string>
-    <string name="TeacherScreeningExam">CREATE SCREENING EXAM</string>
+    <string name="TeacherActivity">CREATE / EDIT ACTIVITIES</string>
     <string name="TeacherPerformance">VIEW PERFORMANCE</string>
     <string name="TeacherStudents">SHOW ALL STUDENTS</string>
 </resources>

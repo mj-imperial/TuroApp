@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.window.Dialog
+import com.example.turomobileapp.ui.theme.MainWhite
 
 @Composable
 fun PopupMinimal(
@@ -29,8 +30,7 @@ fun PopupMinimal(
     dialogText: String,
     fontFamily: FontFamily,
     fontSize: TextUnit,
-    textColor: Color,
-    cardColors: CardColors
+    textColor: Color
 ) {
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
@@ -39,7 +39,7 @@ fun PopupMinimal(
                 .height(height)
                 .padding(padding),
             shape = RoundedCornerShape(roundedCornerShape),
-            colors = cardColors
+            colors = CardDefaults.cardColors(MainWhite)
         ) {
             Text(
                 text = dialogText,

@@ -3,6 +3,7 @@ package com.example.turomobileapp.repositories
 import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.interfaces.ActivityApiService
 import com.example.turomobileapp.models.Activity
+import com.example.turomobileapp.models.ActivityDeleteResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -37,10 +38,9 @@ class ActivityRepository @Inject constructor(private val activityApiService: Act
         )
     }
 
-    fun deleteActivity(activityId: String): Flow<Result<Unit>> = flow {
+    fun deleteActivity(activityId: String): Flow<Result<ActivityDeleteResponse>> =
         handleApiResponse(
             call = { activityApiService.deleteActivity(activityId) },
             errorMessage = "Failed to delete activity $activityId"
         )
-    }
 }

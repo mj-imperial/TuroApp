@@ -63,7 +63,6 @@ import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.ui.theme.hiddenAnswers1
 import com.example.turomobileapp.ui.theme.hiddenAnswers2
-import com.example.turomobileapp.ui.theme.shortquiz1
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 
@@ -166,8 +165,7 @@ fun QuizResultScreen(
             dialogText = "You got ${selectedResult.earnedPoints} for scoring ${selectedResult.scorePercentage} on your latest attempt.",
             fontFamily = FontFamily(Font(R.font.alata)),
             fontSize = ResponsiveFont.heading3(windowInfo),
-            textColor = TextBlack,
-            cardColors = CardDefaults.cardColors(shortquiz1)
+            textColor = TextBlack
         )
     }
 

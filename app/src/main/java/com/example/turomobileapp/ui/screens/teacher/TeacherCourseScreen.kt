@@ -45,16 +45,14 @@ import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.TextBlack
+import com.example.turomobileapp.ui.theme.hiddenAnswers1
+import com.example.turomobileapp.ui.theme.hiddenAnswers2
 import com.example.turomobileapp.ui.theme.longquiz1
 import com.example.turomobileapp.ui.theme.longquiz2
-import com.example.turomobileapp.ui.theme.practice1
-import com.example.turomobileapp.ui.theme.practice2
-import com.example.turomobileapp.ui.theme.quiz1
-import com.example.turomobileapp.ui.theme.quiz2
+import com.example.turomobileapp.ui.theme.screeningExam1
+import com.example.turomobileapp.ui.theme.screeningExam2
 import com.example.turomobileapp.ui.theme.shortquiz1
 import com.example.turomobileapp.ui.theme.shortquiz2
-import com.example.turomobileapp.ui.theme.tutorial1
-import com.example.turomobileapp.ui.theme.tutorial2
 import com.example.turomobileapp.viewmodels.SessionManager
 
 @Composable
@@ -166,29 +164,23 @@ fun CourseActivities(
             colors = listOf(shortquiz1,shortquiz2)
         ),
         Activities(
-            name = R.string.TeacherTutorials,
-            icon = R.drawable.tutorial_icon,
-            route = Screen.TeacherTutorials.route,
-            colors = listOf(tutorial1,tutorial2)
-        ),
-        Activities(
-            name = R.string.TeacherQuiz,
-            icon = R.drawable.shortquiz_icon,
-            route = Screen.TeacherCreateQuiz.route,
-            colors = listOf(practice1,practice2)
-        ),
-        Activities(
-            name = R.string.TeacherScreeningExam,
+            name = R.string.TeacherActivity,
             icon = R.drawable.longquiz_icon,
-            route = Screen.TeacherCreateScreeningQuiz.route,
+            route = Screen.TeacherActivityModules.createRoute(courseId),
             colors = listOf(longquiz1,longquiz2)
         ),
         Activities(
             name = R.string.TeacherStudents,
             icon = R.drawable.practicequiz_icon,
             route = Screen.TeacherViewAllStudents.route,
-            colors = listOf(quiz1,quiz2)
-        )
+            colors = listOf(screeningExam1,screeningExam2)
+        ),
+        Activities(
+            name = R.string.TeacherPerformance,
+            icon = R.drawable.shortquiz_icon,
+            route = Screen.TeacherPerformance.route,
+            colors = listOf(hiddenAnswers1,hiddenAnswers2)
+        ),
     )
 
     Column(

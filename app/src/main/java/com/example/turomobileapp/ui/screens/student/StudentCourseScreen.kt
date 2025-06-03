@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
-import com.example.turomobileapp.enums.ActivityType
 import com.example.turomobileapp.enums.QuizType
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
@@ -197,7 +196,7 @@ fun CourseHeader(
                 horizontalAlignment = Alignment.Start,
             ) {
                 Text(
-                    text = "Progress: ${progressPercentage}",
+                    text = "Progress: $progressPercentage",
                     fontSize = ResponsiveFont.heading3(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alexandria)),
                     color = MainWhite
@@ -254,7 +253,7 @@ fun CourseActivities(
     val activitiesList = listOf(
         Activities(
             name = R.string.Tutorials,
-            icon = R.drawable.tutorial_icon,
+            icon = R.drawable.tutorial_floating_icon,
             route = Screen.StudentCourseActivity.route,
             colors = listOf(tutorial1,tutorial2)
         ),
@@ -279,7 +278,7 @@ fun CourseActivities(
         Activities(
             name = R.string.ScreeningExam,
             icon = R.drawable.screeningexam_icon,
-            route = Screen.StudentCourseActivity.createRoute(courseId = courseId, type = ActivityType.SCREENING_EXAM),
+            route = Screen.StudentCourseActivity.createRoute(courseId = courseId, type = QuizType.SCREENING_EXAM),
             colors = listOf(screeningExam1,screeningExam2)
         )
     )

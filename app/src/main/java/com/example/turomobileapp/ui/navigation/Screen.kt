@@ -1,7 +1,6 @@
 package com.example.turomobileapp.ui.navigation
 
 import android.net.Uri
-import com.example.turomobileapp.enums.ActivityType
 import com.example.turomobileapp.enums.QuizType
 
 sealed class Screen(val route: String) {
@@ -34,7 +33,7 @@ sealed class Screen(val route: String) {
         }
     }
     object StudentCourseActivity: Screen("course_tutorial_screen/{courseId}/{type}"){
-        fun createRoute(courseId: String, type: ActivityType) = "course_tutorial_screen/$courseId/${type.name}"
+        fun createRoute(courseId: String,type: QuizType) = "course_tutorial_screen/$courseId/${type.name}"
     }
     object StudentCourseQuizzes: Screen("course_quizzes_screen/{courseId}/{type}"){
         fun createRoute(courseId: String, type: QuizType) = "course_quizzes_screen/$courseId/${type.name}"
@@ -57,12 +56,16 @@ sealed class Screen(val route: String) {
             return "course_detail/$courseId/$encodedPic"
         }
     }
-    object TeacherViewAllModules: Screen("teacher_viewAllModules/{courseId}"){
-        fun createRoute(courseId: String) = "teacher_viewAllModules/$courseId"
+    object TeacherViewAllModules: Screen("teacher_view_all_modules/{courseId}"){
+        fun createRoute(courseId: String) = "teacher_view_all_modules/$courseId"
     }
-    object TeacherTutorials: Screen("teacher_tutorials")
-    object TeacherCreateQuiz: Screen("teacher_createQuiz")
-    object TeacherCreateScreeningQuiz: Screen("teacher_createScreeningQuiz")
+    object TeacherActivityModules: Screen("teacher_activity_modules/{courseId}"){
+        fun createRoute(courseId: String) = "teacher_activity_modules/$courseId"
+    }
+    object TeacherCreateEditActivitiesInModule: Screen("teacher_create_edit_activity_in_module/{moduleId}"){
+        fun createRoute(moduleId: String) = "teacher_create_edit_activity_in_module/$moduleId"
+    }
     object TeacherCreateModule: Screen("teacher_createModule")
     object TeacherViewAllStudents: Screen("teacher_viewAllStudents")
+    object TeacherPerformance: Screen("teacher_performance")
 }

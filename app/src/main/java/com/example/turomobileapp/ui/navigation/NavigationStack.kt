@@ -32,14 +32,18 @@ import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizListScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.ui.screens.student.StudentModulesScreen
+import com.example.turomobileapp.ui.screens.teacher.CreateEditActivitiesInModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
+import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
-import com.example.turomobileapp.viewmodels.teacher.CourseActionsViewModel
+import com.example.turomobileapp.viewmodels.teacher.ActivityActionsViewModel
+import com.example.turomobileapp.viewmodels.teacher.CreateModuleViewModel
+import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -255,7 +259,27 @@ fun NavGraphBuilder.teacherNavGraph(
             navArgument("courseId") { type = NavType.StringType }
         )
     ) {
-        val viewModel: CourseActionsViewModel = hiltViewModel()
+        val viewModel: CreateModuleViewModel = hiltViewModel()
         CreateModuleScreen(navController, sessionManager, viewModel)
+    }
+
+    composable(
+        route = Screen.TeacherActivityModules.route,
+        arguments = listOf(
+            navArgument("courseId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel: ModuleListActivityActionsViewModel = hiltViewModel()
+        ModuleFoldersScreen(navController, sessionManager, viewModel)
+    }
+
+    composable(
+        route = Screen.TeacherCreateEditActivitiesInModule.route,
+        arguments = listOf(
+            navArgument("moduleId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel: ActivityActionsViewModel = hiltViewModel()
+        CreateEditActivitiesInModuleScreen(navController, sessionManager, viewModel)
     }
 }

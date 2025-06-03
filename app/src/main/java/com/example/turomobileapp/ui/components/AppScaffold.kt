@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.ui.components.BottomNavigationBar
+import com.example.turomobileapp.ui.components.ButtonItems
+import com.example.turomobileapp.ui.components.CustomFloatingActionButton
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.SideDrawer
 import com.example.turomobileapp.ui.components.TopNavigationBar
@@ -29,7 +31,9 @@ fun AppScaffold(
     canNavigateBack: Boolean,
     navigateUp: () -> Unit = {},
     windowInfo: WindowInfo,
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    hasFloatingActionButton: Boolean = false,
+    items: List<ButtonItems> = emptyList()
 ) {
     val heading2 = ResponsiveFont.heading2(windowInfo)
     val body = ResponsiveFont.body(windowInfo)
@@ -59,7 +63,6 @@ fun AppScaffold(
                 onCloseClick = { scope.launch { drawerState.close() } },
                 onLogOut = {
                     loginViewModel.logout()
-                    navController.navigate(Screen.Login.route)
                 },
                 windowInfo = rememberWindowInfo(),
                 heading2 = heading2,
@@ -70,22 +73,26 @@ fun AppScaffold(
                 email = email.toString()
             )
         }) {
-        Scaffold(topBar = {
-            TopNavigationBar(
-                canNavigateBack = canNavigateBack,
-                onNotificationClick = {
-                    navController.navigate(Screen.Notification.route)
-                },
-                barHeight = barHeight,
-                body = body,
-                subtitle = subtitle,
-                hasNotification = false, //TODO add notification logic
-                navigateUp = navigateUp,
-                onHamburgerClick = {
-                    scope.launch { drawerState.open() }
-                },
-                modifier = modifier,
-            )
+        Scaffold(
+            floatingActionButton = {
+                if (hasFloatingActionButton) CustomFloatingActionButton(items)
+            },
+            topBar = {
+                TopNavigationBar(
+                    canNavigateBack = canNavigateBack,
+                    onNotificationClick = {
+                        navController.navigate(Screen.Notification.route)
+                    },
+                    barHeight = barHeight,
+                    body = body,
+                    subtitle = subtitle,
+                    hasNotification = false, //TODO add notification logic
+                    navigateUp = navigateUp,
+                    onHamburgerClick = {
+                        scope.launch { drawerState.open() }
+                    },
+                    modifier = modifier,
+                )
         },bottomBar = {
             BottomNavigationBar(
                 navController = navController,

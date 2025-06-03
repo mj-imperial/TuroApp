@@ -16,7 +16,6 @@ import com.example.turomobileapp.interfaces.ModuleProgressApiService
 import com.example.turomobileapp.interfaces.OptionsApiService
 import com.example.turomobileapp.interfaces.QuestionApiService
 import com.example.turomobileapp.interfaces.QuizApiService
-import com.example.turomobileapp.interfaces.ScreeningExamApiService
 import com.example.turomobileapp.interfaces.ShopItemApiService
 import com.example.turomobileapp.interfaces.StudentProgressApiService
 import com.example.turomobileapp.interfaces.TutorialApiService
@@ -162,11 +161,6 @@ object NetworkModule{
     @Singleton
     fun provideQuizApiService(retrofit: Retrofit): QuizApiService =
         retrofit.create(QuizApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideScreeningExamApiService(retrofit: Retrofit): ScreeningExamApiService =
-        retrofit.create(ScreeningExamApiService::class.java)
 
     @Provides
     @Singleton

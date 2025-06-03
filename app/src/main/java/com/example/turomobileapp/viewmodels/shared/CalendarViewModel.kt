@@ -1,20 +1,15 @@
 package com.example.turomobileapp.viewmodels.shared
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.CalendarResponse
 import com.example.turomobileapp.repositories.CalendarRepository
-import com.example.turomobileapp.ui.notifications.EventNotificationWorker
 import com.example.turomobileapp.ui.notifications.TuroNotificationService
 import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,9 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)

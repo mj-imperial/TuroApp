@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.example.turomobileapp.enums.ActivityType
 import com.example.turomobileapp.enums.ContentType
 import com.example.turomobileapp.enums.QuizType
-import com.example.turomobileapp.enums.ScreeningTier
 import com.google.gson.annotations.SerializedName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -69,21 +68,6 @@ data class Lecture(
 ): Activity(activityId,moduleId, activityType, activityName, activityDescription, unlockDate, deadlineDate, eventId)
 
 @JsonClass(generateAdapter = true)
-data class ScreeningExam(
-    @SerializedName("screening_id") override val activityId: String,
-    @SerializedName("module_id") override val moduleId: String,
-    @SerializedName("activity_type") override val activityType: ActivityType = ActivityType.SCREENING_EXAM,
-    @SerializedName("screening_name") override val activityName: String,
-    @SerializedName("screening_description") override val activityDescription: String,
-    @SerializedName("unlock_date") override val unlockDate: Date,
-    @SerializedName("deadline_date") override val deadlineDate: Date?,
-    @SerializedName("event_id") override val eventId: String?,
-    @SerializedName("tier_passed") var tierPassed: ScreeningTier,
-    @SerializedName("is_Passed") var isPassed: Boolean,
-    @SerializedName("questions") val questions: List<Question> = emptyList()
-): Activity(activityId,moduleId, activityType, activityName, activityDescription, unlockDate, deadlineDate, eventId)
-
-@JsonClass(generateAdapter = true)
 data class Module(
     @SerializedName("module_id") val moduleId: String,
     @SerializedName("course_id") val courseId: String,
@@ -100,9 +84,44 @@ data class ModuleUploadRequest(
 )
 
 @JsonClass(generateAdapter = true)
-data class ModuleResultUploadResponse(
+data class ModuleResultResponse(
     @Json(name = "success") val success: Boolean,
     @Json(name = "message") val message: String,
+)
+
+@JsonClass(generateAdapter = true)
+data class ModulesResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "modules") val modules: List<ModuleResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class ModuleResponse(
+    @Json(name = "module_id") val moduleId: String,
+    @Json(name = "module_name") val moduleName: String,
+    @Json(name = "module_description") val moduleDescription: String,
+)
+
+@JsonClass(generateAdapter = true)
+data class ModuleActivitiesResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "activities") val activities: List<ModuleActivityResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class ModuleActivityResponse(
+    @Json(name = "activity_id") val activityId: String,
+    @Json(name = "activity_type") val activityType: String,
+    @Json(name = "activity_name") val activityName: String,
+    @Json(name = "activity_description") val activityDescription: String,
+    @Json(name = "unlock_date") val unlockDate: String,
+    @Json(name = "deadline_date") val deadlineDate: String? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class ActivityDeleteResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "message") val message: String
 )
 
 @JsonClass(generateAdapter = true)
