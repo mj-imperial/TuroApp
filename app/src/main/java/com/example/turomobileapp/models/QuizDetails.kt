@@ -11,7 +11,6 @@ import java.util.Date
 data class Question(
     @SerializedName("question_id") val questionId: String,
     @SerializedName("question_text") val questionText: String,
-    @SerializedName("question_image") val questionImage: String? = null,
     @SerializedName("question_type") val questionType: QuestionType,
     @SerializedName("options") val options: List<Options>? = null,
     @SerializedName("correct_answer") val correctAnswer: String? = null,
@@ -116,7 +115,6 @@ data class QuizContentResponses(
 data class QuizContentResponse(
     @Json(name = "question_id") val questionId: String,
     @Json(name = "question_text") val questionText: String,
-    @Json(name = "question_image") val questionImage: String?,
     @Json(name = "type_name") val questionTypeName: String,
     @Json(name = "score") val score: Int,
     @Json(name = "options") val options: List<QuestionResponse>

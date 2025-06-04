@@ -15,9 +15,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults.colors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -112,12 +110,6 @@ fun PasswordCard(
                 onNext = { passwordFocusRequester.requestFocus() }
             ),
             roundedCornerShape = 28.dp,
-            colors = colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = SoftGray,
-                disabledContainerColor = Color.Transparent,
-                cursorColor = MaterialTheme.colorScheme.primary
-            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
@@ -161,12 +153,6 @@ fun PasswordCard(
             onNext = { passwordFocusRequester.requestFocus() }
         ),
         roundedCornerShape = 28.dp,
-        colors = colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = SoftGray,
-            disabledContainerColor = Color.Transparent,
-            cursorColor = MaterialTheme.colorScheme.primary
-        ),
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(passwordFocusRequester)
@@ -212,12 +198,6 @@ fun PasswordCard(
             }
         ),
         roundedCornerShape = 28.dp,
-        colors = colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = SoftGray,
-            disabledContainerColor = Color.Transparent,
-            cursorColor = MaterialTheme.colorScheme.primary
-        ),
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(passwordFocusRequester)
@@ -378,12 +358,6 @@ fun EmailStep(
             }
         ),
         roundedCornerShape = 28.dp,
-        colors = colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = SoftGray,
-            disabledContainerColor = Color.Transparent,
-            cursorColor = MaterialTheme.colorScheme.primary
-        ),
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
@@ -528,12 +502,6 @@ fun CodeStep(
                     onDone = { if (!loading) onVerifyCode() }
                 ),
                 roundedCornerShape = 29.dp,
-                colors = colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = SoftGray,
-                    disabledContainerColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                ),
                 modifier = Modifier
                     .size(64.dp)
                     .focusRequester(focusRequesters[i])

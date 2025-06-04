@@ -24,9 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults.colors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -255,12 +253,6 @@ fun LoginCard(
                     onNext = { passwordFocusRequester.requestFocus() }
                 ),
                 roundedCornerShape = 28.dp,
-                colors = colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = SoftGray,
-                    disabledContainerColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .shadow(
@@ -306,12 +298,6 @@ fun LoginCard(
                 ),
                 visualTransformation = PasswordVisualTransformation(),
                 roundedCornerShape = 28.dp,
-                colors = colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = SoftGray,
-                    disabledContainerColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(passwordFocusRequester)

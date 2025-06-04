@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.ModuleResponse
 import com.example.turomobileapp.repositories.ModuleRepository
+import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.notifications.TuroNotificationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.example.turomobileapp.repositories.Result
 
 @HiltViewModel
 class CreateModuleViewModel @Inject constructor(

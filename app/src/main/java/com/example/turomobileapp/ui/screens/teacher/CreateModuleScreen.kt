@@ -1,15 +1,12 @@
 package com.example.turomobileapp.ui.screens.teacher
 
 import AppScaffold
-import android.widget.Space
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,9 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults.colors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -172,12 +167,6 @@ fun CreateModuleScreen(
                     },
                     isSingleLine = true,
                     roundedCornerShape = 5.dp,
-                    colors = colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = SoftGray,
-                        disabledContainerColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.primary
-                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .shadow(
@@ -214,12 +203,6 @@ fun CreateModuleScreen(
                     },
                     isSingleLine = false,
                     roundedCornerShape = 5.dp,
-                    colors = colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = SoftGray,
-                        disabledContainerColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.primary
-                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(windowInfo.screenHeight * 0.2f)

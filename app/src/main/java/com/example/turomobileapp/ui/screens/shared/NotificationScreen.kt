@@ -117,9 +117,7 @@ fun NotificationScreen(
                         ) { notification ->
                             val dismissState = rememberSwipeToDismissBoxState(
                                 confirmValueChange = { dismissValue ->
-                                    if (dismissValue == SwipeToDismissBoxValue.StartToEnd ||
-                                        dismissValue == SwipeToDismissBoxValue.EndToStart
-                                    ) {
+                                    if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
                                         viewmodel.delete(notification)
                                         true
                                     } else {
@@ -151,7 +149,7 @@ fun NotificationScreen(
                                         )
                                     }
                                 },
-                                enableDismissFromStartToEnd = true,
+                                enableDismissFromStartToEnd = false,
                                 enableDismissFromEndToStart = true,
                                 gesturesEnabled = true
                             ) {

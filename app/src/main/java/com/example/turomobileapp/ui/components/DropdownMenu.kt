@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.components
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,14 +30,15 @@ import com.example.turomobileapp.ui.theme.MainWhite
 @Composable
 fun CustomDropDownMenu(
     menuText: String,
-    dropdownMenuItems: List<DropdownMenuItem>
+    dropdownMenuItems: List<DropdownMenuItem>,
+    maxWidthFloat: Float = 1f
 ){
     val windowInfo = rememberWindowInfo()
     var expanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(maxWidthFloat)
     ) {
         Row(
             modifier = Modifier
@@ -79,7 +79,7 @@ fun CustomDropDownMenu(
                     },
                     onClick = it.onClick,
                     leadingIcon = {
-                        Icon(painter = painterResource(it.leadingIcon), contentDescription = it.itemName)
+                        it.leadingIcon?.let { id -> Icon(painter = painterResource(id), contentDescription = it.itemName) }
                     }
                 )
             }
@@ -89,6 +89,6 @@ fun CustomDropDownMenu(
 
 data class DropdownMenuItem(
     val itemName: String,
-    @DrawableRes val leadingIcon: Int,
+    val leadingIcon: Int? = null,
     val onClick: () -> Unit
 )

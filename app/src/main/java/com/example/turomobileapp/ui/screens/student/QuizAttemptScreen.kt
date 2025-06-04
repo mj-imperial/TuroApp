@@ -30,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults.colors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -52,7 +50,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.enums.QuestionType
 import com.example.turomobileapp.models.QuestionResponse
@@ -66,7 +63,6 @@ import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
-import com.example.turomobileapp.ui.theme.SoftGray
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.ui.theme.quizDetail1
@@ -213,7 +209,6 @@ fun QuizAttemptScreen(
                         windowInfo = windowInfo,
                         questionNumber = uiState.currentIndex + 1,
                         questionText = question.questionText,
-                        questionImage = question.questionImage,
                         questionType = QuestionType.valueOf(question.questionTypeName),
                         options = options,
                         onShortAnswerEntered = viewModel::onShortAnswerEntered,
@@ -283,7 +278,6 @@ fun QuestionBox(
     windowInfo: WindowInfo,
     questionNumber: Int,
     questionText: String,
-    questionImage: String?,
     questionType: QuestionType,
     options: List<QuestionResponse>,
     onShortAnswerEntered: (String) -> Unit,
@@ -333,19 +327,6 @@ fun QuestionBox(
                     fontWeight = FontWeight.Bold
                 )
 
-                if (questionImage != null){
-                    AsyncImage(
-                        model = questionImage,
-                        modifier = Modifier
-                            .size(windowInfo.screenWidth * 0.5f)
-                            .padding(bottom = 10.dp),
-                        contentDescription = "Question Image",
-                        alignment = Alignment.Center,
-                        contentScale = ContentScale.Crop,
-                        clipToBounds = true
-                    )
-                }
-
                 Text(
                     text = questionText,
                     fontSize = ResponsiveFont.heading3(windowInfo),
@@ -361,12 +342,6 @@ fun QuestionBox(
                         },
                         isSingleLine = true,
                         roundedCornerShape = 3.dp,
-                        colors = colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = SoftGray,
-                            disabledContainerColor = Color.Transparent,
-                            cursorColor = MaterialTheme.colorScheme.primary
-                        ),
                         modifier = Modifier.width(windowInfo.screenWidth * 0.4f),
                         enabled = true,
                         textStyle = LocalTextStyle.current

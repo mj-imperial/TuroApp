@@ -36,7 +36,6 @@ data class Quiz(
     @SerializedName("quiz_type") val quizType: QuizType,
     @SerializedName("time_limit") val timeLimit: Int,
     @SerializedName("questions") val questions: List<Question> = emptyList(),
-    @SerializedName("is_passed") val isPassed: Boolean
 ): Activity(activityId,moduleId, activityType, activityName, activityDescription, unlockDate, deadlineDate, eventId)
 
 @JsonClass(generateAdapter = true)

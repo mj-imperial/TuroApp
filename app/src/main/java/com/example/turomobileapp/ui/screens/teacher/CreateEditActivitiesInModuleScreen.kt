@@ -6,7 +6,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,9 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -51,7 +47,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
-import com.example.turomobileapp.enums.ActivityType
 import com.example.turomobileapp.models.ModuleActivityResponse
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.components.ButtonItems
@@ -61,15 +56,14 @@ import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
+import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LighterOrange
 import com.example.turomobileapp.ui.theme.LoginText
-import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.ui.theme.practice2
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.teacher.ActivityActionsViewModel
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -78,7 +72,8 @@ import java.time.format.DateTimeFormatter
 fun CreateEditActivitiesInModuleScreen(
     navController: NavController,
     sessionManager: SessionManager,
-    viewModel: ActivityActionsViewModel
+    viewModel: ActivityActionsViewModel,
+    moduleId: String
 ){
     val context = LocalContext.current
     val windowInfo = rememberWindowInfo()
@@ -126,21 +121,21 @@ fun CreateEditActivitiesInModuleScreen(
             icon = painterResource(R.drawable.tutorial_floating_icon),
             title = "Create Tutorial",
             onClick = {
-                //TODO create tutorial screen page
+                navController.navigate(Screen.TeacherCreateTutorial.createRoute(moduleId))
             }
         ),
         ButtonItems(
             icon = painterResource(R.drawable.lecture_icon),
             title = "Create Lecture",
             onClick = {
-                //TODO create lecture screen page
+                navController.navigate(Screen.TeacherCreateLecture.createRoute(moduleId))
             }
         ),
         ButtonItems(
             icon = painterResource(R.drawable.quiz_icon),
             title = "Create Quiz",
             onClick = {
-                //TODO create quiz screen page
+                navController.navigate(Screen.TeacherCreateQuiz.createRoute(moduleId))
             }
         )
     )

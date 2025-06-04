@@ -34,6 +34,7 @@ import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.ui.screens.student.StudentModulesScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateEditActivitiesInModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
+import com.example.turomobileapp.ui.screens.teacher.CreateQuizScreen
 import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
@@ -43,6 +44,7 @@ import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 import com.example.turomobileapp.viewmodels.teacher.ActivityActionsViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateModuleViewModel
+import com.example.turomobileapp.viewmodels.teacher.CreateQuizViewModel
 import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -52,7 +54,6 @@ fun NavigationStack(
     modifier: Modifier = Modifier,
     sessionManager: SessionManager
 ) {
-    val navController = rememberNavController()
     val roleStr by sessionManager.role.collectAsState(initial = null)
     val role = roleStr?.let { UserRole.valueOf(it) }
 
@@ -278,8 +279,20 @@ fun NavGraphBuilder.teacherNavGraph(
         arguments = listOf(
             navArgument("moduleId") { type = NavType.StringType }
         )
-    ) {
+    ) { backStackEntry ->
+        val moduleId = backStackEntry.arguments?.getString("moduleId")
         val viewModel: ActivityActionsViewModel = hiltViewModel()
-        CreateEditActivitiesInModuleScreen(navController, sessionManager, viewModel)
+        CreateEditActivitiesInModuleScreen(navController, sessionManager, viewModel, moduleId.toString())
+    }
+
+    composable(
+        route = Screen.TeacherCreateQuiz.route,
+        arguments = listOf(
+            navArgument("moduleId") { type = NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val moduleId = backStackEntry.arguments?.getString("moduleId")
+        val viewModel: CreateQuizViewModel = hiltViewModel()
+        CreateQuizScreen(navController, sessionManager, viewModel, moduleId.toString())
     }
 }
