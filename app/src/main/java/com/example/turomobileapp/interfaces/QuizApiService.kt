@@ -2,9 +2,11 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
+import com.example.turomobileapp.models.CreateQuizRequest
 import com.example.turomobileapp.models.Quiz
 import com.example.turomobileapp.models.QuizContentResponses
 import com.example.turomobileapp.models.QuizResponse
+import com.example.turomobileapp.models.QuizUploadResponse
 import com.example.turomobileapp.models.QuizzesResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -17,12 +19,11 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface QuizApiService {
-    @POST("/modules/{moduleId}/activities/{activityId}/quizzes")
+    @POST("create_quiz.php")
     suspend fun createQuiz(
-        @Path("moduleId") moduleId: String,
-        @Path("activityId") activityId: String,
-        @Body quiz: Quiz
-    ): Response<Quiz>
+        @Query("module_id") moduleId: String,
+        @Body quiz: CreateQuizRequest
+    ): Response<QuizUploadResponse>
 
     @POST("/modules/{moduleId}/quizzes/validateDuplication")
     suspend fun isQuizDuplicate(

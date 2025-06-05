@@ -16,13 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -32,17 +30,15 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ReusableDatePicker(
-    selectedDate: MutableState<LocalDate?>,
+    selectedDate: LocalDate?,
     label: String,
-    dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+    onUpdateDate: (LocalDate) -> Unit
 ) {
-    val context = LocalContext.current
-
-    val dateText = selectedDate.value?.format(dateFormat) ?: ""
-
+    val dateText = selectedDate?.format(dateFormat) ?: ""
     var showDialog by remember { mutableStateOf(false) }
 
-    val initialMillis = selectedDate.value
+    val initialMillis = selectedDate
         ?.atStartOfDay(ZoneId.systemDefault())
         ?.toInstant()
         ?.toEpochMilli()
@@ -73,12 +69,13 @@ fun ReusableDatePicker(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { epochMillis ->
+                        // Convert picked epoch millis → LocalDate
                         val pickedDate = Instant
                             .ofEpochMilli(epochMillis)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate()
 
-                        selectedDate.value = pickedDate
+                        onUpdateDate(pickedDate)
                     }
                     showDialog = false
                 }) {
@@ -86,9 +83,7 @@ fun ReusableDatePicker(
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showDialog = false
-                }) {
+                TextButton(onClick = { showDialog = false }) {
                     Text("Cancel")
                 }
             }

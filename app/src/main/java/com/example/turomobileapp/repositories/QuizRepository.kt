@@ -5,21 +5,22 @@ import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.QuizApiService
 import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
+import com.example.turomobileapp.models.CreateQuizRequest
 import com.example.turomobileapp.models.Quiz
 import com.example.turomobileapp.models.QuizContentResponse
 import com.example.turomobileapp.models.QuizResponse
+import com.example.turomobileapp.models.QuizUploadResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class QuizRepository @Inject constructor(private val quizApiService: QuizApiService) {
 
-    fun createQuiz(moduleId: String, activityId: String, quiz: Quiz): Flow<Result<Quiz>> = flow {
+    fun createQuiz(moduleId: String, quiz: CreateQuizRequest): Flow<Result<QuizUploadResponse>> =
         handleApiResponse(
-            call = { quizApiService.createQuiz(moduleId, activityId, quiz) },
-            errorMessage = "Failed to create quiz $quiz in $moduleId"
+            call = { quizApiService.createQuiz(moduleId, quiz) },
+            errorMessage = "Failed to create quiz"
         )
-    }
 
     fun isQuizDuplicate(moduleId: String, quiz: Quiz): Flow<Result<Boolean>> = flow {
         handleApiResponse(

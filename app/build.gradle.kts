@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
+    implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
 
     ksp(libs.moshi.kotlin.codegen)

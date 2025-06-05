@@ -2,6 +2,7 @@ package com.example.turomobileapp.ui.screens.teacher
 
 import AppScaffold
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,10 +37,11 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -54,16 +58,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.components.CustomDropDownMenu
 import com.example.turomobileapp.ui.components.DropdownMenuItem
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.ResponsiveFont
-import com.example.turomobileapp.ui.components.ReusableDatePicker
+import com.example.turomobileapp.ui.components.ReusableDateTimePicker
 import com.example.turomobileapp.ui.components.ReusableTimeLimitPicker
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
+import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
@@ -72,8 +78,9 @@ import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.teacher.CreateQuizViewModel
+import com.example.turomobileapp.viewmodels.teacher.PendingQuestion
 import java.time.Duration
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -83,24 +90,34 @@ fun CreateQuizScreen(
     viewModel: CreateQuizViewModel,
     moduleId: String
 ){
+    val context = LocalContext.current
     val windowInfo = rememberWindowInfo()
 
-    var questionIndices by remember { mutableStateOf(List(1) { it }) }
+    val uiState by viewModel.uiState.collectAsState()
 
+    val questions by viewModel.pendingQuestions.collectAsState()
     var openAlertDialog by remember { mutableStateOf(false) }
+    val isFormValid by viewModel.isFormValid.collectAsState()
 
-    val unlockDateState = remember { mutableStateOf<LocalDate?>(null) }
-    val deadlineDateState = remember { mutableStateOf<LocalDate?>(null) }
-
-    val timeLimitState = remember { mutableStateOf<Duration?>(null) }
-
-    val numberOfAttemptsState = remember { mutableIntStateOf(1) }
+    LaunchedEffect(uiState.createQuizStatus) {
+        if (uiState.createQuizStatus is Result.Success) {
+            Toast.makeText(context, "Quiz successfully created.",Toast.LENGTH_SHORT).show()
+            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
+            viewModel.clearCreateQuizStatus()
+        }else if(uiState.createQuizStatus is Result.Failure){
+            val msg = uiState.errorMessage
+                ?: "Unknown error"
+            Toast.makeText(context, "Failed to create quiz: $msg", Toast.LENGTH_LONG).show()
+            viewModel.clearCreateQuizStatus()
+        }
+    }
 
     if (openAlertDialog){
         PopupAlertWithActions(
             onDismissRequest = { openAlertDialog = false },
             onConfirmation = {
-                //TODO save quiz
+                viewModel.saveQuiz()
+                openAlertDialog = false
             },
             icon = painterResource(R.drawable.create_quiz),
             title = {
@@ -154,31 +171,45 @@ fun CreateQuizScreen(
                 contentPadding = PaddingValues(bottom = 40.dp)
             ) {
                 item {
-                    CreateQuizHeader( windowInfo = windowInfo )
+                    CreateQuizHeader(
+                        windowInfo = windowInfo,
+                        quizName = uiState.quizTitle,
+                        onUpdateName = viewModel::updateQuizName,
+                        quizType = uiState.quizType,
+                        onUpdateQuizType = viewModel::updateQuizType,
+                        quizDescription = uiState.quizDescription,
+                        onUpdateQuizDescription = viewModel::updateQuizDescription
+                    )
 
                     Spacer(modifier = Modifier.height(14.dp))
                 }
 
                 item {
                     CreateQuizMoreInfo(
-                        numberOfAttemptsState = numberOfAttemptsState,
                         windowInfo = windowInfo,
-                        unlockDateState = unlockDateState,
-                        deadlineDateState = deadlineDateState,
-                        timeLimitState = timeLimitState
+                        unlockDateState = uiState.unlockDateTime,
+                        deadlineDateState = uiState.deadlineDateTime,
+                        onUpdateUnlockDate = viewModel::updateUnlockDateTime,
+                        onUpdateDeadlineDate = viewModel::updateDeadlineDateTime,
+                        timeLimitState = remember { mutableStateOf(Duration.ofSeconds(uiState.timeLimit.toLong())) },
+                        numberOfAttempts = uiState.numberOfAttempts,
+                        onUpdateNumberOfAttempts = viewModel::updateNumberOfAttempts,
+                        onUpdateDuration = viewModel::updateTimeLimit,
+                        hasAnswersShown = uiState.hasAnswersShown,
+                        onUpdateShowAnswers = viewModel::updateShowAnswers
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 items(
-                    items = questionIndices,
-                    key = { it }
-                ) { questionId ->
+                    items = questions,
+                    key = { it.tempId }
+                ) { question ->
                     val dismissState = rememberSwipeToDismissBoxState(
                         confirmValueChange = { dismissValue ->
                             if (dismissValue == SwipeToDismissBoxValue.EndToStart ) {
-                                questionIndices = questionIndices.filterNot { it == questionId }
+                                viewModel.removeQuestion(question.tempId)
                                 true
                             } else {
                                 false
@@ -208,7 +239,15 @@ fun CreateQuizScreen(
                     ) {
                         QuizQuestionCard(
                             windowInfo = windowInfo,
-                            questionNumber = questionIndices.indexOf(questionId) + 1,
+                            questionNumber = questions.indexOf(question) + 1,
+                            question = question,
+                            questionTempId = question.tempId,
+                            onQuestionTextChanged = viewModel::updateQuestionText,
+                            onAddOption = viewModel::addOption,
+                            onUpdateOptionText = viewModel::updateOptionText,
+                            onSetSingleCorrectOption = viewModel::setSingleCorrectOption,
+                            onRemoveOption = viewModel::removeOption,
+                            onUpdateQuestionScore = viewModel::updateQuestionScore
                         )
                     }
                 }
@@ -216,10 +255,7 @@ fun CreateQuizScreen(
                 item {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         IconButton(
-                            onClick = {
-                                val nextIndex = (questionIndices.maxOrNull() ?: -1) + 1
-                                questionIndices = questionIndices + nextIndex
-                            },
+                            onClick = { viewModel.addQuestion() },
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.add_circle),
@@ -250,7 +286,7 @@ fun CreateQuizScreen(
                             contentPadding = PaddingValues(10.dp),
                             buttonColors = ButtonDefaults.buttonColors(MainOrange),
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = true
+                            enabled = isFormValid
                         )
                     }
                 }
@@ -261,35 +297,39 @@ fun CreateQuizScreen(
 
 @Composable
 fun CreateQuizHeader(
-    windowInfo: WindowInfo
+    windowInfo: WindowInfo,
+    quizName: String,
+    onUpdateName: (String) -> Unit,
+    quizType: String,
+    onUpdateQuizType: (String) -> Unit,
+    quizDescription: String,
+    onUpdateQuizDescription: (String) -> Unit
 ){
-    var placeholderQuizName by remember { mutableStateOf("") }
-    var placeholderQuizDescription by remember { mutableStateOf("") }
-    var currentQuizType by remember { mutableStateOf("SHORT") }
+    var currentQuizType by remember { mutableStateOf(quizType) }
 
     val menuList = listOf(
         DropdownMenuItem(
             itemName = "SHORT",
             onClick = {
-                currentQuizType = "SHORT"
+                onUpdateQuizType("SHORT")
             }
         ),
         DropdownMenuItem(
             itemName = "PRACTICE",
             onClick = {
-                currentQuizType = "PRACTICE"
+                onUpdateQuizType("PRACTICE")
             }
         ),
         DropdownMenuItem(
             itemName = "LONG",
             onClick = {
-                currentQuizType = "LONG"
+                onUpdateQuizType("LONG")
             }
         ),
         DropdownMenuItem(
             itemName = "SCREENING",
             onClick = {
-                currentQuizType = "SCREENING"
+                onUpdateQuizType("SCREENING")
             }
         )
     )
@@ -311,8 +351,10 @@ fun CreateQuizHeader(
 
         Column(modifier = Modifier.weight(1f)) {
             CapsuleTextField(
-                value = placeholderQuizName,
-                onValueChange = { placeholderQuizName = it },
+                value = quizName,
+                onValueChange = {
+                    onUpdateName(it)
+                },
                 placeholder = {
                     Text(
                         text = "SET QUIZ NAME",
@@ -345,8 +387,8 @@ fun CreateQuizHeader(
             Spacer(modifier = Modifier.height(8.dp))
 
             CapsuleTextField(
-                value = placeholderQuizDescription,
-                onValueChange = { placeholderQuizDescription = it },
+                value = quizDescription,
+                onValueChange = { onUpdateQuizDescription(it) },
                 placeholder = {
                     Text(
                         text = "SET QUIZ DESCRIPTION / INSTRUCTION",
@@ -377,12 +419,20 @@ fun CreateQuizHeader(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreateQuizMoreInfo(
-    numberOfAttemptsState: MutableState<Int>,
     windowInfo: WindowInfo,
-    unlockDateState: MutableState<LocalDate?>,
-    deadlineDateState: MutableState<LocalDate?>,
-    timeLimitState: MutableState<Duration?>
+    unlockDateState: LocalDateTime?,
+    onUpdateUnlockDate: (LocalDateTime?) -> Unit,
+    deadlineDateState: LocalDateTime?,
+    onUpdateDeadlineDate: (LocalDateTime?) -> Unit,
+    timeLimitState: MutableState<Duration?>,
+    numberOfAttempts: Int,
+    onUpdateNumberOfAttempts: (Int) -> Unit,
+    onUpdateDuration: (Int) -> Unit,
+    hasAnswersShown: Boolean?,
+    onUpdateShowAnswers: (Boolean) -> Unit
 ){
+    var attempt by remember { mutableIntStateOf(numberOfAttempts) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -392,14 +442,20 @@ fun CreateQuizMoreInfo(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            ReusableDatePicker(
-                selectedDate = unlockDateState,
-                label = "UNLOCK DATE",
+            ReusableDateTimePicker(
+                selectedDateTime = unlockDateState,
+                label = "UNLOCK DATE & TIME",
+                onUpdateDateTime = {
+                    onUpdateUnlockDate(it)
+                }
             )
 
-            ReusableDatePicker(
-                selectedDate = deadlineDateState,
-                label = "DEADLINE DATE",
+            ReusableDateTimePicker(
+                selectedDateTime = deadlineDateState,
+                label = "DEADLINE DATE & TIME",
+                onUpdateDateTime = {
+                    onUpdateDeadlineDate(it)
+                }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -417,8 +473,8 @@ fun CreateQuizMoreInfo(
                 )
 
                 IconButton(onClick = {
-                    if (numberOfAttemptsState.value > 1) {
-                        numberOfAttemptsState.value--
+                    if (attempt > 1) {
+                        onUpdateNumberOfAttempts(attempt --)
                     }
                 }) {
                     Icon(
@@ -432,13 +488,13 @@ fun CreateQuizMoreInfo(
                     contentAlignment = Alignment.Center
                 ){
                     Text(
-                        text = numberOfAttemptsState.value.toString(),
+                        text = numberOfAttempts.toString(),
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.heading3(windowInfo)
                     )
                 }
 
-                IconButton(onClick = { numberOfAttemptsState.value++ }) {
+                IconButton(onClick = { onUpdateNumberOfAttempts(attempt++) }) {
                     Icon(
                         painter = painterResource(R.drawable.add_circle),
                         contentDescription = null
@@ -451,22 +507,71 @@ fun CreateQuizMoreInfo(
             ReusableTimeLimitPicker(
                 windowInfo = windowInfo,
                 selectedDuration = timeLimitState,
-                label = "Pick time limit"
+                label = "Pick time limit",
+                onDurationSelected = {
+                    onUpdateDuration(it?.seconds?.toInt() ?: 0)
+                }
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = "SHOW ANSWERS: ",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    color = LoginText
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                RadioButton(
+                    selected = hasAnswersShown == true,
+                    onClick = { onUpdateShowAnswers(true) },
+                    colors = RadioButtonDefaults.colors(selectedColor = green)
+                )
+                Text(
+                    text = "YES",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    color = LoginText
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                RadioButton(
+                    selected = hasAnswersShown == false,
+                    onClick = { onUpdateShowAnswers(false) },
+                    colors = RadioButtonDefaults.colors(selectedColor = green)
+                )
+                Text(
+                    text = "NO",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    color = LoginText
+                )
+            }
         }
     }
+
+    Spacer(modifier = Modifier.height(12.dp))
+    HorizontalDivider(color = Color(0xFFDDDDDD), thickness = 1.dp)
 }
 
 @Composable
 fun QuizQuestionCard(
+    windowInfo: WindowInfo,
     questionNumber: Int,
-    windowInfo: WindowInfo
+    question: PendingQuestion,
+    questionTempId: String,
+    onQuestionTextChanged: (String, String) -> Unit,
+    onAddOption: (String) -> Unit,
+    onUpdateOptionText: (String, String, String) -> Unit,
+    onSetSingleCorrectOption: (String, String) -> Unit,
+    onRemoveOption: (String, String) -> Unit,
+    onUpdateQuestionScore: (String, Int) -> Unit
 ){
-    val options = remember { mutableStateListOf<String>("") }
-    var selectedIndex by remember { mutableIntStateOf(0) }
-    var points by remember { mutableIntStateOf(1) }
-    var questionText by remember { mutableStateOf("") }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -491,8 +596,8 @@ fun QuizQuestionCard(
             )
 
             CapsuleTextField(
-                value = questionText,
-                onValueChange = { questionText = it },
+                value = question.text,
+                onValueChange = { onQuestionTextChanged(questionTempId,it) },
                 placeholder = {
                     Text(
                         text = "Type the question here...",
@@ -524,9 +629,10 @@ fun QuizQuestionCard(
                 Spacer(modifier = Modifier.size(12.dp))
 
                 CapsuleTextField(
-                    value = points.toString(),
-                    onValueChange = { newVal ->
-                        newVal.toIntOrNull()?.let { points = it }
+                    value = question.score.toString(),
+                    onValueChange = {
+                        val intVal = it.toIntOrNull() ?: 0
+                        onUpdateQuestionScore(questionTempId, intVal)
                     },
                     placeholder = {
                         Text(
@@ -540,7 +646,8 @@ fun QuizQuestionCard(
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                     roundedCornerShape = 6.dp,
                     modifier = Modifier
-                        .size(width = 80.dp, height = 40.dp)
+                        .padding(10.dp)
+                        .width(70.dp)
                         .background(color = SoftGray, shape = RoundedCornerShape(6.dp))
                         .shadow(elevation = 1.dp, shape = RoundedCornerShape(6.dp), clip = false),
                     enabled = true
@@ -551,7 +658,7 @@ fun QuizQuestionCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                options.forEachIndexed { index, optionText ->
+                question.options.forEach { option ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -559,20 +666,20 @@ fun QuizQuestionCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = (index == selectedIndex),
-                            onClick = { selectedIndex = index },
+                            selected = option.isCorrect,
+                            onClick = { onSetSingleCorrectOption(questionTempId,option.tempId) },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = green,
                                 unselectedColor = LoginText
                             )
                         )
 
-                        Spacer(modifier = Modifier.size(8.dp))
+                        Spacer(modifier = Modifier.size(7.dp))
 
                         CapsuleTextField(
-                            value = optionText,
-                            onValueChange = { newVal ->
-                                options[index] = newVal
+                            value = option.text,
+                            onValueChange = {
+                                onUpdateOptionText(questionTempId, option.tempId, it)
                             },
                             placeholder = {
                                 Text(
@@ -583,21 +690,29 @@ fun QuizQuestionCard(
                                 )
                             },
                             isSingleLine = false,
-                            maxLines = 3,
+                            maxLines = 5,
                             roundedCornerShape = 6.dp,
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .weight(1f)
                                 .background(color = SoftGray, shape = RoundedCornerShape(6.dp))
                                 .shadow(
                                     elevation = 1.dp, shape = RoundedCornerShape(6.dp), clip = false
                                 ),
                             enabled = true
                         )
+
+                        IconButton(onClick = { onRemoveOption(questionTempId,option.tempId) }) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_delete_24),
+                                contentDescription = null,
+                                tint = MainRed
+                            )
+                        }
                     }
                 }
 
                 IconButton(
-                    onClick = { options.add("") },
+                    onClick = { onAddOption(questionTempId) },
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(top = 4.dp)

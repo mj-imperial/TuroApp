@@ -143,7 +143,6 @@ fun CreateEditActivitiesInModuleScreen(
     LaunchedEffect(uiState.deleteStatusResult) {
         if (uiState.deleteStatusResult == Result.Success(Unit)){
             Toast.makeText(context, "Activity successfully deleted.",Toast.LENGTH_SHORT).show()
-
         }
         viewModel.resetDeleteStatusResult()
     }

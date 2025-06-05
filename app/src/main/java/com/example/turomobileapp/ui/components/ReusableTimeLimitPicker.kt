@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,7 +41,8 @@ import java.time.Duration
 fun ReusableTimeLimitPicker(
     windowInfo: WindowInfo,
     selectedDuration: MutableState<Duration?>,
-    label: String
+    label: String,
+    onDurationSelected: (Duration?) -> Unit
 ) {
     val durationText: String = selectedDuration.value
         ?.let { dur ->
@@ -78,9 +80,9 @@ fun ReusableTimeLimitPicker(
         val startM = ((initialSecondsTotal % 3600) / 60).toInt()
         val startS = (initialSecondsTotal % 60).toInt()
 
-        var hour by remember { mutableStateOf(startH) }
-        var minute by remember { mutableStateOf(startM) }
-        var second by remember { mutableStateOf(startS) }
+        var hour by remember { mutableIntStateOf(startH) }
+        var minute by remember { mutableIntStateOf(startM) }
+        var second by remember { mutableIntStateOf(startS) }
 
         PopupAlertWithActions(
             onDismissRequest = { showDialog = false },
@@ -89,6 +91,7 @@ fun ReusableTimeLimitPicker(
                     .ofHours(hour.toLong())
                     .plusMinutes(minute.toLong())
                     .plusSeconds(second.toLong())
+                onDurationSelected(selectedDuration.value)
                 showDialog = false
             },
             icon = painterResource(R.drawable.time_icon),

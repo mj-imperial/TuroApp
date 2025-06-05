@@ -1,6 +1,8 @@
 package com.example.turomobileapp.objects
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.example.turomobileapp.interfaces.AchievementsApiService
 import com.example.turomobileapp.interfaces.ActivityApiService
 import com.example.turomobileapp.interfaces.AssessmentResultApiService
@@ -33,6 +35,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule{
@@ -40,7 +43,7 @@ object NetworkModule{
     @Provides
     @Singleton
     fun provideBaseUrl(): String =
-        // change this to your production URL when you go live
+        // change to production URL when live
         "http://10.0.2.2/turo_app/api/v1/"
 
     @Provides
@@ -70,6 +73,7 @@ object NetworkModule{
     @Singleton
     fun provideMoshi(): Moshi =
         Moshi.Builder()
+            .add(LocalDateTimeAdapter)
             .add(KotlinJsonAdapterFactory())
             .build()
 

@@ -5,6 +5,8 @@ import com.example.turomobileapp.enums.ScreeningTier
 import com.google.gson.annotations.SerializedName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Date
 
 @JsonClass(generateAdapter = true)
@@ -128,3 +130,38 @@ data class QuestionResponse(
 ){
     val isCorrect: Boolean get() = isCorrectInt != 0
 }
+
+@JsonClass(generateAdapter = true)
+data class QuizUploadResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "message") val message: String,
+)
+
+@JsonClass(generateAdapter = true)
+data class CreateQuizRequest(
+    @Json(name = "activity_name") val quizTitle: String,
+    @Json(name = "activity_description") val quizDescription: String,
+    @Json(name = "unlock_date") val unlockDateTime: LocalDateTime?,
+    @Json(name = "deadline_date") val deadlineDateTime: LocalDateTime?,
+    @Json(name = "number_of_attempts") val numberOfAttempts: Int,
+    @Json(name = "quiz_type_name") val quizType: String,
+    @Json(name = "time_limit") val timeLimitSeconds: Int,
+    @Json(name = "has_answers_shown") val hasAnswerShown: Boolean,
+    @Json(name = "number_of_questions") val numberOfQuestions: Int,
+    @Json(name = "overall_points") val overallPoints: Int,
+    @Json(name = "questions") val questions: List<CreateQuizQuestions>
+)
+
+@JsonClass(generateAdapter = true)
+data class CreateQuizQuestions(
+    @Json(name = "question_text") val questionText: String = "",
+    @Json(name = "type_name") val questionType: String = "",
+    @Json(name = "score") val score: Int = 0,
+    @Json(name = "options") val options: List<CreateQuizOptions>
+)
+
+@JsonClass(generateAdapter = true)
+data class CreateQuizOptions(
+    @Json(name = "option_text") val optionText: String = "",
+    @Json(name = "is_correct") val isCorrect: Boolean = false
+)
