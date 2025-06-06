@@ -1,7 +1,7 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Activity
-import com.example.turomobileapp.models.ActivityDeleteResponse
+import com.example.turomobileapp.models.ActivityActionResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -38,5 +38,5 @@ interface ActivityApiService {
     @DELETE("delete_activity_in_module.php")
     suspend fun deleteActivity(
         @Query("activity_id") activityId: String
-    ): Response<ActivityDeleteResponse>
+    ): Response<ActivityActionResponse>
 }

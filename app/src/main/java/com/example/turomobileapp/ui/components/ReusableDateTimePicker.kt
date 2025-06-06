@@ -1,5 +1,7 @@
 package com.example.turomobileapp.ui.components
 
+import com.example.turomobileapp.R
+
 import android.app.TimePickerDialog
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -16,6 +18,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -27,8 +31,8 @@ import java.util.*
 fun ReusableDateTimePicker(
     selectedDateTime: LocalDateTime?,
     label: String,
-    dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
-    onUpdateDateTime: (LocalDateTime) -> Unit
+    dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a"),
+    onUpdateDateTime: (LocalDateTime) -> Unit,
 ) {
     var showDateDialog by remember { mutableStateOf(false) }
     var showTimeDialog by remember { mutableStateOf(false) }
@@ -49,6 +53,12 @@ fun ReusableDateTimePicker(
         value = displayText,
         onValueChange = { },
         label = { Text(label) },
+        placeholder = {
+            Text(
+                text = "MM/DD/YYYY HH:MM AM/PM",
+                fontFamily = FontFamily(Font(R.font.alata)),
+            )
+        },
         readOnly = true,
         modifier = Modifier
             .fillMaxWidth()
@@ -117,7 +127,7 @@ fun ReusableDateTimePicker(
             },
             hour,
             minute,
-            true
+            false
         ).show()
     }
 }

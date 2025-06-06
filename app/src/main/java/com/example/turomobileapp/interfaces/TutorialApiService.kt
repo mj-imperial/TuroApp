@@ -1,6 +1,8 @@
 package com.example.turomobileapp.interfaces
 
+import com.example.turomobileapp.models.ActivityActionResponse
 import com.example.turomobileapp.models.Tutorial
+import com.example.turomobileapp.models.TutorialUploadRequest
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -9,13 +11,14 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface TutorialApiService {
-    @POST("/modules/{moduleId}/tutorials")
+    @POST("create_tutorial.php")
     suspend fun createTutorial(
-        @Path("moduleId") moduleId: String,
-        @Body tutorial: Tutorial
-    ): Response<Tutorial>
+        @Query("module_id") moduleId: String,
+        @Body tutorial: TutorialUploadRequest
+    ): Response<ActivityActionResponse>
 
     @POST("/modules/{moduleId}/tutorials/validateDuplication")
     suspend fun isTutorialDuplicate(

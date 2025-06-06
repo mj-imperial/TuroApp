@@ -1,5 +1,7 @@
 package com.example.turomobileapp.viewmodels.teacher
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,6 +22,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class CreateQuizViewModel @Inject constructor(
     private val quizRepository: QuizRepository,
@@ -42,6 +45,7 @@ class CreateQuizViewModel @Inject constructor(
 
     fun updateQuizName(newQuizName: String){
         _uiState.update { it.copy(quizTitle = newQuizName) }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateQuizType(newQuizType: String){
@@ -50,30 +54,37 @@ class CreateQuizViewModel @Inject constructor(
         }else{
             _uiState.update { it.copy(quizType = newQuizType) }
         }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateQuizDescription(newQuizDescription: String){
         _uiState.update { it.copy(quizDescription = newQuizDescription) }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateNumberOfAttempts(newNumberOfAttempts: Int){
         _uiState.update { it.copy(numberOfAttempts = newNumberOfAttempts) }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateTimeLimit(newTimeLimit: Int){
         _uiState.update { it.copy(timeLimit = newTimeLimit) }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateShowAnswers(newShowAnswers: Boolean){
         _uiState.update { it.copy(hasAnswersShown = newShowAnswers) }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateUnlockDateTime(newDateTime: LocalDateTime?) {
         _uiState.update { it.copy(unlockDateTime = newDateTime) }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateDeadlineDateTime(newDateTime: LocalDateTime?) {
         _uiState.update { it.copy(deadlineDateTime = newDateTime) }
+        _isFormValid.value = isFormValid()
     }
 
 
@@ -81,12 +92,14 @@ class CreateQuizViewModel @Inject constructor(
         val newList = _pendingQuestions.value.toMutableList()
         newList.add(PendingQuestion())
         _pendingQuestions.value = newList
+        _isFormValid.value = isFormValid()
     }
 
     fun removeQuestion(tempQuestionId: String) {
         _pendingQuestions.update { list ->
             list.filterNot { it.tempId == tempQuestionId }
         }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateQuestionText(tempQuestionId: String, newText: String) {
@@ -97,6 +110,7 @@ class CreateQuizViewModel @Inject constructor(
                 } else q
             }
         }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateQuestionScore(tempQuestionId: String, newScore: Int) {
@@ -107,6 +121,7 @@ class CreateQuizViewModel @Inject constructor(
                 } else q
             }
         }
+        _isFormValid.value = isFormValid()
     }
 
     fun addOption(tempQuestionId: String) {
@@ -120,6 +135,7 @@ class CreateQuizViewModel @Inject constructor(
                 } else q
             }
         }
+        _isFormValid.value = isFormValid()
     }
 
     fun updateOptionText(
@@ -139,6 +155,7 @@ class CreateQuizViewModel @Inject constructor(
                 } else q
             }
         }
+        _isFormValid.value = isFormValid()
     }
 
     fun setSingleCorrectOption(
@@ -161,6 +178,7 @@ class CreateQuizViewModel @Inject constructor(
                 }
             }
         }
+        _isFormValid.value = isFormValid()
     }
 
     fun removeOption(tempQuestionId: String, tempOptionId: String) {
@@ -172,8 +190,10 @@ class CreateQuizViewModel @Inject constructor(
                 } else q
             }
         }
+        _isFormValid.value = isFormValid()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun isFormValid(): Boolean {
         val state = uiState.value
 
@@ -195,6 +215,14 @@ class CreateQuizViewModel @Inject constructor(
 
             if (question.score <= 0) return false
         }
+
+        val unlock = state.unlockDateTime
+        if (unlock == null) return false
+
+        val deadline = state.deadlineDateTime
+        if (deadline == null) return false
+
+        if (deadline.isBefore(unlock)) return false
         return true
     }
 
@@ -250,7 +278,7 @@ class CreateQuizViewModel @Inject constructor(
                         )
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err,createQuizStatus = null) }
+                        _uiState.update { it.copy(loading = false, errorMessage = err, createQuizStatus = null) }
                     },
                 )
             }

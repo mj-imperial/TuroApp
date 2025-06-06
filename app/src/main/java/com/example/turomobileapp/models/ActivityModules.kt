@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.Parcelize
+import java.time.LocalDateTime
 import java.util.Date
 
 @JsonClass(generateAdapter = true)
@@ -118,9 +119,19 @@ data class ModuleActivityResponse(
 )
 
 @JsonClass(generateAdapter = true)
-data class ActivityDeleteResponse(
+data class ActivityActionResponse(
     @Json(name = "success") val success: Boolean,
     @Json(name = "message") val message: String
+)
+
+@JsonClass(generateAdapter = true)
+data class TutorialUploadRequest(
+    @Json(name = "activity_name") val activityName: String,
+    @Json(name = "activity_description") val activityDescription: String,
+    @Json(name = "unlock_date") val unlockDateTime: LocalDateTime?,
+    @Json(name = "deadline_date") val deadlineDateTime: LocalDateTime?,
+    @Json(name = "content_type_name") val contentTypeName: String,
+    @Json(name = "video_url") val videoUrl: String
 )
 
 @JsonClass(generateAdapter = true)

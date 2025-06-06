@@ -64,6 +64,7 @@ import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.components.CustomDropDownMenu
 import com.example.turomobileapp.ui.components.DropdownMenuItem
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
+import com.example.turomobileapp.ui.components.PopupMinimal
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.ReusableDateTimePicker
 import com.example.turomobileapp.ui.components.ReusableTimeLimitPicker
@@ -98,6 +99,7 @@ fun CreateQuizScreen(
     val questions by viewModel.pendingQuestions.collectAsState()
     var openAlertDialog by remember { mutableStateOf(false) }
     val isFormValid by viewModel.isFormValid.collectAsState()
+    var openErrorDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.createQuizStatus) {
         if (uiState.createQuizStatus is Result.Success) {
@@ -112,11 +114,28 @@ fun CreateQuizScreen(
         }
     }
 
+    if (openErrorDialog == true){
+        PopupMinimal(
+            onDismissRequest = { openErrorDialog = false },
+            width = windowInfo.screenWidth * 0.7f,
+            height = windowInfo.screenHeight * 0.3f,
+            padding = 15.dp,
+            roundedCornerShape = 15.dp,
+            dialogText = uiState.errorMessage.toString(),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontSize = ResponsiveFont.heading3(windowInfo),
+            textColor = TextBlack
+        )
+    }
+
     if (openAlertDialog){
         PopupAlertWithActions(
             onDismissRequest = { openAlertDialog = false },
             onConfirmation = {
                 viewModel.saveQuiz()
+                if (uiState.errorMessage != null){
+                    openErrorDialog = true
+                }
                 openAlertDialog = false
             },
             icon = painterResource(R.drawable.create_quiz),
@@ -170,6 +189,19 @@ fun CreateQuizScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(bottom = 40.dp)
             ) {
+                item {
+                    Text(
+                        text = "Create Quiz",
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading1(windowInfo),
+                        color = TextBlack,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    )
+                }
+
                 item {
                     CreateQuizHeader(
                         windowInfo = windowInfo,

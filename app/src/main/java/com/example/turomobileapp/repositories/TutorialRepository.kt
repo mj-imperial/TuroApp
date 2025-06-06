@@ -2,19 +2,20 @@ package com.example.turomobileapp.repositories
 
 import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.interfaces.TutorialApiService
+import com.example.turomobileapp.models.ActivityActionResponse
 import com.example.turomobileapp.models.Tutorial
+import com.example.turomobileapp.models.TutorialUploadRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class TutorialRepository @Inject constructor(private val tutorialApiService: TutorialApiService) {
 
-    fun createTutorial(moduleId: String, tutorial: Tutorial): Flow<Result<Tutorial>> = flow {
+    fun createTutorial(moduleId: String, tutorial: TutorialUploadRequest): Flow<Result<ActivityActionResponse>> =
         handleApiResponse(
             call = { tutorialApiService.createTutorial(moduleId, tutorial) },
             errorMessage = "Failed to create tutorial $tutorial in module $moduleId"
         )
-    }
 
     fun isTutorialDuplicate(moduleId: String, tutorial: Tutorial): Flow<Result<Boolean>> = flow {
         handleApiResponse(
