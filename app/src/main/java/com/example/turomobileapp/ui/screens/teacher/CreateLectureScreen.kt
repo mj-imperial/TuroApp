@@ -1,12 +1,18 @@
 package com.example.turomobileapp.ui.screens.teacher
 
 import AppScaffold
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,13 +20,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,58 +39,121 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.repositories.Result
+import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.components.CustomDropDownMenu
 import com.example.turomobileapp.ui.components.DropdownMenuItem
+import com.example.turomobileapp.ui.components.PopupAlertWithActions
+import com.example.turomobileapp.ui.components.PopupMinimal
 import com.example.turomobileapp.ui.components.ResponsiveFont
+import com.example.turomobileapp.ui.components.ReusableDateTimePicker
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
+import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.MainOrange
+import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.SoftGray
+import com.example.turomobileapp.ui.theme.TextBlack
+import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.teacher.CreateLectureViewModel
+import java.time.LocalDateTime
 
-//TODO replace with viewmodel variables after ui
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreateLectureScreen(
     navController: NavController,
     sessionManager: SessionManager,
     moduleId: String,
-    fromTutorial: Boolean
+    viewModel: CreateLectureViewModel
 ){
     val windowInfo = rememberWindowInfo()
+    val context = LocalContext.current
 
-    var currentUploadType by remember { mutableStateOf("PDF/DOCS") }
+    val uiState by viewModel.uiState.collectAsState()
+    
+    val isFormValid by viewModel.isFormValid.collectAsState()
 
-    val menuList = listOf(
-        DropdownMenuItem(
-            itemName = "PDF/DOCS",
-            onClick = {
-                currentUploadType = "PDF/DOCS"
-            }
-        ),
-        DropdownMenuItem(
-            itemName = "YOUTUBE LINK",
-            onClick = {
-                currentUploadType = "YOUTUBE LINK"
-            }
-        ),
-        DropdownMenuItem(
-            itemName = "TEXT",
-            onClick = {
-                currentUploadType = "TEXT"
-            }
-        ),
-    )
+    var openAlertDialog by remember { mutableStateOf(false) }
+    var openErrorDialog by remember { mutableStateOf(false) }
 
-    var placeholderActivityName by remember { mutableStateOf("") }
-    var placeholderActivityDescription by remember {mutableStateOf("")}
+    LaunchedEffect(uiState.createLectureStatus) {
+        if (uiState.createLectureStatus is Result.Success){
+            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
+            viewModel.clearCreateLectureStatus()
+        }
+    }
+
+    if (openErrorDialog){
+        PopupMinimal(
+            onDismissRequest = { openErrorDialog = false },
+            width = windowInfo.screenWidth * 0.95f,
+            height = windowInfo.screenHeight * 0.45f,
+            padding = 10.dp,
+            roundedCornerShape = 10.dp,
+            dialogText = uiState.errorMessage.toString(),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontSize = ResponsiveFont.heading3(windowInfo),
+            textColor = TextBlack
+        )
+    }
+    
+    if (openAlertDialog){
+        PopupAlertWithActions(
+            onDismissRequest = { openAlertDialog = false },
+            onConfirmation = {
+                viewModel.createLecture()
+                if (uiState.errorMessage != null){
+                    openErrorDialog = true
+                }
+                openAlertDialog = false
+            },
+            icon = painterResource(R.drawable.upload_files_color),
+            title = {
+                Text(
+                    text = "LECTURE CREATION",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.title(windowInfo),
+                    color = LoginText
+                )
+            },
+            dialogText = {
+                Text(
+                    text = "Are you satisfied with the information uploaded/inputted?",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading2(windowInfo),
+                    color = LoginText
+                )
+            },
+            confirmText = {
+                Text(
+                    text = "YES",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    color = green
+                )
+            },
+            dismissText = {
+                Text(
+                    text = "NO",
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    color = MainRed
+                )
+            }
+        )
+    }
 
     AppScaffold(
         navController = navController,
@@ -90,150 +163,351 @@ fun CreateLectureScreen(
         sessionManager = sessionManager,
         hasFloatingActionButton = false,
         content = { padding ->
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(20.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .padding(20.dp),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    CustomDropDownMenu(
-                        menuText = currentUploadType,
-                        dropdownMenuItems = menuList,
-                        maxWidthFloat = 0.3f
+                item {
+                    Text(
+                        text = "CREATE LECTURE",
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading1(windowInfo),
+                        color = TextBlack,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 5.dp)
                     )
 
-                    Spacer(modifier = Modifier.size(16.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        CapsuleTextField(
-                            value = placeholderActivityName,
-                            onValueChange = {
-                                placeholderActivityName = it
-                            },
-                            placeholder = {
-                                Text(
-                                    text = if (fromTutorial) "TUTORIAL NAME" else "LECTURE NAME",
-                                    fontFamily = FontFamily(Font(R.font.alata)),
-                                    fontSize = ResponsiveFont.heading2(windowInfo),
-                                    color = LoginText
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = if (fromTutorial) "TUTORIAL NAME" else "LECTURE NAME",
-                                    fontFamily = FontFamily(Font(R.font.alata)),
-                                    fontSize = ResponsiveFont.heading2(windowInfo),
-                                    color = LoginText
-                                )
-                            },
-                            isSingleLine = true,
-                            roundedCornerShape = 5.dp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(
-                                    elevation = 3.dp, shape = RoundedCornerShape(5.dp), clip = false
-                                )
-                                .background(
-                                    color = SoftGray, shape = RoundedCornerShape(5.dp)
-                                ),
-                            enabled = true,
-                        )
-
-                        CapsuleTextField(
-                            value = placeholderActivityDescription,
-                            onValueChange = { placeholderActivityDescription = it },
-                            placeholder = {
-                                Text(
-                                    text = if (fromTutorial) "TUTORIAL DESCRIPTION" else "LECTURE DESCRIPTION",
-                                    fontFamily = FontFamily(Font(R.font.alata)),
-                                    fontSize = ResponsiveFont.heading2(windowInfo),
-                                    color = LoginText
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = if (fromTutorial) "TUTORIAL DESCRIPTION" else "LECTURE DESCRIPTION",
-                                    fontFamily = FontFamily(Font(R.font.alata)),
-                                    fontSize = ResponsiveFont.heading2(windowInfo),
-                                    color = LoginText
-                                )
-                            },
-                            isSingleLine = false,
-                            roundedCornerShape = 5.dp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(
-                                    elevation = 3.dp, shape = RoundedCornerShape(5.dp), clip = false
-                                )
-                                .background(
-                                    color = SoftGray, shape = RoundedCornerShape(5.dp)
-                                ),
-                            enabled = true,
-                            maxLines = 5
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                Spacer(modifier = Modifier.height(15.dp))
+                item {
+                    CreateLectureHeader(
+                        windowInfo = windowInfo,
+                        currentUploadType = uiState.uploadType,
+                        onUploadTypeChange = viewModel::updateUploadType,
+                        lectureName = uiState.lectureTitle,
+                        onUpdateLectureName = viewModel::updateLectureTitle,
+                        lectureDescription = uiState.lectureDescription,
+                        onUpdateLectureDescription = viewModel::updateLectureDescription,
+                    )
 
-                when(currentUploadType){
-                    "PDF/DOCS" -> CreatePDFCard(height = windowInfo.screenHeight * 0.3f)
-                    "YOUTUBE LINK" -> CreateYoutubeLink(windowInfo = windowInfo)
-                    "TEXT" -> CreateText(windowInfo = windowInfo)
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+
+                item {
+                    CreateLectureMoreInfo(
+                        unlockDate = uiState.unlockDateTime,
+                        onUpdateUnlockDate = viewModel::updateUnlockDateTime,
+                        deadlineDate = uiState.deadlineDateTime,
+                        onUpdateDeadlineDate = viewModel::updateDeadlineDateTime
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+                
+                item {
+                    when(uiState.uploadType){
+                        "PDF/DOCS" -> CreatePDFCard(
+                            height = windowInfo.screenHeight * 0.3f,
+                            onPickFile = { uri ->
+                                viewModel.onFilePicked(context, uri)
+                            },
+                            windowInfo = windowInfo,
+                            fileName = uiState.fileName,
+                            isLoading = uiState.loadingFile,
+                        )
+                        "YOUTUBE LINK" -> CreateYoutubeLink(
+                            windowInfo = windowInfo,
+                            youtubeLink = uiState.youtubeUrl.toString(),
+                            onUpdateYoutubeLink = viewModel::updateYoutubeUrl,
+                        )
+                        "TEXT" -> CreateText(
+                            windowInfo = windowInfo,
+                            text = uiState.text.toString(),
+                            onUpdateText = viewModel::updateText,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(35.dp))
+                }
+
+                item {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
+                        CapsuleButton(
+                            text = {
+                                Text(
+                                    text = "CREATE LECTURE",
+                                    fontFamily = FontFamily(Font(R.font.alata)),
+                                    fontSize = ResponsiveFont.heading1(windowInfo),
+                                    color = TextBlack
+                                )
+                            },
+                            onClick = { openAlertDialog = true },
+                            roundedCornerShape = 10.dp,
+                            buttonElevation = ButtonDefaults.buttonElevation(5.dp),
+                            contentPadding = PaddingValues(10.dp),
+                            buttonColors = ButtonDefaults.buttonColors(MainOrange),
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = isFormValid
+                        )
+                    }
                 }
             }
         }
     )
 }
 
-//Upload pdf
 @Composable
-fun CreatePDFCard(
-    height: Dp
+fun CreateLectureHeader(
+    windowInfo: WindowInfo,
+    currentUploadType: String,
+    onUploadTypeChange: (String) -> Unit,
+    lectureName: String,
+    onUpdateLectureName: (String) -> Unit,
+    lectureDescription: String,
+    onUpdateLectureDescription: (String) -> Unit
+){
+    val menuList = listOf(
+        DropdownMenuItem(
+            itemName = "PDF/DOCS",
+            onClick = {
+                onUploadTypeChange("PDF/DOCS")
+            }
+        ),
+        DropdownMenuItem(
+            itemName = "VIDEO",
+            onClick = {
+                onUploadTypeChange("VIDEO")
+            }
+        ),
+        DropdownMenuItem(
+            itemName = "TEXT",
+            onClick = {
+                onUploadTypeChange("TEXT")
+            }
+        ),
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        CustomDropDownMenu(
+            menuText = currentUploadType,
+            dropdownMenuItems = menuList,
+            maxWidthFloat = 0.3f
+        )
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            CapsuleTextField(
+                value = lectureName,
+                onValueChange = {
+                    onUpdateLectureName(it)
+                },
+                placeholder = {
+                    Text(
+                        text = "LECTURE NAME",
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading2(windowInfo),
+                        color = LoginText
+                    )
+                },
+                label = {
+                    Text(
+                        text = "LECTURE NAME",
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading2(windowInfo),
+                        color = LoginText
+                    )
+                },
+                isSingleLine = true,
+                roundedCornerShape = 5.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 3.dp, shape = RoundedCornerShape(5.dp), clip = false
+                    )
+                    .background(
+                        color = SoftGray, shape = RoundedCornerShape(5.dp)
+                    ),
+                enabled = true,
+            )
+
+            CapsuleTextField(
+                value = lectureDescription,
+                onValueChange = { onUpdateLectureDescription(it) },
+                placeholder = {
+                    Text(
+                        text = "LECTURE DESCRIPTION",
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading2(windowInfo),
+                        color = LoginText
+                    )
+                },
+                label = {
+                    Text(
+                        text = "LECTURE DESCRIPTION",
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading2(windowInfo),
+                        color = LoginText
+                    )
+                },
+                isSingleLine = false,
+                roundedCornerShape = 5.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 3.dp, shape = RoundedCornerShape(5.dp), clip = false
+                    )
+                    .background(
+                        color = SoftGray, shape = RoundedCornerShape(5.dp)
+                    ),
+                enabled = true,
+                maxLines = 5
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(15.dp))
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun CreateLectureMoreInfo(
+    unlockDate: LocalDateTime?,
+    onUpdateUnlockDate: (LocalDateTime?) -> Unit,
+    deadlineDate: LocalDateTime?,
+    onUpdateDeadlineDate: (LocalDateTime?) -> Unit
 ){
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(height)
-            .clickable(onClick = {/*ask for permission to access files upload docs / pdf*/ }),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.LightGray),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ){
-            Image(
-                painter = painterResource(R.drawable.upload_files),
-                contentDescription = "Upload Files",
-                modifier = Modifier.size(height * 0.5f)
+        Column(modifier = Modifier.padding(16.dp)) {
+            ReusableDateTimePicker(
+                selectedDateTime = unlockDate,
+                label = "UNLOCK DATE & TIME",
+                onUpdateDateTime = {
+                    onUpdateUnlockDate(it)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ReusableDateTimePicker(
+                selectedDateTime = deadlineDate,
+                label = "DEADLINE DATE & TIME",
+                onUpdateDateTime = {
+                    onUpdateDeadlineDate(it)
+                }
             )
         }
     }
 }
 
-//upload youtube link
+@Composable
+fun CreatePDFCard(
+    windowInfo: WindowInfo,
+    height: Dp,
+    fileName: String?,
+    isLoading: Boolean,
+    onPickFile: (Uri) -> Unit
+) {
+    val filePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let(onPickFile)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+            .clickable(onClick = {
+                filePicker.launch(
+                    arrayOf(
+                        "application/pdf",
+                        "application/msword",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                )
+            }),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = SoftGray),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Box(
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                isLoading -> CircularProgressIndicator()
+
+                fileName != null ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_file_present_24),
+                            contentDescription = "$fileName present",
+                            tint = LoginText
+                        )
+
+                        Spacer(modifier = Modifier.size(5.dp))
+
+                        Text(
+                            text = "Filename: $fileName",
+                            fontSize = ResponsiveFont.heading2(windowInfo),
+                            fontFamily = FontFamily(Font(R.font.alata)),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+
+                else -> Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.upload_files),
+                        contentDescription = "Pick a PDF or DOC",
+                        modifier = Modifier.size(height * 0.4f)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Tap to select PDF/DOC",
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading2(windowInfo)
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun CreateYoutubeLink(
-    windowInfo: WindowInfo
+    windowInfo: WindowInfo,
+    youtubeLink: String,
+    onUpdateYoutubeLink: (String) -> Unit
 ){
-    var placeholderLink by remember { mutableStateOf("") }
-
     CapsuleTextField(
-        value = placeholderLink,
+        value = youtubeLink,
         onValueChange = {
-            placeholderLink = it
+            onUpdateYoutubeLink(it)
         },
         placeholder = {
             Text(
@@ -252,24 +526,48 @@ fun CreateYoutubeLink(
             )
         },
         isSingleLine = false,
-        roundedCornerShape = 5.dp,
+        roundedCornerShape = 10.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 3.dp, shape = RoundedCornerShape(5.dp), clip = false
-            )
-            .background(
-                color = SoftGray, shape = RoundedCornerShape(5.dp)
-            ),
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(10.dp), clip = false)
+            .background(color = SoftGray, shape = RoundedCornerShape(10.dp)),
         enabled = true,
         maxLines = 3
     )
 }
 
-//upload text
 @Composable
 fun CreateText(
-    windowInfo: WindowInfo
+    windowInfo: WindowInfo,
+    text: String,
+    onUpdateText: (String) -> Unit
 ){
-    var placeholderText by remember { mutableStateOf("") }
+    CapsuleTextField(
+        value = text,
+        onValueChange = { onUpdateText(it) },
+        placeholder = {
+            Text(
+                text = "TYPE CONTENT",
+                fontFamily = FontFamily(Font(R.font.alata)),
+                fontSize = ResponsiveFont.heading2(windowInfo),
+                color = LoginText
+            )
+        },
+        label = {
+            Text(
+                text = "TYPE CONTENT",
+                fontFamily = FontFamily(Font(R.font.alata)),
+                fontSize = ResponsiveFont.heading2(windowInfo),
+                color = LoginText
+            )
+        },
+        isSingleLine = false,
+        roundedCornerShape = 10.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(10.dp), clip = false)
+            .background(color = SoftGray, shape = RoundedCornerShape(10.dp)),
+        enabled = true,
+        maxLines = 8
+    )
 }

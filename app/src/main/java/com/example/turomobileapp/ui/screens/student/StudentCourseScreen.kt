@@ -64,6 +64,7 @@ import com.example.turomobileapp.ui.theme.tutorial1
 import com.example.turomobileapp.ui.theme.tutorial2
 import com.example.turomobileapp.viewmodels.SessionManager
 
+//TODO current module logic
 @Composable
 fun CourseDetailScreen(
     navController: NavController,

@@ -33,6 +33,7 @@ import com.example.turomobileapp.ui.screens.student.QuizListScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.ui.screens.student.StudentModulesScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateEditActivitiesInModuleScreen
+import com.example.turomobileapp.ui.screens.teacher.CreateLectureScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateQuizScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateTutorialScreen
@@ -44,6 +45,7 @@ import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
 import com.example.turomobileapp.viewmodels.teacher.ActivityActionsViewModel
+import com.example.turomobileapp.viewmodels.teacher.CreateLectureViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateModuleViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateQuizViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateTutorialViewModel
@@ -308,5 +310,17 @@ fun NavGraphBuilder.teacherNavGraph(
         val viewModel: CreateTutorialViewModel = hiltViewModel()
 
         CreateTutorialScreen(navController, sessionManager, moduleId.toString(), viewModel)
+    }
+
+    composable(
+        route = Screen.TeacherCreateLecture.route,
+        arguments = listOf(
+            navArgument("moduleId") { type = NavType.StringType },
+        )
+    ) { backStackEntry ->
+        val moduleId = backStackEntry.arguments?.getString("moduleId")
+        val viewModel: CreateLectureViewModel = hiltViewModel()
+
+        CreateLectureScreen(navController, sessionManager, moduleId.toString(), viewModel)
     }
 }

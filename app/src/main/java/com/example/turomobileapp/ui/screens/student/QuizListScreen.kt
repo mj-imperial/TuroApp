@@ -127,7 +127,6 @@ fun QuizListByModule(
                 )
             }
 
-            //TODO add attempt scores
             items(quizzes) {quiz ->
                 QuizCard(
                     windowInfo = windowInfo,

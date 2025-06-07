@@ -5,7 +5,6 @@ import com.example.turomobileapp.enums.ScreeningTier
 import com.google.gson.annotations.SerializedName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Date
 

@@ -71,9 +71,8 @@ class CreateTutorialViewModel @Inject constructor(
         if (unlock == null) return false
 
         val deadline = state.deadlineDateTime
-        if (deadline == null) return false
 
-        if (deadline.isBefore(unlock)) return false
+        deadline?.let { if (it.isBefore(unlock)) return false }
 
         return true
     }
