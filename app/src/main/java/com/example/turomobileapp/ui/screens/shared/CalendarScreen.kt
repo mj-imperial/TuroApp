@@ -61,6 +61,7 @@ import com.kizitonwose.calendar.core.daysOfWeek
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -73,19 +74,10 @@ fun CalendarScreen(
 ){
     val windowInfo = rememberWindowInfo()
     val height = windowInfo.screenHeight
-    val width = windowInfo.screenWidth
 
     val uiState by viewModel.uiState.collectAsState()
-    val rawEvents = uiState.rawEvents
-    val eventsByDate = remember(rawEvents) {
-        rawEvents
-            .mapNotNull { resp ->
-                runCatching {
-                    val date = LocalDate.parse(resp.date)
-                    date to resp
-                }.getOrNull()
-            }
-            .groupBy({ it.first }, { it.second })
+    val eventsByDate = remember(uiState.rawEvents) {
+        uiState.rawEvents.groupBy { it.date.toLocalDate() }
     }
 
     AppScaffold(
@@ -131,7 +123,7 @@ fun CalendarContent(
         outDateStyle = OutDateStyle.EndOfGrid
     )
 
-    var selectedDate by rememberSaveable { mutableStateOf<LocalDate?>(null) }
+    var selectedDate by rememberSaveable { mutableStateOf(LocalDate.now()) }
     val eventsList = remember(selectedDate, eventsByDate) {
         selectedDate?.let { eventsByDate[it].orEmpty() } ?: emptyList()
     }
@@ -151,13 +143,12 @@ fun CalendarContent(
                 reverseLayout = false,
                 contentHeightMode = ContentHeightMode.Wrap,
                 dayContent = { day ->
-                    val date = day.date
-                    val list = eventsByDate[date].orEmpty()
+                    val hasEvent = eventsByDate[day.date].orEmpty().isNotEmpty()
                     Day(
                         day = day,
-                        isSelected = date == selectedDate,
-                        hasEvent = list.isNotEmpty(),
-                        isUrgent = list.any { it.isUrgent },
+                        isSelected = day.date == selectedDate,
+                        hasEvent = hasEvent,
+                        isUrgent = eventsByDate[day.date]?.any { it.isUrgent } == true,
                         onClick = {
                             selectedDate = it.date
                         },
@@ -244,12 +235,14 @@ fun AbbreviatedDaysOfWeek(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DateEvents(
     windowInfo: WindowInfo,
     list: List<CalendarResponse>,
     height: Dp
 ){
+    val dateFormatterOut = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a")
     if (list.isEmpty()){
         Box(
             modifier = Modifier
@@ -275,6 +268,13 @@ fun DateEvents(
                     text = it.title,
                     fontSize = ResponsiveFont.heading1(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alata)),
+                )
+
+                Text(
+                    text = it.date.format(dateFormatterOut),
+                    fontSize = ResponsiveFont.body(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
                 )
 
                 Text(

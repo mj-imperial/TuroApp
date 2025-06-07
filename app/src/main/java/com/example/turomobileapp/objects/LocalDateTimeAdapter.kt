@@ -10,15 +10,14 @@ import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 object LocalDateTimeAdapter {
-    private val fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    private val isoFmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    private val dbFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-    @ToJson
-    fun toJson(dateTime: LocalDateTime): String {
-        return dateTime.format(fmt)
-    }
+    @ToJson fun toJson(dt: LocalDateTime): String = dt.format(isoFmt)
 
-    @FromJson
-    fun fromJson(json: String): LocalDateTime {
-        return LocalDateTime.parse(json, fmt)
+    @FromJson fun fromJson(raw: String): LocalDateTime = runCatching {
+        LocalDateTime.parse(raw, isoFmt)
+    }.getOrElse {
+        LocalDateTime.parse(raw, dbFmt)
     }
 }

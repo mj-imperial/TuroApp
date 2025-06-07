@@ -53,7 +53,7 @@ import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -68,19 +68,6 @@ fun QuizDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val quiz = uiState.quiz
     val scoresList = uiState.scores.sortedBy { it.attemptNumber }
-
-    val dateFormatterIn = DateTimeFormatter.ISO_DATE
-    val dateFormatterOut = DateTimeFormatter.ofPattern("MMM d, yyyy")
-
-    val dueDateFormatted = quiz?.deadlineDate
-        ?.substringBefore(" ")
-        ?.let { LocalDate.parse(it, dateFormatterIn).format(dateFormatterOut) }
-        ?: "—"
-
-    val unlockDateFormatted = quiz?.unlockDate
-        ?.substringBefore(" ")
-        ?.let { LocalDate.parse(it, dateFormatterIn).format(dateFormatterOut) }
-        ?: "—"
 
     AppScaffold(
         navController = navController,
@@ -123,8 +110,8 @@ fun QuizDetailScreen(
 
                     QuizHeader(
                         windowInfo = windowInfo,
-                        dueDate = dueDateFormatted,
-                        unlockDate = unlockDateFormatted,
+                        dueDate = quiz?.deadlineDate,
+                        unlockDate = quiz?.unlockDate,
                         timeLimit = quiz?.timeLimit,
                         allowedAttempts = quiz?.numberOfAttempts,
                         questionSize = quiz?.numberOfQuestions,
@@ -149,7 +136,7 @@ fun QuizDetailScreen(
                         },
                         scoresList = scoresList,
                         attemptNumber = quiz?.numberOfAttempts ?: 0,
-                        deadline = dueDateFormatted
+                        deadline = quiz?.deadlineDate
                     )
 
                     HorizontalDivider(
@@ -216,18 +203,21 @@ fun QuizTitle(
 @Composable
 fun QuizHeader(
     windowInfo: WindowInfo,
-    dueDate: String?,
-    unlockDate: String?,
+    dueDate: LocalDateTime?,
+    unlockDate: LocalDateTime?,
     timeLimit: Int?,
     allowedAttempts: Int?,
     questionSize: Int?,
     points: Int?
 ){
     val timeLimitMinutes = timeLimit?.div(60)
+    val dateFormatterOut = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a")
+    val dueDateFormatted = dueDate?.format(dateFormatterOut) ?: "—"
+    val unlockDateFormatted = unlockDate?.format(dateFormatterOut) ?: "—"
 
     val textList = mapOf(
-        "Deadline Date" to dueDate,
-        "Unlocks At" to unlockDate,
+        "Deadline Date" to dueDateFormatted,
+        "Unlocks At" to unlockDateFormatted,
         "Time Limit (Minutes)" to timeLimitMinutes,
         "Allowed Attempts" to allowedAttempts,
         "Questions" to questionSize,
@@ -253,14 +243,13 @@ fun QuizBody(
     onViewStatistics: () -> Unit,
     scoresList: List<AssessmentScoreResponse>,
     attemptNumber: Int,
-    deadline: String?
+    deadline: LocalDateTime?
 ){
     var openAlertDialog by remember { mutableStateOf(false) }
-    val today = LocalDate.now()
-    val deadlineDate = deadline
-        ?.substringBefore(" ")
-        ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-    val beforeDeadline = deadlineDate?.let { today <= it } ?: true
+
+    val today = LocalDateTime.now()
+    val beforeDeadline = deadline?.let { today <= it } ?: true
+
     val hasAttemptsLeft = scoresList.size < attemptNumber
     val canTake = hasAttemptsLeft && beforeDeadline
 

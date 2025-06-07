@@ -1,6 +1,8 @@
 package com.example.turomobileapp.ui.screens.shared
 
 import AppScaffold
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,9 +55,9 @@ import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.shared.NotificationViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun NotificationScreen(
@@ -170,6 +172,7 @@ fun NotificationScreen(
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun NotificationCard(
     windowInfo: WindowInfo,
@@ -204,9 +207,15 @@ private fun NotificationCard(
                 fontSize = ResponsiveFont.heading3(windowInfo),
                 color = TextBlack
             )
-            val sdf = remember { SimpleDateFormat("MMM d, yyyy  HH:mm", Locale.getDefault()) }
+            val dateFormatterOut = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a")
+            val formatted = remember(notification.timestamp) {
+                Instant
+                    .ofEpochMilli(notification.timestamp)
+                    .atZone(ZoneId.systemDefault())
+                    .format(dateFormatterOut)
+            }
             Text(
-                text = sdf.format(Date(notification.timestamp)),
+                text = formatted,
                 modifier = Modifier.align(Alignment.End),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 fontSize = ResponsiveFont.body(windowInfo),

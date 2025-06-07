@@ -254,7 +254,7 @@ fun CourseActivities(
     val activitiesList = listOf(
         Activities(
             name = R.string.Tutorials,
-            icon = R.drawable.tutorial_floating_icon,
+            icon = R.drawable.tutorial_icon,
             route = Screen.StudentCourseActivity.route,
             colors = listOf(tutorial1,tutorial2)
         ),

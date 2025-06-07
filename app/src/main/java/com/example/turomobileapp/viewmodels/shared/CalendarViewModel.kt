@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -61,24 +60,18 @@ class CalendarViewModel @Inject constructor(
                     onSuccess = { events ->
                         _uiState.update { it.copy(loading = false, rawEvents = events) }
 
-                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a")
 
                         events.forEach {
                             if (notifiedIds.contains(it.eventId)) {
                                 return@forEach
                             }
-                            val parsedDate = try {
-                                LocalDate.parse(it.date, formatter)
-                            } catch (e: Exception) {
-                                null
-                            }
 
+                            val date = it.date
+
+                            val whenText = date.format(formatter)
                             val title = "Reminder: ${it.title}"
-                            val text = if (parsedDate != null) {
-                                "You have an event on ${it.date}"
-                            } else {
-                                "You have an upcoming event"
-                            }
+                            val text = "You have an event on $whenText"
                             notificationService.showNotification(
                                 notificationTitle = title,
                                 notificationText = text,
