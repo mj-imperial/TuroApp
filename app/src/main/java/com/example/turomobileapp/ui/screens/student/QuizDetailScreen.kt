@@ -185,13 +185,13 @@ fun QuizTitle(
 
         Column{
             Text(
-                text = "$quizTypeName QUIZ",
+                text = quizName,
                 fontSize = ResponsiveFont.heading1(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata))
             )
 
             Text(
-                text = quizName,
+                text = "$quizTypeName QUIZ",
                 fontSize = ResponsiveFont.heading3(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata))
             )
@@ -216,8 +216,8 @@ fun QuizHeader(
     val unlockDateFormatted = unlockDate?.format(dateFormatterOut) ?: "—"
 
     val textList = mapOf(
-        "Deadline Date" to dueDateFormatted,
         "Unlocks At" to unlockDateFormatted,
+        "Deadline Date At" to dueDateFormatted,
         "Time Limit (Minutes)" to timeLimitMinutes,
         "Allowed Attempts" to allowedAttempts,
         "Questions" to questionSize,
@@ -297,7 +297,7 @@ fun QuizBody(
         }
     }
 
-    Spacer(Modifier.height(15.dp))
+    Spacer(Modifier.height(30.dp))
 
     Row(
         modifier = Modifier.fillMaxWidth(),
