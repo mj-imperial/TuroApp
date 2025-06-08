@@ -120,4 +120,8 @@ dependencies {
     implementation("androidx.hilt:hilt-work:1.2.0")
     ksp("androidx.hilt:hilt-compiler:1.2.0")
 
+
+    //confetti
+    implementation("nl.dionsegijn:konfetti-compose:2.0.5")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }

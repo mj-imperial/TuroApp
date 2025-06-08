@@ -2,6 +2,7 @@ package com.example.turomobileapp.models
 
 import com.example.turomobileapp.enums.AchievementConditionType
 import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.time.Instant
 
@@ -43,3 +44,22 @@ data class ShopItem(
     @SerializedName("item_picture") val itemPicture: String,
     @SerializedName("points_required") val pointsRequired: Int,
 )
+
+@JsonClass(generateAdapter = true)
+data class StudentBadgesResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "badges") val badges: List<StudentBadgeResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class StudentBadgeResponse(
+    @Json(name = "badge_id") val badgeId: String,
+    @Json(name = "is_unlocked") val isUnlockedInt: Int,
+    @Json(name = "badge_name") val badgeName: String,
+    @Json(name = "badge_description") val badgeDescription: String,
+    @Json(name = "badge_image") val badgeImage: String,
+    @Json(name = "points_required") val pointsRequired: Int,
+    @Json(name = "total_points") val studentTotalPoints: Int
+){
+    val isUnlocked: Boolean get() = isUnlockedInt != 0
+}

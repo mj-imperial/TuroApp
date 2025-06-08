@@ -95,7 +95,7 @@ fun CreateModuleScreen(
                 viewModel.createModule()
                 openAlertDialog = false
             },
-            icon = painterResource(R.drawable.save_icon),
+            icon = painterResource(R.drawable.module_create),
             title = {
                 Text(
                     text = "CREATE MODULE",

@@ -3,7 +3,9 @@ package com.example.turomobileapp.viewmodels.student
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
+import com.example.turomobileapp.models.StudentBadgeResponse
 import com.example.turomobileapp.models.StudentProgressResponse
+import com.example.turomobileapp.repositories.BadgesRepository
 import com.example.turomobileapp.repositories.StudentProgressRepository
 import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,8 +19,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LeaderboardViewModel @Inject constructor(
+class GamificationViewModel @Inject constructor(
     private val studentProgressRepository: StudentProgressRepository,
+    private val badgesRepository: BadgesRepository,
     private val sessionManager: SessionManager
 ): ViewModel(){
 
@@ -26,7 +29,10 @@ class LeaderboardViewModel @Inject constructor(
     val uiState: StateFlow<LeaderboardUIState> = _uiState.asStateFlow()
 
     init {
-        getLeaderboard()
+        viewModelScope.launch {
+            launch { getLeaderboard() }
+            launch { getBadgesForStudent() }
+        }
     }
 
     fun getLeaderboard(){
@@ -48,10 +54,31 @@ class LeaderboardViewModel @Inject constructor(
             }
         }
     }
+
+    fun getBadgesForStudent(){
+        viewModelScope.launch {
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
+
+            val studentId: String = sessionManager.userId.filterNotNull().first()
+
+            badgesRepository.getAllBadgesForStudent(studentId).collect { result ->
+                handleResult(
+                    result = result,
+                    onSuccess = { badges ->
+                        _uiState.update { it.copy(loading = false, studentBadges = badges) }
+                    },
+                    onFailure = { err ->
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                    }
+                )
+            }
+        }
+    }
 }
 
 data class LeaderboardUIState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
-    val progresses: List<StudentProgressResponse> = emptyList()
+    val progresses: List<StudentProgressResponse> = emptyList(),
+    val studentBadges: List<StudentBadgeResponse> = emptyList()
 )
