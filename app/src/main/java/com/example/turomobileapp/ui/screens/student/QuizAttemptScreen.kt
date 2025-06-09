@@ -187,49 +187,45 @@ fun QuizAttemptScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.SpaceAround,
+                horizontalAlignment = Alignment.Start
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceAround,
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    val question = uiState.content[uiState.currentIndex]
-                    val options = question.options
+                val question = uiState.content[uiState.currentIndex]
+                val options = question.options
 
-                    QuizAttemptHeader(
-                        height = windowInfo.screenHeight * 0.15f,
-                        windowInfo = windowInfo,
-                        quizType = uiState.quizType,
-                        quizName = uiState.quizName
-                    )
+                QuizAttemptHeader(
+                    height = windowInfo.screenHeight * 0.15f,
+                    windowInfo = windowInfo,
+                    quizType = uiState.quizType,
+                    quizName = uiState.quizName
+                )
 
-                    QuestionBox(
-                        uiState = uiState,
-                        windowInfo = windowInfo,
-                        questionNumber = uiState.currentIndex + 1,
-                        questionText = question.questionText,
-                        questionType = QuestionType.valueOf(question.questionTypeName),
-                        options = options,
-                        onShortAnswerEntered = viewModel::onShortAnswerEntered,
-                        onOptionSelected = viewModel::onOptionSelected,
-                        onNextClicked = viewModel::onNextClicked,
-                        onOpenAlertDialog = {
-                            openAlertDialog = true
-                        }
-                    )
+                QuestionBox(
+                    uiState = uiState,
+                    windowInfo = windowInfo,
+                    questionNumber = uiState.currentIndex + 1,
+                    questionText = question.questionText,
+                    questionType = QuestionType.valueOf(question.questionTypeName),
+                    options = options,
+                    onShortAnswerEntered = viewModel::onShortAnswerEntered,
+                    onOptionSelected = viewModel::onOptionSelected,
+                    onNextClicked = viewModel::onNextClicked,
+                    onOpenAlertDialog = {
+                        openAlertDialog = true
+                    }
+                )
 
-                    Text(
-                        text = timerText,
-                        color = LoginText,
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 5.dp)
-                    )
-                }
+                Text(
+                    text = timerText,
+                    color = LoginText,
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 5.dp)
+                )
             }
         }
     )

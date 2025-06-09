@@ -215,7 +215,7 @@ fun CreateModuleScreen(
                     enabled = true,
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 CapsuleButton(
                     text = {

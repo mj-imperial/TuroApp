@@ -77,4 +77,7 @@ sealed class Screen(val route: String) {
     object TeacherCreateLecture: Screen("teacher_create_lecture/{moduleId}"){
         fun createRoute(moduleId: String) = "teacher_create_lecture/$moduleId"
     }
+    object TeacherEditModule: Screen("teacher_edit_module/{courseId}/{moduleId}"){
+        fun createRoute(courseId: String, moduleId: String) = "teacher_edit_module/$courseId/$moduleId"
+    }
 }

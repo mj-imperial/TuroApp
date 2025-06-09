@@ -81,83 +81,77 @@ fun QuizDetailScreen(
             Column(
                 modifier = Modifier
                     .padding(contentPadding)
+                    .padding(windowInfo.screenWidth * 0.09f)
                     .verticalScroll(rememberScrollState())
                     .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.SpaceAround,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
+                QuizTitle(
+                    height = windowInfo.screenHeight * 0.2f,
+                    windowInfo = windowInfo,
+                    quizTypeName = quiz?.quizTypeName.toString(),
+                    quizName = quiz?.quizName.toString()
+                )
+
+                HorizontalDivider(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(windowInfo.screenWidth * 0.09f),
-                    verticalArrangement = Arrangement.SpaceAround
-                ) {
-                    QuizTitle(
-                        height = windowInfo.screenHeight * 0.2f,
-                        windowInfo = windowInfo,
-                        quizTypeName = quiz?.quizTypeName.toString(),
-                        quizName = quiz?.quizName.toString()
-                    )
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(vertical = 15.dp),
+                    thickness =  1.dp,
+                    color = LoginText
+                )
 
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally)
-                            .padding(vertical = 15.dp),
-                        thickness =  1.dp,
-                        color = LoginText
-                    )
+                QuizHeader(
+                    windowInfo = windowInfo,
+                    dueDate = quiz?.deadlineDate,
+                    unlockDate = quiz?.unlockDate,
+                    timeLimit = quiz?.timeLimit,
+                    allowedAttempts = quiz?.numberOfAttempts,
+                    questionSize = quiz?.numberOfQuestions,
+                    points = quiz?.overallPoints,
+                )
 
-                    QuizHeader(
-                        windowInfo = windowInfo,
-                        dueDate = quiz?.deadlineDate,
-                        unlockDate = quiz?.unlockDate,
-                        timeLimit = quiz?.timeLimit,
-                        allowedAttempts = quiz?.numberOfAttempts,
-                        questionSize = quiz?.numberOfQuestions,
-                        points = quiz?.overallPoints,
-                    )
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(vertical = 15.dp),
+                    thickness =  1.dp,
+                    color = LoginText
+                )
 
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally)
-                            .padding(vertical = 15.dp),
-                        thickness =  1.dp,
-                        color = LoginText
-                    )
+                QuizBody(
+                    windowInfo = windowInfo,
+                    description = quiz?.quizDescription,
+                    onTakeQuizClick = { quiz?.let { onClickTakeQuiz(it) } },
+                    onViewStatistics = {
+                        navController.navigate(Screen.StudentQuizResult.createRoute(quiz?.quizId ?: "", false))
+                    },
+                    scoresList = scoresList,
+                    attemptNumber = quiz?.numberOfAttempts ?: 0,
+                    deadline = quiz?.deadlineDate
+                )
 
-                    QuizBody(
-                        windowInfo = windowInfo,
-                        description = quiz?.quizDescription,
-                        onTakeQuizClick = { quiz?.let { onClickTakeQuiz(it) } },
-                        onViewStatistics = {
-                            navController.navigate(Screen.StudentQuizResult.createRoute(quiz?.quizId ?: "", false))
-                        },
-                        scoresList = scoresList,
-                        attemptNumber = quiz?.numberOfAttempts ?: 0,
-                        deadline = quiz?.deadlineDate
-                    )
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(vertical = 30.dp),
+                    thickness =  1.dp,
+                    color = LoginText
+                )
 
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally)
-                            .padding(vertical = 30.dp),
-                        thickness =  1.dp,
-                        color = LoginText
-                    )
-
-                    PreviousNextButton(
-                        windowInfo = windowInfo,
-                        onClickPrevious = {
-                            //TODO
-                        },
-                        onClickNext = {
-                            //TODO
-                        }
-                    )
-                }
+                PreviousNextButton(
+                    windowInfo = windowInfo,
+                    onClickPrevious = {
+                        //TODO
+                    },
+                    onClickNext = {
+                        //TODO
+                    }
+                )
             }
         }
     )

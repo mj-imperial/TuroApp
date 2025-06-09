@@ -65,7 +65,8 @@ import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsVie
 fun ModuleFoldersScreen(
     navController: NavController,
     sessionManager: SessionManager,
-    viewModel: ModuleListActivityActionsViewModel
+    viewModel: ModuleListActivityActionsViewModel,
+    courseId: String
 ){
     val context = LocalContext.current
     val windowInfo = rememberWindowInfo()
@@ -171,7 +172,7 @@ fun ModuleFoldersScreen(
                                     )
                                 },
                                 onClickEdit = {
-                                    //TODO edit screen for modules
+                                    navController.navigate(Screen.TeacherEditModule.createRoute(courseId,module.moduleId))
                                 },
                                 onDeleteClick = {
                                     selectedToDeleteId = module.moduleId

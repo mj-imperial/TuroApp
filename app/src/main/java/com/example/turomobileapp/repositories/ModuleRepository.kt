@@ -7,6 +7,7 @@ import com.example.turomobileapp.models.Module
 import com.example.turomobileapp.models.ModuleActivityResponse
 import com.example.turomobileapp.models.ModuleResponse
 import com.example.turomobileapp.models.ModuleResultResponse
+import com.example.turomobileapp.models.ModuleUpdateRequest
 import com.example.turomobileapp.models.ModuleUploadRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -38,31 +39,22 @@ class ModuleRepository @Inject constructor(private val moduleApiService: ModuleA
             errorMessage = "Failed to delete module $moduleId"
         )
 
-    fun isModuleDuplicate(courseId: String, module: Module): Flow<Result<Boolean>> = flow {
-        handleApiResponse(
-            call = { moduleApiService.isModuleDuplicate(courseId, module) },
-            errorMessage = "Failed to check is module $module duplication for course $courseId"
-        )
-    }
-
-    fun getModule(moduleId: String): Flow<Result<Module>> = flow {
+    fun getModule(moduleId: String): Flow<Result<ModuleUploadRequest>> =
         handleApiResponse(
             call = { moduleApiService.getModule(moduleId) },
             errorMessage = "Failed to get module $moduleId"
         )
-    }
+
+    fun updateModule(moduleId: String, module: ModuleUpdateRequest): Flow<Result<ModuleResultResponse>> =
+        handleApiResponse(
+            call = { moduleApiService.updateModule(moduleId, module) },
+            errorMessage = "Failed to update module $moduleId"
+        )
 
     fun getAllModules(): Flow<Result<List<Module>>> = flow {
         handleApiResponse(
             call = { moduleApiService.getAllModules() },
             errorMessage = "Failed to get all modules"
-        )
-    }
-
-    fun updateModule(moduleId: String, module: Module): Flow<Result<Unit>> = flow {
-        handleApiResponse(
-            call = { moduleApiService.updateModule(moduleId, module) },
-            errorMessage = "Failed to update module $moduleId"
         )
     }
 

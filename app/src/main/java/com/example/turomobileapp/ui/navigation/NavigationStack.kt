@@ -37,6 +37,7 @@ import com.example.turomobileapp.ui.screens.teacher.CreateLectureScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateQuizScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateTutorialScreen
+import com.example.turomobileapp.ui.screens.teacher.EditModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
@@ -49,6 +50,7 @@ import com.example.turomobileapp.viewmodels.teacher.CreateLectureViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateModuleViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateQuizViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateTutorialViewModel
+import com.example.turomobileapp.viewmodels.teacher.EditModuleViewModel
 import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -273,9 +275,10 @@ fun NavGraphBuilder.teacherNavGraph(
         arguments = listOf(
             navArgument("courseId") { type = NavType.StringType }
         )
-    ) {
+    ) { backStackEntry ->
+        val courseId = backStackEntry.arguments?.getString("courseId")
         val viewModel: ModuleListActivityActionsViewModel = hiltViewModel()
-        ModuleFoldersScreen(navController, sessionManager, viewModel)
+        ModuleFoldersScreen(navController, sessionManager, viewModel, courseId.toString())
     }
 
     composable(
@@ -322,5 +325,18 @@ fun NavGraphBuilder.teacherNavGraph(
         val viewModel: CreateLectureViewModel = hiltViewModel()
 
         CreateLectureScreen(navController, sessionManager, moduleId.toString(), viewModel)
+    }
+
+    composable(
+        route = Screen.TeacherEditModule.route,
+        arguments = listOf(
+            navArgument("moduleId") { type = NavType.StringType },
+            navArgument("courseId") { type = NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val courseId = backStackEntry.arguments?.getString("courseId")
+        val viewModel: EditModuleViewModel = hiltViewModel()
+
+        EditModuleScreen(navController, sessionManager, viewModel, courseId.toString())
     }
 }

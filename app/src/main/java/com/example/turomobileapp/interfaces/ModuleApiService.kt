@@ -2,7 +2,9 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.Module
 import com.example.turomobileapp.models.ModuleActivitiesResponse
+import com.example.turomobileapp.models.ModuleResponse
 import com.example.turomobileapp.models.ModuleResultResponse
+import com.example.turomobileapp.models.ModuleUpdateRequest
 import com.example.turomobileapp.models.ModuleUploadRequest
 import com.example.turomobileapp.models.ModulesResponse
 import okhttp3.ResponseBody
@@ -34,25 +36,19 @@ interface ModuleApiService {
         @Query("module_id") moduleId: String
     ): Response<ModuleResultResponse>
 
-    @GET("/modules/{moduleId}")
-    suspend fun getModule(
-        @Path("moduleId") moduleId: String
-    ): Response<Module>
-
     @POST("create_module.php")
     suspend fun createModule(
         @Body request: ModuleUploadRequest
     ): Response<ModuleResultResponse>
 
-    @POST("/course/{courseId}/modules/validateDuplication")
-    suspend fun isModuleDuplicate(
-        @Path("courseId") courseId: String,
-        @Body module: Module
-    ): Response<Boolean>
+    @GET("get_module.php")
+    suspend fun getModule(
+        @Query("module_id") moduleId: String
+    ): Response<ModuleUploadRequest>
 
-    @PUT("/modules/{moduleId}")
+    @POST("update_module.php")
     suspend fun updateModule(
-        @Path("moduleId") moduleId: String,
-        @Body module: Module
-    ): Response<ResponseBody>
+        @Query("module_id") moduleId: String,
+        @Body module: ModuleUpdateRequest
+    ): Response<ModuleResultResponse>
 }

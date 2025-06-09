@@ -463,8 +463,6 @@ fun CreateQuizMoreInfo(
     hasAnswersShown: Boolean?,
     onUpdateShowAnswers: (Boolean) -> Unit
 ){
-    var attempt by remember { mutableIntStateOf(numberOfAttempts) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -505,8 +503,8 @@ fun CreateQuizMoreInfo(
                 )
 
                 IconButton(onClick = {
-                    if (attempt > 1) {
-                        onUpdateNumberOfAttempts(attempt --)
+                    if (numberOfAttempts > 1) {
+                        onUpdateNumberOfAttempts(numberOfAttempts - 1)
                     }
                 }) {
                     Icon(
@@ -526,7 +524,7 @@ fun CreateQuizMoreInfo(
                     )
                 }
 
-                IconButton(onClick = { onUpdateNumberOfAttempts(attempt++) }) {
+                IconButton(onClick = { onUpdateNumberOfAttempts(numberOfAttempts + 1) }) {
                     Icon(
                         painter = painterResource(R.drawable.add_circle),
                         contentDescription = null

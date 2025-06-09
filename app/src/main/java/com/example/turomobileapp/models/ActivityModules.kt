@@ -96,6 +96,12 @@ data class ModulesResponse(
 )
 
 @JsonClass(generateAdapter = true)
+data class ModuleUpdateRequest(
+    @Json(name = "module_name") val moduleName: String,
+    @Json(name = "module_description") val moduleDescription: String
+)
+
+@JsonClass(generateAdapter = true)
 data class ModuleResponse(
     @Json(name = "module_id") val moduleId: String,
     @Json(name = "module_name") val moduleName: String,
