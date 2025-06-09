@@ -38,6 +38,7 @@ import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateQuizScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateTutorialScreen
 import com.example.turomobileapp.ui.screens.teacher.EditModuleScreen
+import com.example.turomobileapp.ui.screens.teacher.EditTutorialScreen
 import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
@@ -51,6 +52,7 @@ import com.example.turomobileapp.viewmodels.teacher.CreateModuleViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateQuizViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateTutorialViewModel
 import com.example.turomobileapp.viewmodels.teacher.EditModuleViewModel
+import com.example.turomobileapp.viewmodels.teacher.EditTutorialViewModel
 import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -338,5 +340,18 @@ fun NavGraphBuilder.teacherNavGraph(
         val viewModel: EditModuleViewModel = hiltViewModel()
 
         EditModuleScreen(navController, sessionManager, viewModel, courseId.toString())
+    }
+
+    composable(
+        route = Screen.TeacherEditTutorial.route,
+        arguments = listOf(
+            navArgument("activityId") { type = NavType.StringType },
+            navArgument("moduleId") { type = NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val moduleId = backStackEntry.arguments?.getString("moduleId")
+        val viewModel: EditTutorialViewModel = hiltViewModel()
+
+        EditTutorialScreen(navController, sessionManager, viewModel, moduleId.toString())
     }
 }

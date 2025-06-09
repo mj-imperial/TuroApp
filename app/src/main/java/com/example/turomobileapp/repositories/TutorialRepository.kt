@@ -4,6 +4,7 @@ import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.interfaces.TutorialApiService
 import com.example.turomobileapp.models.ActivityActionResponse
 import com.example.turomobileapp.models.Tutorial
+import com.example.turomobileapp.models.TutorialResponse
 import com.example.turomobileapp.models.TutorialUploadRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -17,19 +18,12 @@ class TutorialRepository @Inject constructor(private val tutorialApiService: Tut
             errorMessage = "Failed to create tutorial $tutorial in module $moduleId"
         )
 
-    fun isTutorialDuplicate(moduleId: String, tutorial: Tutorial): Flow<Result<Boolean>> = flow {
-        handleApiResponse(
-            call = { tutorialApiService.isTutorialDuplicate(moduleId, tutorial) },
-            errorMessage = "Failed to check tutorial $tutorial duplication in module $moduleId"
-        )
-    }
 
-    fun getTutorial(tutorialId: String): Flow<Result<Tutorial>> = flow {
+    fun getTutorial(tutorialId: String): Flow<Result<TutorialResponse>> =
         handleApiResponse(
             call = { tutorialApiService.getTutorial(tutorialId) },
             errorMessage = "Failed to get tutorial $tutorialId"
         )
-    }
 
     fun getAllTutorialsForModule(moduleId: String): Flow<Result<List<Tutorial>>> = flow {
         handleApiResponse(
@@ -38,17 +32,10 @@ class TutorialRepository @Inject constructor(private val tutorialApiService: Tut
         )
     }
 
-    fun updateTutorial(tutorialId: String, tutorial: Tutorial): Flow<Result<Unit>> = flow {
+    fun updateTutorial(activityId: String, moduleId: String, tutorial: TutorialResponse): Flow<Result<ActivityActionResponse>> =
         handleApiResponse(
-            call = { tutorialApiService.updateTutorial(tutorialId, tutorial) },
-            errorMessage = "Failed to update tutorial $tutorialId"
+            call = { tutorialApiService.updateTutorial(activityId, moduleId, tutorial) },
+            errorMessage = "Failed to update tutorial $activityId"
         )
-    }
 
-    fun deleteTutorial(tutorialId: String): Flow<Result<Unit>> = flow {
-        handleApiResponse(
-            call = { tutorialApiService.deleteTutorial(tutorialId) },
-            errorMessage = "Failed to delete tutorial $tutorialId"
-        )
-    }
 }

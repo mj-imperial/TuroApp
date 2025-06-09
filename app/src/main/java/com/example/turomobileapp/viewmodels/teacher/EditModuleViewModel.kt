@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.ModuleResponse
 import com.example.turomobileapp.models.ModuleUpdateRequest
 import com.example.turomobileapp.repositories.ModuleRepository
 import com.example.turomobileapp.repositories.Result

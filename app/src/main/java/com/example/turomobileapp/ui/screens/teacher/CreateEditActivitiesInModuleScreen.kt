@@ -180,7 +180,7 @@ fun CreateEditActivitiesInModuleScreen(
                             windowInfo = windowInfo,
                             activities = lectures,
                             activityType = "LECTURE",
-                            onEdit = { /* … */ },
+                            onEdit = { /* TODO: edit lecture */ },
                             onDeleteClick = { activityId ->
                                 selectedToDeleteId = activityId
                             }
@@ -189,7 +189,9 @@ fun CreateEditActivitiesInModuleScreen(
                             windowInfo = windowInfo,
                             activities = tutorials,
                             activityType = "TUTORIAL",
-                            onEdit = { /* TODO: edit tutorial */ },
+                            onEdit = {
+                                navController.navigate(Screen.TeacherEditTutorial.createRoute(it.activityId, moduleId))
+                            },
                             onDeleteClick = { activityId ->
                                 selectedToDeleteId = activityId
                             }

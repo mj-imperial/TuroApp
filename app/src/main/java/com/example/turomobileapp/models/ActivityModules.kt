@@ -131,6 +131,15 @@ data class ActivityActionResponse(
 )
 
 @JsonClass(generateAdapter = true)
+data class TutorialResponse(
+    @Json(name = "activity_name") val activityName: String,
+    @Json(name = "activity_description") val activityDescription: String,
+    @Json(name = "unlock_date") val unlockDate: LocalDateTime?,
+    @Json(name = "deadline_date") val deadlineDate: LocalDateTime?,
+    @Json(name = "video_url") val videoUrl: String
+)
+
+@JsonClass(generateAdapter = true)
 data class TutorialUploadRequest(
     @Json(name = "activity_name") val activityName: String,
     @Json(name = "activity_description") val activityDescription: String,
