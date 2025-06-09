@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
 header('Content-Type: application/json');
 $configFile = __DIR__ . '/config.php';
 if (! file_exists($configFile)) {
@@ -35,7 +32,7 @@ try{
             CE.event_id,
             CE.title,
             CE.description,
-            DATE(CE.`date`) AS date,
+            CE.date,
             ET.event_type_name,
             CE.is_urgent,
             CE.location
@@ -43,14 +40,14 @@ try{
         INNER JOIN `Eventtype` AS ET 
             ON CE.event_type_id = ET.event_type_id
         INNER JOIN `Activity` AS A  
-            ON A.event_id = CE.event_id
+            ON CE.event_id = A.activity_id 
         INNER JOIN `Module` AS M  
             ON A.module_id = M.module_id
         INNER JOIN `Course` AS C 
             ON M.course_id = C.course_id
         INNER JOIN `Enrollment` AS E  
             ON C.course_id = E.course_id
-        WHERE E.student_id = ? AND CE.date >= CURDATE()
+        WHERE E.student_id = ?
         ORDER BY CE.date;
     ";
     $stmt = $conn->prepare($sql);

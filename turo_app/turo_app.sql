@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 25, 2025 at 02:07 PM
+-- Generation Time: Jun 09, 2025 at 07:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -29,8 +29,26 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `achievementconditiontype` (
   `condition_type_id` int(11) NOT NULL,
-  `condition_name` enum('POINTS','MODULE_COMPLETION','QUIZ_SCORE','ACTIVITY_COMPLETION','FIRST_ASSESSMENT','GRADE_ABOVE','BADGES_EARNED','LEADERBOARD_RANK') NOT NULL
+  `condition_name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `achievementconditiontype`:
+--
+
+--
+-- Dumping data for table `achievementconditiontype`
+--
+
+INSERT INTO `achievementconditiontype` (`condition_type_id`, `condition_name`) VALUES
+(4, 'ACTIVITY_COMPLETION'),
+(7, 'BADGES_EARNED'),
+(5, 'FIRST_ASSESSMENT'),
+(6, 'GRADE_ABOVE'),
+(8, 'LEADERBOARD_RANK'),
+(2, 'MODULE_COMPLETION'),
+(1, 'POINTS'),
+(3, 'QUIZ_SCORE');
 
 -- --------------------------------------------------------
 
@@ -48,6 +66,12 @@ CREATE TABLE `achievements` (
   `is_unlocked` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- RELATIONSHIPS FOR TABLE `achievements`:
+--   `condition_type_id`
+--       `achievementconditiontype` -> `condition_type_id`
+--
+
 -- --------------------------------------------------------
 
 --
@@ -57,23 +81,27 @@ CREATE TABLE `achievements` (
 CREATE TABLE `activity` (
   `activity_id` varchar(255) NOT NULL,
   `module_id` varchar(255) NOT NULL,
-  `activity_type` enum('TUTORIAL','QUIZ','LECTURE','SCREENING_EXAM') NOT NULL,
+  `activity_type` enum('TUTORIAL','QUIZ','LECTURE') NOT NULL,
   `activity_name` varchar(255) NOT NULL,
   `activity_description` text DEFAULT NULL,
   `unlock_date` datetime NOT NULL,
-  `deadline_date` datetime DEFAULT NULL,
-  `event_id` varchar(255) DEFAULT NULL
+  `deadline_date` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `activity`:
+--   `module_id`
+--       `module` -> `module_id`
+--
 
 --
 -- Dumping data for table `activity`
 --
 
-INSERT INTO `activity` (`activity_id`, `module_id`, `activity_type`, `activity_name`, `activity_description`, `unlock_date`, `deadline_date`, `event_id`) VALUES
-('M101A1', 'M1011', 'LECTURE', 'Lecture 1 - All About Sets', 'Activities and Lectures to help you learn about sets', '2025-05-21 11:22:34', '2025-06-05 17:22:34', 'M101A1E1'),
-('M101A2', 'M1011', 'TUTORIAL', 'Tutorial 1 - Additional Resources', 'Here are some additional resources for your learning', '2025-05-21 11:22:34', NULL, 'M101A1E2'),
-('M101A3', 'M1011', 'QUIZ', 'Short Quiz 1', 'Short Quiz 1 on Sets', '2025-05-22 11:52:14', '2025-05-27 17:52:14', 'M101A3E1'),
-('M101A4', 'M1011', 'QUIZ', 'Long Quiz 1', 'Long Quiz 1 on Sets', '2025-05-22 11:52:14', '2025-06-01 17:52:14', 'M101A4E2');
+INSERT INTO `activity` (`activity_id`, `module_id`, `activity_type`, `activity_name`, `activity_description`, `unlock_date`, `deadline_date`) VALUES
+('2b6bf879-4987-4c72-b171-0c511932dc58', '2p394p0', 'LECTURE', 'asfd', 'asf', '2025-06-09 12:31:00', '2025-06-19 12:31:00'),
+('2bb874bc-3b92-495c-9732-61ba16620927', '2p394p0', 'QUIZ', 'sadfa', 'asdfasdf', '2025-06-19 14:20:00', '2025-06-20 14:20:00'),
+('56bfade8-cb9a-428f-8acb-48fe7208a5bb', '2p394p0', 'TUTORIAL', 'asdf', 'asdfasdf', '2025-06-12 14:56:00', '2025-06-20 14:57:00');
 
 -- --------------------------------------------------------
 
@@ -85,17 +113,11 @@ CREATE TABLE `admin` (
   `user_id` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `answers`
+-- RELATIONSHIPS FOR TABLE `admin`:
+--   `user_id`
+--       `user` -> `user_id`
 --
-
-CREATE TABLE `answers` (
-  `question_id` varchar(255) NOT NULL,
-  `option_id` varchar(255) DEFAULT NULL,
-  `selected_answer` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -112,8 +134,21 @@ CREATE TABLE `assessmentresult` (
   `date_taken` datetime NOT NULL,
   `attempt_number` int(11) NOT NULL,
   `tier_level_id` int(11) DEFAULT NULL,
-  `earned_points` int(11) NOT NULL
+  `earned_points` int(11) NOT NULL,
+  `is_kept` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `assessmentresult`:
+--   `student_id`
+--       `student` -> `user_id`
+--   `module_id`
+--       `module` -> `module_id`
+--   `activity_id`
+--       `activity` -> `activity_id`
+--   `tier_level_id`
+--       `screeningtier` -> `tier_id`
+--
 
 -- --------------------------------------------------------
 
@@ -124,8 +159,19 @@ CREATE TABLE `assessmentresult` (
 CREATE TABLE `assessmentresult_answers` (
   `result_id` varchar(255) NOT NULL,
   `question_id` varchar(255) NOT NULL,
+  `option_id` varchar(255) NOT NULL,
   `is_correct` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `assessmentresult_answers`:
+--   `result_id`
+--       `assessmentresult` -> `result_id`
+--   `question_id`
+--       `question` -> `question_id`
+--   `option_id`
+--       `options` -> `option_id`
+--
 
 -- --------------------------------------------------------
 
@@ -141,6 +187,10 @@ CREATE TABLE `attachment` (
   `mime_type` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- RELATIONSHIPS FOR TABLE `attachment`:
+--
+
 -- --------------------------------------------------------
 
 --
@@ -152,9 +202,22 @@ CREATE TABLE `badges` (
   `badge_name` varchar(255) NOT NULL,
   `badge_description` text NOT NULL,
   `badge_image` varchar(2048) DEFAULT NULL,
-  `points_required` int(11) NOT NULL,
-  `is_unlocked` tinyint(1) NOT NULL
+  `points_required` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `badges`:
+--
+
+--
+-- Dumping data for table `badges`
+--
+
+INSERT INTO `badges` (`badge_id`, `badge_name`, `badge_description`, `badge_image`, `points_required`) VALUES
+('1', 'Starting Run', 'Congrats Learner! You have earned 5 points!', 'https://thumbs.dreamstime.com/b/ui-badge-icon-modern-reward-button-design-award-medal-casino-bonus-futuristic-hud-grunge-royal-achievement-interface-sign-316977278.jpg', 5),
+('2', 'Mathlete Apprentice', 'Earn 25 points', 'https://thumbs.dreamstime.com/b/ui-badge-icon-modern-reward-button-design-award-medal-casino-bonus-futuristic-hud-grunge-royal-achievement-interface-sign-316977278.jpg', 25),
+('3', 'Budding Mathematician', 'Earn 50 points', 'https://thumbs.dreamstime.com/b/ui-badge-icon-modern-reward-button-design-award-medal-casino-bonus-futuristic-hud-grunge-royal-achievement-interface-sign-316977278.jpg', 50),
+('4', 'Math Whiz', 'Earn 75 Points', 'https://thumbs.dreamstime.com/b/ui-badge-icon-modern-reward-button-design-award-medal-casino-bonus-futuristic-hud-grunge-royal-achievement-interface-sign-316977278.jpg', 75);
 
 -- --------------------------------------------------------
 
@@ -168,17 +231,26 @@ CREATE TABLE `calendarevent` (
   `description` text DEFAULT NULL,
   `date` datetime NOT NULL,
   `event_type_id` int(11) NOT NULL,
-  `is_urgent` tinyint(1) NOT NULL DEFAULT 0,
+  `is_urgent` tinyint(1) DEFAULT 0,
   `location` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `calendarevent`:
+--   `event_type_id`
+--       `eventtype` -> `event_type_id`
+--   `event_id`
+--       `activity` -> `activity_id`
+--
 
 --
 -- Dumping data for table `calendarevent`
 --
 
 INSERT INTO `calendarevent` (`event_id`, `title`, `description`, `date`, `event_type_id`, `is_urgent`, `location`) VALUES
-('M101A3E1', 'Short Quiz 1', 'We will be taking our Short Quiz 1', '2025-05-23 11:43:14', 2, 1, 'Good Shepard High School'),
-('M101A4E2', 'Long Quiz 1', 'We will be taking our Long quiz', '2025-05-23 11:43:14', 4, 1, 'Good Shepard High School');
+('2b6bf879-4987-4c72-b171-0c511932dc58', 'fasdf', 'asdf', '2025-06-07 15:46:43', 1, 0, 'sadf'),
+('2bb874bc-3b92-495c-9732-61ba16620927', 'sadfa', 'asdfasdf', '2025-06-19 14:20:00', 2, 1, 'Good Shepard High School'),
+('56bfade8-cb9a-428f-8acb-48fe7208a5bb', 'asdf', 'asdfasdf', '2025-06-12 14:56:00', 1, 0, 'Good Shepard High School');
 
 -- --------------------------------------------------------
 
@@ -188,16 +260,20 @@ INSERT INTO `calendarevent` (`event_id`, `title`, `description`, `date`, `event_
 
 CREATE TABLE `contenttype` (
   `content_type_id` int(11) NOT NULL,
-  `content_type_name` enum('TEXT','PDF','VIDEO') NOT NULL
+  `content_type_name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `contenttype`:
+--
 
 --
 -- Dumping data for table `contenttype`
 --
 
 INSERT INTO `contenttype` (`content_type_id`, `content_type_name`) VALUES
+(2, 'PDF/DOCS'),
 (1, 'TEXT'),
-(2, 'PDF'),
 (3, 'VIDEO');
 
 -- --------------------------------------------------------
@@ -210,19 +286,25 @@ CREATE TABLE `course` (
   `course_id` varchar(255) NOT NULL,
   `course_code` varchar(255) NOT NULL,
   `course_name` varchar(255) NOT NULL,
-  `teacher_id` varchar(255) NOT NULL,
+  `teacher_id` varchar(255) DEFAULT NULL,
   `course_description` text DEFAULT NULL,
+  `course_picture` varchar(255) NOT NULL,
   `start_date` date DEFAULT NULL,
-  `end_date` date DEFAULT NULL,
-  `course_picture` varchar(2048) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL
+  `end_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `course`:
+--   `teacher_id`
+--       `teacher` -> `user_id`
+--
 
 --
 -- Dumping data for table `course`
 --
 
-INSERT INTO `course` (`course_id`, `course_code`, `course_name`, `teacher_id`, `course_description`, `start_date`, `end_date`, `course_picture`) VALUES
-('2349023', 'MATH101', 'Math', 'T2012943', 'Basic Math', '2025-05-18', '2025-06-30', 'https://cdn.prod.website-files.com/6744bdb342b0a7660e7b7c7d/67df5face1f96bebc07f8f2b_3b23b533-c408-4380-bce6-0820b89131e9_math-on-board.jpeg');
+INSERT INTO `course` (`course_id`, `course_code`, `course_name`, `teacher_id`, `course_description`, `course_picture`, `start_date`, `end_date`) VALUES
+('13409504384', 'MATH101', 'Grade 7 Math', 'T2022123124', 'Let\'s Learn Math', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZ6UNP6GoD9gDTZwWhn_GxRqU8rY9ATTIJtw&s', '2025-06-04', '2025-07-01');
 
 -- --------------------------------------------------------
 
@@ -240,11 +322,19 @@ CREATE TABLE `enrollment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- RELATIONSHIPS FOR TABLE `enrollment`:
+--   `student_id`
+--       `student` -> `user_id`
+--   `course_id`
+--       `course` -> `course_id`
+--
+
+--
 -- Dumping data for table `enrollment`
 --
 
 INSERT INTO `enrollment` (`enrollment_id`, `student_id`, `course_id`, `enrollment_date`, `isEnrolled`, `finalGrade`) VALUES
-('31349823', '202210383', '2349023', '2025-05-18', 1, 0);
+('wcasvsav', '202210383', '13409504384', '2025-06-05', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -254,19 +344,24 @@ INSERT INTO `enrollment` (`enrollment_id`, `student_id`, `course_id`, `enrollmen
 
 CREATE TABLE `eventtype` (
   `event_type_id` int(11) NOT NULL,
-  `event_type_name` enum('MODULE','SHORT_QUIZ','PRACTICE_QUIZ','LONG_QUIZ','CATCH_UP') NOT NULL
+  `event_type_name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `eventtype`:
+--
 
 --
 -- Dumping data for table `eventtype`
 --
 
 INSERT INTO `eventtype` (`event_type_id`, `event_type_name`) VALUES
-(1, 'MODULE'),
-(2, 'SHORT_QUIZ'),
-(3, 'PRACTICE_QUIZ'),
+(5, 'CATCH_UP'),
 (4, 'LONG_QUIZ'),
-(5, 'CATCH_UP');
+(1, 'MODULE'),
+(3, 'PRACTICE_QUIZ'),
+(6, 'SCREENING_EXAM'),
+(2, 'SHORT_QUIZ');
 
 -- --------------------------------------------------------
 
@@ -276,10 +371,13 @@ INSERT INTO `eventtype` (`event_type_id`, `event_type_name`) VALUES
 
 CREATE TABLE `inbox` (
   `inbox_id` varchar(255) NOT NULL,
-  `last_message_id` varchar(255) DEFAULT NULL,
-  `unread_count` int(11) NOT NULL,
+  `unread_count` int(11) NOT NULL DEFAULT 0,
   `timestamp` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `inbox`:
+--
 
 -- --------------------------------------------------------
 
@@ -292,19 +390,13 @@ CREATE TABLE `inboxparticipant` (
   `participant_id` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `leaderboard`
+-- RELATIONSHIPS FOR TABLE `inboxparticipant`:
+--   `inbox_id`
+--       `inbox` -> `inbox_id`
+--   `participant_id`
+--       `user` -> `user_id`
 --
-
-CREATE TABLE `leaderboard` (
-  `course_id` varchar(255) NOT NULL,
-  `student_id` varchar(255) NOT NULL,
-  `total_points` int(11) NOT NULL,
-  `ranking` int(11) NOT NULL,
-  `last_updated` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -316,10 +408,26 @@ CREATE TABLE `lecture` (
   `activity_id` varchar(255) NOT NULL,
   `content_type_id` int(11) NOT NULL,
   `video_url` varchar(2048) DEFAULT NULL,
-  `pdf_url` varchar(2048) DEFAULT NULL,
-  `doc_url` varchar(2048) DEFAULT NULL,
-  `text_body` text DEFAULT NULL
+  `text_body` text DEFAULT NULL,
+  `file_url` varchar(2048) DEFAULT NULL,
+  `file_mime_type` varchar(255) DEFAULT NULL,
+  `file_name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `lecture`:
+--   `activity_id`
+--       `activity` -> `activity_id`
+--   `content_type_id`
+--       `contenttype` -> `content_type_id`
+--
+
+--
+-- Dumping data for table `lecture`
+--
+
+INSERT INTO `lecture` (`activity_id`, `content_type_id`, `video_url`, `text_body`, `file_url`, `file_mime_type`, `file_name`) VALUES
+('2b6bf879-4987-4c72-b171-0c511932dc58', 2, NULL, NULL, 'http://10.0.2.2/turo_app/api/v1/uploads/lec_6844312f934e9.pdf', 'application/pdf', 'dummy.pdf');
 
 -- --------------------------------------------------------
 
@@ -329,14 +437,20 @@ CREATE TABLE `lecture` (
 
 CREATE TABLE `message` (
   `message_id` varchar(255) NOT NULL,
+  `inbox_id` varchar(255) NOT NULL,
   `sender_id` varchar(255) NOT NULL,
-  `subject` varchar(255) NOT NULL,
+  `subject` varchar(255) DEFAULT NULL,
   `body` text NOT NULL,
-  `timestamp` bigint(20) NOT NULL,
-  `is_read` tinyint(1) NOT NULL,
-  `is_mass` tinyint(1) NOT NULL,
-  `delete_for_user` tinyint(1) NOT NULL DEFAULT 0
+  `timestamp` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `message`:
+--   `inbox_id`
+--       `inbox` -> `inbox_id`
+--   `sender_id`
+--       `user` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -349,17 +463,34 @@ CREATE TABLE `messageattachment` (
   `attachment_id` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- RELATIONSHIPS FOR TABLE `messageattachment`:
+--   `message_id`
+--       `message` -> `message_id`
+--   `attachment_id`
+--       `attachment` -> `attachment_id`
+--
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `messagerecipient`
+-- Table structure for table `messageuserstate`
 --
 
-CREATE TABLE `messagerecipient` (
+CREATE TABLE `messageuserstate` (
   `message_id` varchar(255) NOT NULL,
-  `recipient_id` varchar(255) NOT NULL,
-  `is_cc` tinyint(1) NOT NULL
+  `user_id` varchar(255) NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `messageuserstate`:
+--   `message_id`
+--       `message` -> `message_id`
+--   `user_id`
+--       `user` -> `user_id`
+--
 
 -- --------------------------------------------------------
 
@@ -375,12 +506,17 @@ CREATE TABLE `module` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- RELATIONSHIPS FOR TABLE `module`:
+--   `course_id`
+--       `course` -> `course_id`
+--
+
+--
 -- Dumping data for table `module`
 --
 
 INSERT INTO `module` (`module_id`, `course_id`, `module_name`, `module_description`) VALUES
-('M1011', '2349023', 'Module 1 - Sets', 'Introduction to Sets, Venn Diagrams, and Set Operations'),
-('M1012', '2349023', 'Module 2 - Real Numbers (Integers)', 'Absolute Values, Integers and Integer Operations');
+('2p394p0', '13409504384', 'Module 1 - Setss', 'Let\'s Learn Sets');
 
 -- --------------------------------------------------------
 
@@ -398,6 +534,16 @@ CREATE TABLE `moduleprogress` (
   `screening_exam_failed_count` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- RELATIONSHIPS FOR TABLE `moduleprogress`:
+--   `student_id`
+--       `student` -> `user_id`
+--   `module_id`
+--       `module` -> `module_id`
+--   `tier_passed_id`
+--       `screeningtier` -> `tier_id`
+--
+
 -- --------------------------------------------------------
 
 --
@@ -407,43 +553,28 @@ CREATE TABLE `moduleprogress` (
 CREATE TABLE `options` (
   `option_id` varchar(255) NOT NULL,
   `question_id` varchar(255) NOT NULL,
-  `option_text` varchar(255) NOT NULL,
+  `option_text` varchar(500) NOT NULL,
   `is_correct` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `options`:
+--   `question_id`
+--       `question` -> `question_id`
+--
 
 --
 -- Dumping data for table `options`
 --
 
 INSERT INTO `options` (`option_id`, `question_id`, `option_text`, `is_correct`) VALUES
-('M101A3Q10O1', 'M101A3Q10', 'True', 1),
-('M101A3Q10O2', 'M101A3Q10', 'False', 0),
-('M101A3Q1O1', 'M101A3Q1', '{1,2}', 0),
-('M101A3Q1O2', 'M101A3Q1', '{3,4}', 1),
-('M101A3Q1O3', 'M101A3Q1', '{5,6}', 0),
-('M101A3Q1O4', 'M101A3Q1', '{1,2,3,4,5,6}', 0),
-('M101A3Q2O1', 'M101A3Q2', '{{a},{b},{a,b}}', 0),
-('M101A3Q2O2', 'M101A3Q2', '{∅,{a},{b},{a,b}}', 1),
-('M101A3Q2O3', 'M101A3Q2', '{{a,b}}', 0),
-('M101A3Q2O4', 'M101A3Q2', '{∅,{a,b}}', 0),
-('M101A3Q3O1', 'M101A3Q3', '{1,3,5}', 1),
-('M101A3Q3O2', 'M101A3Q3', '{2,4}', 0),
-('M101A3Q3O3', 'M101A3Q3', '{1,2,3,4,5}', 0),
-('M101A3Q3O4', 'M101A3Q3', '∅', 0),
-('M101A3Q4O1', 'M101A3Q4', 'Two sets are equal if and only if they have exactly the same elements.', 0),
-('M101A3Q4O2', 'M101A3Q4', 'The order of elements matters in a set.', 1),
-('M101A3Q4O3', 'M101A3Q4', 'Repetition of elements in the roster method doesn’t change the set.', 0),
-('M101A3Q4O4', 'M101A3Q4', 'Every element of the empty set vacuously satisfies any given property.', 0),
-('M101A3Q5O1', 'M101A3Q5', 'True', 1),
-('M101A3Q5O2', 'M101A3Q5', 'False', 0),
-('M101A3Q6O1', 'M101A3Q6', 'True', 1),
-('M101A3Q6O2', 'M101A3Q6', 'False', 0),
-('M101A3Q7O1', 'M101A3Q7', 'True', 1),
-('M101A3Q7O2', 'M101A3Q7', 'False', 0),
-('M101A3Q8O1', 'M101A3Q8', 'True', 0),
-('M101A3Q8O2', 'M101A3Q8', 'False', 1),
-('M101A3Q9O1', 'M101A3Q9', 'True', 1),
-('M101A3Q9O2', 'M101A3Q9', 'False', 0);
+('0a87832a-604d-4783-927a-6a55ec797a25', '011749ab-7d17-4be7-a132-589bf3a2f542', 'sadf', 0),
+('2c14ff0c-3409-42fc-9845-8b3fb6537a57', '011749ab-7d17-4be7-a132-589bf3a2f542', 'sadf', 1),
+('73acd783-bfcb-4d27-8ac6-8c347cae575d', '754cfb37-1671-413e-a306-177ee5dfb105', 'asdf', 0),
+('7c4d16e2-880b-4f59-973d-54d7e360713a', '754cfb37-1671-413e-a306-177ee5dfb105', 'asdf', 0),
+('81734e4e-78fc-430a-9bcc-14fdaea0864f', '754cfb37-1671-413e-a306-177ee5dfb105', 'asdf', 1),
+('92c7dace-bd93-40c2-8e56-ae452292e327', '754cfb37-1671-413e-a306-177ee5dfb105', 'asdf', 0),
+('adbf77f5-e27c-4a1d-bdef-65d8b41670d9', '011749ab-7d17-4be7-a132-589bf3a2f542', 'asdf', 0);
 
 -- --------------------------------------------------------
 
@@ -460,11 +591,10 @@ CREATE TABLE `password_resets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `password_resets`
+-- RELATIONSHIPS FOR TABLE `password_resets`:
+--   `user_id`
+--       `user` -> `user_id`
 --
-
-INSERT INTO `password_resets` (`user_id`, `code_hash`, `expires_at`, `created_at`, `requested_at`) VALUES
-('202210383', '$2y$10$s3Xa/ujIi75zipRXUfcKmuyRLgaIHnI5aY.krEFAcxuaWIDYMO20a', '2025-05-19 13:33:29', '2025-05-14 22:40:23', '2025-05-19 13:23:29');
 
 -- --------------------------------------------------------
 
@@ -475,27 +605,26 @@ INSERT INTO `password_resets` (`user_id`, `code_hash`, `expires_at`, `created_at
 CREATE TABLE `question` (
   `question_id` varchar(255) NOT NULL,
   `question_text` text NOT NULL,
-  `question_image` varchar(2048) DEFAULT NULL,
   `question_type_id` int(11) NOT NULL,
   `score` int(11) NOT NULL,
   `activity_id` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- RELATIONSHIPS FOR TABLE `question`:
+--   `activity_id`
+--       `activity` -> `activity_id`
+--   `question_type_id`
+--       `questiontype` -> `type_id`
+--
+
+--
 -- Dumping data for table `question`
 --
 
-INSERT INTO `question` (`question_id`, `question_text`, `question_image`, `question_type_id`, `score`, `activity_id`) VALUES
-('M101A3Q1', 'Let 𝐴 = { 1 , 2 , 3 , 4 } and 𝐵 = { 3 , 4 , 5 , 6 }. What is 𝐴 ∩ 𝐵?', NULL, 1, 1, 'M101A3'),
-('M101A3Q10', 'True or False\r\nFor any sets 𝐴 and 𝐵, ∣ 𝐴 ∪ 𝐵 ∣ = ∣ 𝐴 ∣ + ∣ 𝐵 ∣ − ∣ 𝐴 ∩ 𝐵 ∣.', NULL, 1, 1, 'M101A3'),
-('M101A3Q2', 'Which of the following represents the power set of { 𝑎 , 𝑏 }?', NULL, 1, 1, 'M101A3'),
-('M101A3Q3', 'If 𝑈 = { 1 , 2 , 3 , 4 , 5 } is the universal set and 𝐴 = { 2 , 4 }, what is the complement 𝐴𝑐?', NULL, 1, 1, 'M101A3'),
-('M101A3Q4', 'Which statement is false?', NULL, 1, 1, 'M101A3'),
-('M101A3Q5', 'True or False\r\nThe empty set ∅ is a subset of every set.', NULL, 1, 1, 'M101A3'),
-('M101A3Q6', 'True or False\r\n{1,2}⊆{1,2,3} but { 1 , 2 , 3 } ⊈ { 1 , 2 }.', NULL, 1, 1, 'M101A3'),
-('M101A3Q7', 'True or False\r\nIf 𝐴 ⊂ 𝐵 (proper subset), then ∣ 𝐴 ∣ < ∣ 𝐵 ∣.', NULL, 1, 1, 'M101A3'),
-('M101A3Q8', 'True or False\r\nThe union of two disjoint sets is always the empty set.', NULL, 1, 1, 'M101A3'),
-('M101A3Q9', 'True or False\r\n{x:x is an even integer} is an infinite set.', NULL, 1, 1, 'M101A3');
+INSERT INTO `question` (`question_id`, `question_text`, `question_type_id`, `score`, `activity_id`) VALUES
+('011749ab-7d17-4be7-a132-589bf3a2f542', 'asdf', 1, 1, '2bb874bc-3b92-495c-9732-61ba16620927'),
+('754cfb37-1671-413e-a306-177ee5dfb105', 'asdf', 1, 1, '2bb874bc-3b92-495c-9732-61ba16620927');
 
 -- --------------------------------------------------------
 
@@ -505,8 +634,12 @@ INSERT INTO `question` (`question_id`, `question_text`, `question_image`, `quest
 
 CREATE TABLE `questiontype` (
   `type_id` int(11) NOT NULL,
-  `type_name` enum('MULTIPLE_CHOICE','SHORT_ANSWER') NOT NULL
+  `type_name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `questiontype`:
+--
 
 --
 -- Dumping data for table `questiontype`
@@ -527,18 +660,25 @@ CREATE TABLE `quiz` (
   `number_of_attempts` int(11) NOT NULL,
   `quiz_type_id` int(11) NOT NULL,
   `time_limit` int(11) NOT NULL,
-  `is_passed` tinyint(1) DEFAULT NULL,
   `number_of_questions` int(11) NOT NULL,
-  `overall_points` int(11) NOT NULL
+  `overall_points` int(11) NOT NULL,
+  `has_answers_shown` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `quiz`:
+--   `activity_id`
+--       `activity` -> `activity_id`
+--   `quiz_type_id`
+--       `quiztype` -> `quiz_type_id`
+--
 
 --
 -- Dumping data for table `quiz`
 --
 
-INSERT INTO `quiz` (`activity_id`, `number_of_attempts`, `quiz_type_id`, `time_limit`, `is_passed`, `number_of_questions`, `overall_points`) VALUES
-('M101A3', 2, 1, 1800, NULL, 10, 10),
-('M101A4', 1, 3, 3000, NULL, 10, 10);
+INSERT INTO `quiz` (`activity_id`, `number_of_attempts`, `quiz_type_id`, `time_limit`, `number_of_questions`, `overall_points`, `has_answers_shown`) VALUES
+('2bb874bc-3b92-495c-9732-61ba16620927', 1, 1, 420, 2, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -548,29 +688,22 @@ INSERT INTO `quiz` (`activity_id`, `number_of_attempts`, `quiz_type_id`, `time_l
 
 CREATE TABLE `quiztype` (
   `quiz_type_id` int(11) NOT NULL,
-  `quiz_type_name` enum('SHORT','PRACTICE','LONG') NOT NULL
+  `quiz_type_name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `quiztype`:
+--
 
 --
 -- Dumping data for table `quiztype`
 --
 
 INSERT INTO `quiztype` (`quiz_type_id`, `quiz_type_name`) VALUES
-(1, 'SHORT'),
+(3, 'LONG'),
 (2, 'PRACTICE'),
-(3, 'LONG');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `screeningexam`
---
-
-CREATE TABLE `screeningexam` (
-  `activity_id` varchar(255) NOT NULL,
-  `tier_passed_id` int(11) NOT NULL,
-  `is_Passed` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(4, 'SCREENING_EXAM'),
+(1, 'SHORT');
 
 -- --------------------------------------------------------
 
@@ -580,8 +713,21 @@ CREATE TABLE `screeningexam` (
 
 CREATE TABLE `screeningtier` (
   `tier_id` int(11) NOT NULL,
-  `tier_name` enum('TIER_1','TIER_2','TIER_3') NOT NULL
+  `tier_name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `screeningtier`:
+--
+
+--
+-- Dumping data for table `screeningtier`
+--
+
+INSERT INTO `screeningtier` (`tier_id`, `tier_name`) VALUES
+(1, 'TIER_1'),
+(2, 'TIER_2'),
+(3, 'TIER_3');
 
 -- --------------------------------------------------------
 
@@ -597,6 +743,10 @@ CREATE TABLE `shopitem` (
   `points_required` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- RELATIONSHIPS FOR TABLE `shopitem`:
+--
+
 -- --------------------------------------------------------
 
 --
@@ -605,17 +755,21 @@ CREATE TABLE `shopitem` (
 
 CREATE TABLE `student` (
   `user_id` varchar(255) NOT NULL,
-  `averageScore` double NOT NULL DEFAULT 0,
-  `isCatchUp` tinyint(1) NOT NULL DEFAULT 0,
-  `totalPoints` int(11) NOT NULL DEFAULT 0
+  `isCatchUp` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `student`:
+--   `user_id`
+--       `user` -> `user_id`
+--
 
 --
 -- Dumping data for table `student`
 --
 
-INSERT INTO `student` (`user_id`, `averageScore`, `isCatchUp`, `totalPoints`) VALUES
-('202210383', 0, 0, 0);
+INSERT INTO `student` (`user_id`, `isCatchUp`) VALUES
+('202210383', 1);
 
 -- --------------------------------------------------------
 
@@ -627,9 +781,23 @@ CREATE TABLE `studentprogress` (
   `student_id` varchar(255) NOT NULL,
   `course_id` varchar(255) NOT NULL,
   `total_points` int(11) NOT NULL,
-  `average_score` double NOT NULL,
-  `leaderboard_rank` int(11) NOT NULL
+  `average_score` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `studentprogress`:
+--   `student_id`
+--       `student` -> `user_id`
+--   `course_id`
+--       `course` -> `course_id`
+--
+
+--
+-- Dumping data for table `studentprogress`
+--
+
+INSERT INTO `studentprogress` (`student_id`, `course_id`, `total_points`, `average_score`) VALUES
+('202210383', '13409504384', 5, 0);
 
 -- --------------------------------------------------------
 
@@ -642,6 +810,14 @@ CREATE TABLE `student_achievements` (
   `achievement_id` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- RELATIONSHIPS FOR TABLE `student_achievements`:
+--   `student_id`
+--       `student` -> `user_id`
+--   `achievement_id`
+--       `achievements` -> `achievement_id`
+--
+
 -- --------------------------------------------------------
 
 --
@@ -650,8 +826,27 @@ CREATE TABLE `student_achievements` (
 
 CREATE TABLE `student_badges` (
   `student_id` varchar(255) NOT NULL,
-  `badge_id` varchar(255) NOT NULL
+  `badge_id` varchar(255) NOT NULL,
+  `is_unlocked` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `student_badges`:
+--   `student_id`
+--       `student` -> `user_id`
+--   `badge_id`
+--       `badges` -> `badge_id`
+--
+
+--
+-- Dumping data for table `student_badges`
+--
+
+INSERT INTO `student_badges` (`student_id`, `badge_id`, `is_unlocked`) VALUES
+('202210383', '1', 1),
+('202210383', '2', 0),
+('202210383', '3', 0),
+('202210383', '4', 0);
 
 -- --------------------------------------------------------
 
@@ -665,6 +860,14 @@ CREATE TABLE `student_shopitem` (
   `purchase_date` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- RELATIONSHIPS FOR TABLE `student_shopitem`:
+--   `student_id`
+--       `student` -> `user_id`
+--   `item_id`
+--       `shopitem` -> `item_id`
+--
+
 -- --------------------------------------------------------
 
 --
@@ -676,11 +879,17 @@ CREATE TABLE `teacher` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- RELATIONSHIPS FOR TABLE `teacher`:
+--   `user_id`
+--       `user` -> `user_id`
+--
+
+--
 -- Dumping data for table `teacher`
 --
 
 INSERT INTO `teacher` (`user_id`) VALUES
-('T2012943');
+('T2022123124');
 
 -- --------------------------------------------------------
 
@@ -693,6 +902,21 @@ CREATE TABLE `tutorial` (
   `content_type_id` int(11) NOT NULL,
   `video_url` varchar(2048) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `tutorial`:
+--   `activity_id`
+--       `activity` -> `activity_id`
+--   `content_type_id`
+--       `contenttype` -> `content_type_id`
+--
+
+--
+-- Dumping data for table `tutorial`
+--
+
+INSERT INTO `tutorial` (`activity_id`, `content_type_id`, `video_url`) VALUES
+('56bfade8-cb9a-428f-8acb-48fe7208a5bb', 3, 'https://www.youtube.com/watch?v=FbtRzerW3xw&t=71s');
 
 -- --------------------------------------------------------
 
@@ -707,19 +931,24 @@ CREATE TABLE `user` (
   `email` varchar(255) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role_id` int(11) NOT NULL,
-  `profile_pic` varchar(512) DEFAULT NULL,
+  `profile_pic` varchar(2048) DEFAULT NULL,
   `agreed_to_terms` tinyint(1) NOT NULL DEFAULT 0,
   `requires_password_change` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `user`:
+--   `role_id`
+--       `userrole` -> `role_id`
+--
 
 --
 -- Dumping data for table `user`
 --
 
 INSERT INTO `user` (`user_id`, `first_name`, `last_name`, `email`, `password_hash`, `role_id`, `profile_pic`, `agreed_to_terms`, `requires_password_change`) VALUES
-('202210383', 'Test', 'Imperial', 'codegeassislife@gmail.com', '$2y$10$sNBgLs3q4BxEk1Na2xLkwulpRUQSOj71YShSYMQk8wLiLcbRRTSoi', 1, 'http://10.0.2.2/turo_app/api/v1/uploads/profile_pics/profile_682ac032e435b3.42709459.jpg', 1, 0),
-('202211373', 'Test', 'Imperial', 'imperialmj542@gmail.com', '$2y$10$lJ5IqHkxhS61dn7FA7wKS.SHbNGw16NRhHH66QtMR3hivwJQvM9Rq', 1, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFCkHR8ZebRAxt-45SHEh0QBetYHdeE9cSEw&s', 0, 1),
-('T2012943', 'Teacher1', 'TeacherLastName', 'turoapplication40@gmail.com', '$2y$10$bcFSRphuRATGFPr5F0Okm.vWQKD/1H2K.wy6Wt/buMDX1r56fXriG', 2, 'https://img.gta5-mods.com/q95/images/final-fantasy-vii-cloud-strife-jp-voice/371e38-26df6e6724dd714619e35b29e7455df1.jpg', 1, 0);
+('202210383', 'Student1', 'Lastname', 'codegeassislife@gmail.com', '$2y$10$TrI2gTU3iNAcsR3bo4Q5RuoCRc7nDDuPiLDCHGSp4BQwUk9sOuX96', 1, 'https://static.wikia.nocookie.net/deathbattle/images/b/b4/Portrait.cloud.png/revision/latest?cb=20230923010647', 1, 0),
+('T2022123124', 'Teacher', 'Lastname', 'teach@gmail.com', '$2y$10$d9Qa5nvir2OtzJVOj2tFxeryAl93eWK6Wulihq3BL8107emJqZJbW', 2, 'https://cdn.mos.cms.futurecdn.net/z2fxx8VpPisBLfyjaYd8d5.jpg', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -729,17 +958,21 @@ INSERT INTO `user` (`user_id`, `first_name`, `last_name`, `email`, `password_has
 
 CREATE TABLE `userrole` (
   `role_id` int(11) NOT NULL,
-  `role_name` enum('STUDENT','TEACHER','ADMIN') NOT NULL
+  `role_name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `userrole`:
+--
 
 --
 -- Dumping data for table `userrole`
 --
 
 INSERT INTO `userrole` (`role_id`, `role_name`) VALUES
+(3, 'ADMIN'),
 (1, 'STUDENT'),
-(2, 'TEACHER'),
-(3, 'ADMIN');
+(2, 'TEACHER');
 
 --
 -- Indexes for dumped tables
@@ -764,21 +997,13 @@ ALTER TABLE `achievements`
 --
 ALTER TABLE `activity`
   ADD PRIMARY KEY (`activity_id`),
-  ADD KEY `module_id` (`module_id`),
-  ADD KEY `idx_activity_event_id` (`event_id`);
+  ADD KEY `module_id` (`module_id`);
 
 --
 -- Indexes for table `admin`
 --
 ALTER TABLE `admin`
   ADD PRIMARY KEY (`user_id`);
-
---
--- Indexes for table `answers`
---
-ALTER TABLE `answers`
-  ADD PRIMARY KEY (`question_id`),
-  ADD KEY `option_id` (`option_id`);
 
 --
 -- Indexes for table `assessmentresult`
@@ -795,7 +1020,8 @@ ALTER TABLE `assessmentresult`
 --
 ALTER TABLE `assessmentresult_answers`
   ADD PRIMARY KEY (`result_id`,`question_id`),
-  ADD KEY `question_id` (`question_id`);
+  ADD KEY `question_id` (`question_id`),
+  ADD KEY `option_id` (`option_id`);
 
 --
 -- Indexes for table `attachment`
@@ -850,8 +1076,7 @@ ALTER TABLE `eventtype`
 -- Indexes for table `inbox`
 --
 ALTER TABLE `inbox`
-  ADD PRIMARY KEY (`inbox_id`),
-  ADD KEY `last_message_id` (`last_message_id`);
+  ADD PRIMARY KEY (`inbox_id`);
 
 --
 -- Indexes for table `inboxparticipant`
@@ -859,13 +1084,6 @@ ALTER TABLE `inbox`
 ALTER TABLE `inboxparticipant`
   ADD PRIMARY KEY (`inbox_id`,`participant_id`),
   ADD KEY `participant_id` (`participant_id`);
-
---
--- Indexes for table `leaderboard`
---
-ALTER TABLE `leaderboard`
-  ADD PRIMARY KEY (`course_id`,`student_id`),
-  ADD KEY `student_id` (`student_id`);
 
 --
 -- Indexes for table `lecture`
@@ -879,6 +1097,7 @@ ALTER TABLE `lecture`
 --
 ALTER TABLE `message`
   ADD PRIMARY KEY (`message_id`),
+  ADD KEY `inbox_id` (`inbox_id`),
   ADD KEY `sender_id` (`sender_id`);
 
 --
@@ -889,11 +1108,11 @@ ALTER TABLE `messageattachment`
   ADD KEY `attachment_id` (`attachment_id`);
 
 --
--- Indexes for table `messagerecipient`
+-- Indexes for table `messageuserstate`
 --
-ALTER TABLE `messagerecipient`
-  ADD PRIMARY KEY (`message_id`,`recipient_id`,`is_cc`),
-  ADD KEY `recipient_id` (`recipient_id`);
+ALTER TABLE `messageuserstate`
+  ADD PRIMARY KEY (`message_id`,`user_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `module`
@@ -921,8 +1140,7 @@ ALTER TABLE `options`
 -- Indexes for table `password_resets`
 --
 ALTER TABLE `password_resets`
-  ADD PRIMARY KEY (`user_id`),
-  ADD KEY `idx_expires_at` (`expires_at`);
+  ADD PRIMARY KEY (`user_id`);
 
 --
 -- Indexes for table `question`
@@ -952,13 +1170,6 @@ ALTER TABLE `quiz`
 ALTER TABLE `quiztype`
   ADD PRIMARY KEY (`quiz_type_id`),
   ADD UNIQUE KEY `quiz_type_name` (`quiz_type_name`);
-
---
--- Indexes for table `screeningexam`
---
-ALTER TABLE `screeningexam`
-  ADD PRIMARY KEY (`activity_id`),
-  ADD KEY `tier_passed_id` (`tier_passed_id`);
 
 --
 -- Indexes for table `screeningtier`
@@ -1043,7 +1254,7 @@ ALTER TABLE `userrole`
 -- AUTO_INCREMENT for table `achievementconditiontype`
 --
 ALTER TABLE `achievementconditiontype`
-  MODIFY `condition_type_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `condition_type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `contenttype`
@@ -1055,7 +1266,7 @@ ALTER TABLE `contenttype`
 -- AUTO_INCREMENT for table `eventtype`
 --
 ALTER TABLE `eventtype`
-  MODIFY `event_type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `event_type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `questiontype`
@@ -1067,13 +1278,13 @@ ALTER TABLE `questiontype`
 -- AUTO_INCREMENT for table `quiztype`
 --
 ALTER TABLE `quiztype`
-  MODIFY `quiz_type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `quiz_type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `screeningtier`
 --
 ALTER TABLE `screeningtier`
-  MODIFY `tier_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `tier_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `userrole`
@@ -1095,26 +1306,19 @@ ALTER TABLE `achievements`
 -- Constraints for table `activity`
 --
 ALTER TABLE `activity`
-  ADD CONSTRAINT `activity_ibfk_1` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`);
+  ADD CONSTRAINT `activity_ibfk_1` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `admin`
 --
 ALTER TABLE `admin`
-  ADD CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
-
---
--- Constraints for table `answers`
---
-ALTER TABLE `answers`
-  ADD CONSTRAINT `answers_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`),
-  ADD CONSTRAINT `answers_ibfk_2` FOREIGN KEY (`option_id`) REFERENCES `options` (`option_id`);
+  ADD CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `assessmentresult`
 --
 ALTER TABLE `assessmentresult`
-  ADD CONSTRAINT `assessmentresult_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`),
+  ADD CONSTRAINT `assessmentresult_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `assessmentresult_ibfk_2` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`),
   ADD CONSTRAINT `assessmentresult_ibfk_3` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`),
   ADD CONSTRAINT `assessmentresult_ibfk_4` FOREIGN KEY (`tier_level_id`) REFERENCES `screeningtier` (`tier_id`);
@@ -1123,34 +1327,29 @@ ALTER TABLE `assessmentresult`
 -- Constraints for table `assessmentresult_answers`
 --
 ALTER TABLE `assessmentresult_answers`
-  ADD CONSTRAINT `assessmentresult_answers_ibfk_1` FOREIGN KEY (`result_id`) REFERENCES `assessmentresult` (`result_id`),
-  ADD CONSTRAINT `assessmentresult_answers_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`);
+  ADD CONSTRAINT `assessmentresult_answers_ibfk_1` FOREIGN KEY (`result_id`) REFERENCES `assessmentresult` (`result_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `assessmentresult_answers_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`),
+  ADD CONSTRAINT `assessmentresult_answers_ibfk_3` FOREIGN KEY (`option_id`) REFERENCES `options` (`option_id`);
 
 --
 -- Constraints for table `calendarevent`
 --
 ALTER TABLE `calendarevent`
   ADD CONSTRAINT `calendarevent_ibfk_1` FOREIGN KEY (`event_type_id`) REFERENCES `eventtype` (`event_type_id`),
-  ADD CONSTRAINT `calendarevent_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `activity` (`event_id`);
+  ADD CONSTRAINT `calendarevent_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `course`
 --
 ALTER TABLE `course`
-  ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`user_id`);
+  ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`user_id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `enrollment`
 --
 ALTER TABLE `enrollment`
-  ADD CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`),
-  ADD CONSTRAINT `enrollment_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`);
-
---
--- Constraints for table `inbox`
---
-ALTER TABLE `inbox`
-  ADD CONSTRAINT `inbox_ibfk_1` FOREIGN KEY (`last_message_id`) REFERENCES `message` (`message_id`);
+  ADD CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `enrollment_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `inboxparticipant`
@@ -1160,50 +1359,44 @@ ALTER TABLE `inboxparticipant`
   ADD CONSTRAINT `inboxparticipant_ibfk_2` FOREIGN KEY (`participant_id`) REFERENCES `user` (`user_id`);
 
 --
--- Constraints for table `leaderboard`
---
-ALTER TABLE `leaderboard`
-  ADD CONSTRAINT `leaderboard_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`),
-  ADD CONSTRAINT `leaderboard_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`);
-
---
 -- Constraints for table `lecture`
 --
 ALTER TABLE `lecture`
-  ADD CONSTRAINT `lecture_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`),
+  ADD CONSTRAINT `lecture_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `lecture_ibfk_2` FOREIGN KEY (`content_type_id`) REFERENCES `contenttype` (`content_type_id`);
 
 --
 -- Constraints for table `message`
 --
 ALTER TABLE `message`
-  ADD CONSTRAINT `message_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `user` (`user_id`);
+  ADD CONSTRAINT `message_ibfk_1` FOREIGN KEY (`inbox_id`) REFERENCES `inbox` (`inbox_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `message_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `user` (`user_id`);
 
 --
 -- Constraints for table `messageattachment`
 --
 ALTER TABLE `messageattachment`
-  ADD CONSTRAINT `messageattachment_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `message` (`message_id`),
-  ADD CONSTRAINT `messageattachment_ibfk_2` FOREIGN KEY (`attachment_id`) REFERENCES `attachment` (`attachment_id`);
+  ADD CONSTRAINT `messageattachment_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `message` (`message_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `messageattachment_ibfk_2` FOREIGN KEY (`attachment_id`) REFERENCES `attachment` (`attachment_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `messagerecipient`
+-- Constraints for table `messageuserstate`
 --
-ALTER TABLE `messagerecipient`
-  ADD CONSTRAINT `messagerecipient_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `message` (`message_id`),
-  ADD CONSTRAINT `messagerecipient_ibfk_2` FOREIGN KEY (`recipient_id`) REFERENCES `user` (`user_id`);
+ALTER TABLE `messageuserstate`
+  ADD CONSTRAINT `messageuserstate_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `message` (`message_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `messageuserstate_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
 
 --
 -- Constraints for table `module`
 --
 ALTER TABLE `module`
-  ADD CONSTRAINT `module_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`);
+  ADD CONSTRAINT `module_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `moduleprogress`
 --
 ALTER TABLE `moduleprogress`
-  ADD CONSTRAINT `moduleprogress_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`),
+  ADD CONSTRAINT `moduleprogress_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `moduleprogress_ibfk_2` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`),
   ADD CONSTRAINT `moduleprogress_ibfk_3` FOREIGN KEY (`tier_passed_id`) REFERENCES `screeningtier` (`tier_id`);
 
@@ -1211,80 +1404,73 @@ ALTER TABLE `moduleprogress`
 -- Constraints for table `options`
 --
 ALTER TABLE `options`
-  ADD CONSTRAINT `options_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`);
+  ADD CONSTRAINT `options_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `password_resets`
 --
 ALTER TABLE `password_resets`
-  ADD CONSTRAINT `fk_password_resets_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `password_resets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `question`
 --
 ALTER TABLE `question`
-  ADD CONSTRAINT `question_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`),
+  ADD CONSTRAINT `question_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `question_ibfk_2` FOREIGN KEY (`question_type_id`) REFERENCES `questiontype` (`type_id`);
 
 --
 -- Constraints for table `quiz`
 --
 ALTER TABLE `quiz`
-  ADD CONSTRAINT `quiz_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`),
+  ADD CONSTRAINT `quiz_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `quiz_ibfk_2` FOREIGN KEY (`quiz_type_id`) REFERENCES `quiztype` (`quiz_type_id`);
-
---
--- Constraints for table `screeningexam`
---
-ALTER TABLE `screeningexam`
-  ADD CONSTRAINT `screeningexam_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`),
-  ADD CONSTRAINT `screeningexam_ibfk_2` FOREIGN KEY (`tier_passed_id`) REFERENCES `screeningtier` (`tier_id`);
 
 --
 -- Constraints for table `student`
 --
 ALTER TABLE `student`
-  ADD CONSTRAINT `student_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+  ADD CONSTRAINT `student_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `studentprogress`
 --
 ALTER TABLE `studentprogress`
-  ADD CONSTRAINT `studentprogress_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`),
-  ADD CONSTRAINT `studentprogress_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`);
+  ADD CONSTRAINT `studentprogress_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `studentprogress_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `student_achievements`
 --
 ALTER TABLE `student_achievements`
-  ADD CONSTRAINT `student_achievements_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`),
-  ADD CONSTRAINT `student_achievements_ibfk_2` FOREIGN KEY (`achievement_id`) REFERENCES `achievements` (`achievement_id`);
+  ADD CONSTRAINT `student_achievements_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_achievements_ibfk_2` FOREIGN KEY (`achievement_id`) REFERENCES `achievements` (`achievement_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `student_badges`
 --
 ALTER TABLE `student_badges`
-  ADD CONSTRAINT `student_badges_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`),
-  ADD CONSTRAINT `student_badges_ibfk_2` FOREIGN KEY (`badge_id`) REFERENCES `badges` (`badge_id`);
+  ADD CONSTRAINT `student_badges_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_badges_ibfk_2` FOREIGN KEY (`badge_id`) REFERENCES `badges` (`badge_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `student_shopitem`
 --
 ALTER TABLE `student_shopitem`
-  ADD CONSTRAINT `student_shopitem_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`),
+  ADD CONSTRAINT `student_shopitem_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `student_shopitem_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `shopitem` (`item_id`);
 
 --
 -- Constraints for table `teacher`
 --
 ALTER TABLE `teacher`
-  ADD CONSTRAINT `teacher_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+  ADD CONSTRAINT `teacher_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `tutorial`
 --
 ALTER TABLE `tutorial`
-  ADD CONSTRAINT `tutorial_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`),
+  ADD CONSTRAINT `tutorial_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `tutorial_ibfk_2` FOREIGN KEY (`content_type_id`) REFERENCES `contenttype` (`content_type_id`);
 
 --

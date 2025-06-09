@@ -43,7 +43,6 @@ try{
             Q.number_of_attempts,
             QT.quiz_type_name,
             Q.time_limit,
-            Q.is_passed,
             Q.number_of_questions,
             Q.overall_points,
             Q.has_answers_shown

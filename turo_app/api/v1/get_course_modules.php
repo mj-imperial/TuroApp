@@ -25,33 +25,19 @@ if (empty($input['course_id'])) {
     jsonResponse([ 'success' => false, 'message' => 'Invalid request: course_id' ], 400);
 }
 
+$courseId = $input['course_id'];
+
 try{
     $sql = "
         SELECT 
-            A.activity_id,
+            M.module_id,
             M.module_name,
-            A.activity_type,
-            A.activity_name,
-            A.activity_description,
-            A.unlock_date,
-            A.deadline_date,
-            Q.number_of_attempts,
-            QT.quiz_type_name,
-            Q.time_limit,
-            Q.number_of_questions,
-            Q.overall_points,
-            Q.has_answers_shown
-        FROM `Activity` AS A
-        INNER JOIN `Quiz` AS Q
-            on A.activity_id = Q.activity_id
-        INNER JOIN `Quiztype` AS QT
-            on Q.quiz_type_id = QT.quiz_type_id
-        INNER JOIN `Module` AS M
-            on M.module_id = A.module_id
+            M.module_description
+        FROM `Module` AS M
         WHERE M.course_id = ?
     ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $input['course_id']);
+    $stmt->bind_param('s', $courseId);
     if (! $stmt) {
         http_response_code(500);
         jsonResponse(['success'=>false,'message'=>'Database prepare failed'],500);
@@ -62,13 +48,13 @@ try{
         jsonResponse(['success'=>false,'message'=>'Database execute failed'],500);
         return;
     }
-    $quizzes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $modules = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 
     header('Content-Type: application/json');
     echo json_encode([
       'success' => true,
-      'quizzes' => $quizzes
+      'modules' => $modules
     ]);
     exit;
 }catch (mysqli_sql_exception $e) {

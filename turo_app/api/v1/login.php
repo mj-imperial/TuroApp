@@ -1,8 +1,6 @@
 <?php
 ini_set('display_errors','0');
 ini_set('log_errors','1');
-ob_start();
-session_start();
 
 header('Content-Type: application/json; charset=UTF-8');
 $configFile = __DIR__ . '/config.php';
@@ -86,10 +84,6 @@ if (! password_verify($password, $passwordHash)) {
     http_response_code(401);
     jsonResponse(['success' => false, 'error'   => 'Invalid credentials.'], 401);
 }
-
-$_SESSION['user_id'] = $userId;
-
-ob_end_clean();
 jsonResponse([ 
     'success' => true, 
     'user_id' => $userId, 

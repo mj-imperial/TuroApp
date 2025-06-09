@@ -20,38 +20,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $input = json_decode($raw, true) ?: [];
 }
 
-if (empty($input['course_id'])) {
+if (empty($input['student_id'])) {
     http_response_code(400);
-    jsonResponse([ 'success' => false, 'message' => 'Invalid request: course_id' ], 400);
+    jsonResponse([ 'success' => false, 'message' => 'Invalid request: student_id' ], 400);
 }
+
+$studentId = $input['student_id'];
 
 try{
     $sql = "
-        SELECT 
-            A.activity_id,
-            M.module_name,
-            A.activity_type,
-            A.activity_name,
-            A.activity_description,
-            A.unlock_date,
-            A.deadline_date,
-            Q.number_of_attempts,
-            QT.quiz_type_name,
-            Q.time_limit,
-            Q.number_of_questions,
-            Q.overall_points,
-            Q.has_answers_shown
-        FROM `Activity` AS A
-        INNER JOIN `Quiz` AS Q
-            on A.activity_id = Q.activity_id
-        INNER JOIN `Quiztype` AS QT
-            on Q.quiz_type_id = QT.quiz_type_id
-        INNER JOIN `Module` AS M
-            on M.module_id = A.module_id
-        WHERE M.course_id = ?
+        SELECT
+            sb.badge_id,
+            sb.is_unlocked,
+            b.badge_name,
+            b.badge_description,
+            b.badge_image,
+            b.points_required,
+            sp.total_points
+        FROM `Student_badges` AS sb
+        INNER JOIN `Badges` AS b
+            ON sb.badge_id = b.badge_id
+        INNER JOIN `Studentprogress` AS sp
+            on sb.student_id = sp.student_id
+        WHERE sb.student_id = ?
     ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $input['course_id']);
+    $stmt->bind_param('s', $studentId);
     if (! $stmt) {
         http_response_code(500);
         jsonResponse(['success'=>false,'message'=>'Database prepare failed'],500);
@@ -62,13 +56,13 @@ try{
         jsonResponse(['success'=>false,'message'=>'Database execute failed'],500);
         return;
     }
-    $quizzes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $badges = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 
     header('Content-Type: application/json');
     echo json_encode([
       'success' => true,
-      'quizzes' => $quizzes
+      'badges' => $badges
     ]);
     exit;
 }catch (mysqli_sql_exception $e) {
