@@ -20,38 +20,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $input = json_decode($raw, true) ?: [];
 }
 
-if (empty($input['course_id'])) {
+if (empty($input['module_id'])) {
     http_response_code(400);
     jsonResponse([ 'success' => false, 'message' => 'Invalid request: course_id' ], 400);
 }
 
+$moduleId = $input['module_id'];
+
 try{
     $sql = "
-        SELECT 
+        SELECT
             A.activity_id,
-            M.module_name,
             A.activity_type,
             A.activity_name,
             A.activity_description,
             A.unlock_date,
-            A.deadline_date,
-            Q.number_of_attempts,
-            QT.quiz_type_name,
-            Q.time_limit,
-            Q.number_of_questions,
-            Q.overall_points,
-            Q.has_answers_shown
+            A.deadline_date
         FROM `Activity` AS A
-        INNER JOIN `Quiz` AS Q
-            on A.activity_id = Q.activity_id
-        INNER JOIN `Quiztype` AS QT
-            on Q.quiz_type_id = QT.quiz_type_id
-        INNER JOIN `Module` AS M
-            on M.module_id = A.module_id
-        WHERE M.course_id = ?
+        WHERE module_id = ?
     ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $input['course_id']);
+    $stmt->bind_param('s', $moduleId);
     if (! $stmt) {
         http_response_code(500);
         jsonResponse(['success'=>false,'message'=>'Database prepare failed'],500);
@@ -62,13 +51,13 @@ try{
         jsonResponse(['success'=>false,'message'=>'Database execute failed'],500);
         return;
     }
-    $quizzes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+    $activities = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt -> close();
 
     header('Content-Type: application/json');
     echo json_encode([
       'success' => true,
-      'quizzes' => $quizzes
+      'activities' => $activities
     ]);
     exit;
 }catch (mysqli_sql_exception $e) {

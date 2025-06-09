@@ -31,7 +31,6 @@ try{
     SELECT
         Q.question_id, 
         Q.question_text, 
-        Q.question_image,
         QT.type_name,  
         Q.score,
         O.option_id,   
@@ -61,7 +60,6 @@ try{
             $questions[$id] = [
             'question_id'    => $r['question_id'],
             'question_text'  => $r['question_text'],
-            'question_image' => $r['question_image'], 
             'type_name'      => $r['type_name'],
             'score'          => (int)$r['score'],
             'options'        => [],

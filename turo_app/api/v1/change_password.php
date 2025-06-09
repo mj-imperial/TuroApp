@@ -64,3 +64,4 @@ switch ($input['action']) {
         http_response_code(400);
         jsonResponse([ 'success' => false, 'message' => 'Unknown action' ], 400);
 }
+
