@@ -58,7 +58,7 @@ try{
     $stmt->execute();
     $conn->commit();
 
-    echo json_encode(['success'=> true,'message'=> 'Module successfully']);
+    echo json_encode(['success'=> true,'message'=> 'Module successfully updated']);
 }catch (Exception $e) {
     $conn->rollback();
     http_response_code(500);
