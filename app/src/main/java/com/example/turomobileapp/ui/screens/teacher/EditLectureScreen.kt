@@ -67,31 +67,29 @@ import com.example.turomobileapp.ui.theme.SoftGray
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
-import com.example.turomobileapp.viewmodels.teacher.CreateLectureViewModel
+import com.example.turomobileapp.viewmodels.teacher.EditLectureViewModel
 import java.time.LocalDateTime
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CreateLectureScreen(
+fun EditLectureScreen(
     navController: NavController,
     sessionManager: SessionManager,
-    moduleId: String,
-    viewModel: CreateLectureViewModel
+    viewModel: EditLectureViewModel,
+    moduleId: String
 ){
     val windowInfo = rememberWindowInfo()
     val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsState()
-    
-    val isFormValid by viewModel.isFormValid.collectAsState()
 
     var openAlertDialog by remember { mutableStateOf(false) }
     var openErrorDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(uiState.createLectureStatus) {
-        if (uiState.createLectureStatus is Result.Success){
+    LaunchedEffect(uiState.editLectureStatus) {
+        if (uiState.editLectureStatus is Result.Success){
             navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
-            viewModel.clearCreateLectureStatus()
+            viewModel.clearLectureStatus()
         }
     }
 
@@ -108,12 +106,12 @@ fun CreateLectureScreen(
             textColor = TextBlack
         )
     }
-    
+
     if (openAlertDialog){
         PopupAlertWithActions(
             onDismissRequest = { openAlertDialog = false },
             onConfirmation = {
-                viewModel.createLecture(context)
+                viewModel.updateLecture(context)
                 if (uiState.errorMessage != null){
                     openErrorDialog = true
                 }
@@ -122,7 +120,7 @@ fun CreateLectureScreen(
             icon = painterResource(R.drawable.upload_files_color),
             title = {
                 Text(
-                    text = "LECTURE CREATION",
+                    text = "LECTURE UPDATE",
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontSize = ResponsiveFont.title(windowInfo),
                     color = LoginText
@@ -130,7 +128,7 @@ fun CreateLectureScreen(
             },
             dialogText = {
                 Text(
-                    text = "Are you satisfied with the information uploaded/inputted?",
+                    text = "Are you satisfied with the information uploaded/updated?",
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontSize = ResponsiveFont.heading2(windowInfo),
                     color = LoginText
@@ -161,99 +159,107 @@ fun CreateLectureScreen(
         navigateUp = { navController.navigateUp() },
         windowInfo = windowInfo,
         sessionManager = sessionManager,
-        hasFloatingActionButton = false,
-        content = { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    Text(
-                        text = "CREATE LECTURE",
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading1(windowInfo),
-                        color = TextBlack,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 5.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
+        content = {
+            if (uiState.loading){
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ){
+                    CircularProgressIndicator()
                 }
-
-                item {
-                    CreateLectureHeader(
-                        windowInfo = windowInfo,
-                        currentUploadType = uiState.uploadType,
-                        onUploadTypeChange = viewModel::updateUploadType,
-                        lectureName = uiState.lectureTitle,
-                        onUpdateLectureName = viewModel::updateLectureTitle,
-                        lectureDescription = uiState.lectureDescription,
-                        onUpdateLectureDescription = viewModel::updateLectureDescription,
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-
-                item {
-                    CreateLectureMoreInfo(
-                        unlockDate = uiState.unlockDateTime,
-                        onUpdateUnlockDate = viewModel::updateUnlockDateTime,
-                        deadlineDate = uiState.deadlineDateTime,
-                        onUpdateDeadlineDate = viewModel::updateDeadlineDateTime
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-                
-                item {
-                    when(uiState.uploadType){
-                        "PDF/DOCS" -> CreatePDFCard(
-                            height = windowInfo.screenHeight * 0.3f,
-                            onPickFile = { uri ->
-                                viewModel.onFilePicked(context, uri)
-                            },
-                            windowInfo = windowInfo,
-                            fileName = uiState.fileName,
-                            isLoading = uiState.loadingFile,
+            }else{
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        Text(
+                            text = "UPDATE LECTURE",
+                            fontFamily = FontFamily(Font(R.font.alata)),
+                            fontSize = ResponsiveFont.heading1(windowInfo),
+                            color = TextBlack,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 5.dp)
                         )
-                        "YOUTUBE LINK" -> CreateYoutubeLink(
-                            windowInfo = windowInfo,
-                            youtubeLink = uiState.youtubeUrl.toString(),
-                            onUpdateYoutubeLink = viewModel::updateYoutubeUrl,
-                        )
-                        "TEXT" -> CreateText(
-                            windowInfo = windowInfo,
-                            text = uiState.text.toString(),
-                            onUpdateText = viewModel::updateText,
-                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
-                    Spacer(modifier = Modifier.height(35.dp))
-                }
 
-                item {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
-                        CapsuleButton(
-                            text = {
-                                Text(
-                                    text = "CREATE LECTURE",
-                                    fontFamily = FontFamily(Font(R.font.alata)),
-                                    fontSize = ResponsiveFont.heading1(windowInfo),
-                                    color = TextBlack
-                                )
-                            },
-                            onClick = { openAlertDialog = true },
-                            roundedCornerShape = 10.dp,
-                            buttonElevation = ButtonDefaults.buttonElevation(5.dp),
-                            contentPadding = PaddingValues(10.dp),
-                            buttonColors = ButtonDefaults.buttonColors(MainOrange),
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = isFormValid
+                    item {
+                        EditLectureHeader(
+                            windowInfo = windowInfo,
+                            currentUploadType = uiState.contentTypeName,
+                            onUploadTypeChange = viewModel::updateContentTypeName,
+                            lectureName = uiState.lectureTitle,
+                            onUpdateLectureName = viewModel::updateLectureTitle,
+                            lectureDescription = uiState.lectureDescription,
+                            onUpdateLectureDescription = viewModel::updateLectureDescription
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+
+                    item {
+                        EditLectureMoreInfo(
+                            unlockDate = uiState.unlockDate,
+                            onUpdateUnlockDate = viewModel::updateUnlockDate,
+                            deadlineDate = uiState.deadlineDate,
+                            onUpdateDeadlineDate = viewModel::updateDeadlineDate
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
+                    item {
+                        when(uiState.contentTypeName){
+                            "PDF/DOCS" -> EditPDFCard(
+                                height = windowInfo.screenHeight * 0.3f,
+                                onPickFile = { uri ->
+                                    viewModel.onFilePicked(context, uri)
+                                },
+                                windowInfo = windowInfo,
+                                fileName = uiState.fileName,
+                                isLoading = uiState.loading,
+                            )
+                            "YOUTUBE LINK" -> EditYoutubeLink(
+                                windowInfo = windowInfo,
+                                youtubeLink = uiState.videoUrl.toString(),
+                                onUpdateYoutubeLink = viewModel::updateVideoUrl,
+                            )
+                            "TEXT" -> EditText(
+                                windowInfo = windowInfo,
+                                text = uiState.textBody.toString(),
+                                onUpdateText = viewModel::updateText,
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(35.dp))
+                    }
+
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
+                            CapsuleButton(
+                                text = {
+                                    Text(
+                                        text = "UPDATE LECTURE",
+                                        fontFamily = FontFamily(Font(R.font.alata)),
+                                        fontSize = ResponsiveFont.heading1(windowInfo),
+                                        color = TextBlack
+                                    )
+                                },
+                                onClick = { openAlertDialog = true },
+                                roundedCornerShape = 10.dp,
+                                buttonElevation = ButtonDefaults.buttonElevation(5.dp),
+                                contentPadding = PaddingValues(10.dp),
+                                buttonColors = ButtonDefaults.buttonColors(MainOrange),
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = true
+                            )
+                        }
                     }
                 }
             }
@@ -262,7 +268,7 @@ fun CreateLectureScreen(
 }
 
 @Composable
-fun CreateLectureHeader(
+fun EditLectureHeader(
     windowInfo: WindowInfo,
     currentUploadType: String,
     onUploadTypeChange: (String) -> Unit,
@@ -382,7 +388,7 @@ fun CreateLectureHeader(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CreateLectureMoreInfo(
+fun EditLectureMoreInfo(
     unlockDate: LocalDateTime?,
     onUpdateUnlockDate: (LocalDateTime?) -> Unit,
     deadlineDate: LocalDateTime?,
@@ -419,7 +425,7 @@ fun CreateLectureMoreInfo(
 }
 
 @Composable
-fun CreatePDFCard(
+fun EditPDFCard(
     windowInfo: WindowInfo,
     height: Dp,
     fileName: String?,
@@ -499,7 +505,7 @@ fun CreatePDFCard(
 }
 
 @Composable
-fun CreateYoutubeLink(
+fun EditYoutubeLink(
     windowInfo: WindowInfo,
     youtubeLink: String,
     onUpdateYoutubeLink: (String) -> Unit
@@ -537,7 +543,7 @@ fun CreateYoutubeLink(
 }
 
 @Composable
-fun CreateText(
+fun EditText(
     windowInfo: WindowInfo,
     text: String,
     onUpdateText: (String) -> Unit
@@ -571,3 +577,4 @@ fun CreateText(
         maxLines = 8
     )
 }
+

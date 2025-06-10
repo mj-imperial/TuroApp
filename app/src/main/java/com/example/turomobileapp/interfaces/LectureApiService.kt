@@ -3,6 +3,8 @@ package com.example.turomobileapp.interfaces
 import com.example.turomobileapp.models.ActivityActionResponse
 import com.example.turomobileapp.models.FileUploadResponse
 import com.example.turomobileapp.models.Lecture
+import com.example.turomobileapp.models.LectureResponse
+import com.example.turomobileapp.models.LectureUpdateRequest
 import com.example.turomobileapp.models.LectureUploadRequest
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
@@ -30,26 +32,22 @@ interface LectureApiService {
         @Body lecture: LectureUploadRequest
     ): Response<ActivityActionResponse>
 
-    @GET("/lectures/validateDuplication")
-    suspend fun isLectureDuplicate(
-        @Body lecture: Lecture
-    ): Response<Boolean>
-
-    @GET("/lectures/{lectureId}")
+    @GET("get_lecture.php")
     suspend fun getLecture(
-        @Path("lectureId") lectureId: String
-    ): Response<Lecture>
+        @Query("activity_id") lectureId: String,
+    ): Response<LectureResponse>
+
+    @POST("update_lecture.php")
+    suspend fun updateLecture(
+        @Query("activity_id") lectureId: String,
+        @Query("module_id") moduleId: String,
+        @Body lecture: LectureUpdateRequest
+    ): Response<ActivityActionResponse>
 
     @GET("/modules/{moduleId}/lectures")
     suspend fun getAllLecturesForModule(
         @Path("moduleId") moduleId: String
     ): Response<List<Lecture>>
-
-    @PUT("/lectures/{lectureId}")
-    suspend fun updateLecture(
-        @Path("lectureId") lectureId: String,
-        @Body lecture: Lecture
-    ): Response<ResponseBody>
 
     @DELETE("/lectures/{lectureId}")
     suspend fun deleteLecture(

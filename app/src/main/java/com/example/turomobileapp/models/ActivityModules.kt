@@ -172,6 +172,34 @@ data class LectureUploadRequest(
 )
 
 @JsonClass(generateAdapter = true)
+data class LectureResponse(
+    @Json(name = "activity_name") val lectureName: String,
+    @Json(name = "activity_description") val lectureDescription: String?,
+    @Json(name = "unlock_date") val unlockDate: LocalDateTime?,
+    @Json(name = "deadline_date") val deadlineDate: LocalDateTime?,
+    @Json(name = "content_type_name") val contentTypeName: String,
+    @Json(name = "video_url") val videoUrl: String? = null,
+    @Json(name = "file_url") val fileUrl: String? = null,
+    @Json(name = "file_mime_type") val fileMimeType: String? = null,
+    @Json(name = "file_name") val fileName: String? = null,
+    @Json(name = "text_body") val textBody: String? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class LectureUpdateRequest(
+    @Json(name = "activity_name") val lectureName: String,
+    @Json(name = "activity_description") val lectureDescription: String?,
+    @Json(name = "unlock_date") val unlockDate: LocalDateTime?,
+    @Json(name = "deadline_date") val deadlineDate: LocalDateTime?,
+    @Json(name = "content_type_name") val contentTypeName: String,
+    @Json(name = "video_url") val videoUrl: String? = null,
+    @Json(name = "file_url") val fileUrl: String? = null,
+    @Json(name = "file_mime_type") val fileMimeType: String? = null,
+    @Json(name = "file_name") val fileName: String? = null,
+    @Json(name = "text_body") val textBody: String? = null
+)
+
+@JsonClass(generateAdapter = true)
 data class QuizzesResponse(
     @Json(name = "success") val success: Boolean,
     @Json(name = "quizzes") val quizzes: List<QuizResponse>

@@ -74,34 +74,20 @@ class CreateLectureViewModel @Inject constructor(
     }
 
     fun onFilePicked(context: Context, uri: Uri) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(loadingFile = true, errorMessage = null) }
+        val name = getDisplayName(context, uri)
+        val mime = context.contentResolver.getType(uri)
 
-            val mime = context.contentResolver.getType(uri) ?: "application/octet-stream"
-            val name = getDisplayName(context, uri)
-            val bytes = context.contentResolver.openInputStream(uri)!!.readBytes()
-            val req = bytes.toRequestBody(mime.toMediaType())
-            val part = MultipartBody.Part.createFormData("file", name, req)
-
-            lectureRepository.uploadLectureFile(part).collect { result ->
-                handleResult(
-                    result = result,
-                    onSuccess = { response ->
-                        _uiState.update { it.copy(
-                            loadingFile = false,
-                            fileUrl = response.fileUrl,
-                            fileMimeType = response.mimeType,
-                            fileName = getDisplayName(context, uri)
-                        ) }
-                        _isFormValid.value = validateForm()
-                    },
-                    onFailure = { err ->
-                        _uiState.update { it.copy(loadingFile = false, errorMessage = err) }
-                    }
-                )
-            }
+        _uiState.update {
+            it.copy(
+                fileUri = uri,
+                fileName = name,
+                fileMimeType = mime
+            )
         }
+
+        _isFormValid.value = validateForm()
     }
+
 
     private fun getDisplayName(context: Context, uri: Uri): String =
         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -126,30 +112,73 @@ class CreateLectureViewModel @Inject constructor(
         }
     }
 
-    fun createLecture(){
+    fun createLecture(context: Context) {
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
             val state = _uiState.value
 
-            val lectureRequest = LectureUploadRequest(
-                activityType = "LECTURE",
-                lectureName = state.lectureTitle,
-                lectureDescription = state.lectureDescription,
-                unlockDate = state.unlockDateTime,
-                deadlineDate = state.deadlineDateTime,
-                contentTypeName = state.uploadType,
-                videoUrl = state.youtubeUrl,
-                fileUrl = state.fileUrl,
-                fileMimeType = state.fileMimeType,
-                fileName = state.fileName,
-                textBody = state.text
-            )
+            var uploadedFileUrl: String? = null
 
-            lectureRepository.createLecture(_moduleId, lectureRequest).collect {  result ->
+            if (state.uploadType == "PDF/DOCS") {
+                val uri = state.fileUri
+                if (uri == null) {
+                    _uiState.update { it.copy(loading = false, errorMessage = "No file selected") }
+                    return@launch
+                }
+
+                try {
+                    val mime = context.contentResolver.getType(uri) ?: "application/octet-stream"
+                    val name = getDisplayName(context, uri)
+                    val bytes = context.contentResolver.openInputStream(uri)!!.readBytes()
+                    val req = bytes.toRequestBody(mime.toMediaType())
+                    val part = MultipartBody.Part.createFormData("file", name, req)
+
+                    lectureRepository.uploadLectureFile(part).collect { result ->
+                        handleResult(
+                            result = result,
+                            onSuccess = { response ->
+                                uploadedFileUrl = response.fileUrl
+                                submitLecture(uploadedFileUrl)
+                            },
+                            onFailure = { err ->
+                                _uiState.update { it.copy(loading = false, errorMessage = err) }
+                            }
+                        )
+                    }
+
+                } catch (e: Exception) {
+                    _uiState.update { it.copy(loading = false, errorMessage = e.message ?: "Upload error") }
+                }
+
+            } else {
+                submitLecture(null)
+            }
+        }
+    }
+
+    private fun submitLecture(fileUrl: String?) {
+        val state = _uiState.value
+
+        val lectureRequest = LectureUploadRequest(
+            activityType = "LECTURE",
+            lectureName = state.lectureTitle,
+            lectureDescription = state.lectureDescription,
+            unlockDate = state.unlockDateTime,
+            deadlineDate = state.deadlineDateTime,
+            contentTypeName = state.uploadType,
+            videoUrl = state.youtubeUrl,
+            fileUrl = fileUrl,
+            fileMimeType = state.fileMimeType,
+            fileName = state.fileName,
+            textBody = state.text
+        )
+
+        viewModelScope.launch {
+            lectureRepository.createLecture(_moduleId, lectureRequest).collect { result ->
                 handleResult(
                     result = result,
-                    onSuccess = { response ->
+                    onSuccess = {
                         _uiState.update { it.copy(loading = false, createLectureStatus = Result.Success(Unit)) }
 
                         notificationService.showNotification(
@@ -185,5 +214,6 @@ data class CreateLectureUIState(
     val youtubeUrl: String? = null,
     val fileUrl: String? = null,
     val fileMimeType: String? = null,
-    val fileName: String? = null
+    val fileName: String? = null,
+    val fileUri: Uri? = null
 )

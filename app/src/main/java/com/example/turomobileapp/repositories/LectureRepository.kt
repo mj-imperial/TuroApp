@@ -5,6 +5,8 @@ import com.example.turomobileapp.interfaces.LectureApiService
 import com.example.turomobileapp.models.ActivityActionResponse
 import com.example.turomobileapp.models.FileUploadResponse
 import com.example.turomobileapp.models.Lecture
+import com.example.turomobileapp.models.LectureResponse
+import com.example.turomobileapp.models.LectureUpdateRequest
 import com.example.turomobileapp.models.LectureUploadRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -25,19 +27,11 @@ class LectureRepository @Inject constructor(private val lectureApiService: Lectu
             errorMessage = "Failed file upload"
         )
 
-    fun isLectureDuplicate(lecture: Lecture): Flow<Result<Boolean>> = flow {
-        handleApiResponse(
-            call = { lectureApiService.isLectureDuplicate(lecture) },
-            errorMessage = "Failed to check lecture $lecture duplication"
-        )
-    }
-
-    fun getLecture(lectureId: String): Flow<Result<Lecture>> = flow {
+    fun getLecture(lectureId: String): Flow<Result<LectureResponse>> =
         handleApiResponse(
             call = { lectureApiService.getLecture(lectureId) },
             errorMessage = "Failed to get lecture $lectureId"
         )
-    }
 
     fun getAllLecturesForModule(moduleId: String): Flow<Result<List<Lecture>>> = flow {
         handleApiResponse(
@@ -46,12 +40,11 @@ class LectureRepository @Inject constructor(private val lectureApiService: Lectu
         )
     }
 
-    fun updateLecture(lectureId: String, lecture: Lecture): Flow<Result<Unit>> = flow {
+    fun updateLecture(lectureId: String, moduleId: String, lecture: LectureUpdateRequest): Flow<Result<ActivityActionResponse>> =
         handleApiResponse(
-            call = { lectureApiService.updateLecture(lectureId, lecture) },
+            call = { lectureApiService.updateLecture(lectureId, moduleId, lecture) },
             errorMessage = "Failed to update lecture $lectureId"
         )
-    }
 
     fun deleteLecture(lectureId: String): Flow<Result<Unit>> = flow {
         handleApiResponse(
