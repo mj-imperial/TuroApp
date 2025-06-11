@@ -30,13 +30,19 @@ $moduleId = $input['module_id'];
 try{
     $sql = "
         SELECT
+            A.module_id,
             A.activity_id,
             A.activity_type,
             A.activity_name,
+            QT.quiz_type_name,
             A.activity_description,
             A.unlock_date,
             A.deadline_date
         FROM `Activity` AS A
+        LEFT JOIN `Quiz` AS Q 
+            ON A.activity_id = Q.activity_id
+        LEFT JOIN `Quiztype` AS QT
+            ON Q.quiz_type_id = QT.quiz_type_id
         WHERE module_id = ?
     ";
     $stmt = $conn->prepare($sql);
