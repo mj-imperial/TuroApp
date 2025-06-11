@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.LectureUpdateRequest
 import com.example.turomobileapp.repositories.LectureRepository
+import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.notifications.TuroNotificationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,6 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDateTime
 import javax.inject.Inject
-import com.example.turomobileapp.repositories.Result
 
 @HiltViewModel
 class EditLectureViewModel @Inject constructor(

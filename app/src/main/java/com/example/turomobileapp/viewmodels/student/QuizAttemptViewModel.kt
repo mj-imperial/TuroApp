@@ -44,8 +44,10 @@ class QuizAttemptViewModel @Inject constructor(
     val events: Flow<QuizAttemptEvent> = _events.receiveAsFlow()
 
     init {
-        loadMetadata()
-        loadQuizContent()
+        viewModelScope.launch {
+            launch { loadMetadata() }
+            launch { loadQuizContent() }
+        }
     }
 
     private fun loadMetadata() {

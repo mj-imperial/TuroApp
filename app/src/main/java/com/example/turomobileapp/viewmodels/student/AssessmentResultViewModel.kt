@@ -34,8 +34,10 @@ class AssessmentResultViewModel @Inject constructor(
     val uiState: StateFlow<AssessmentResultUIState> = _uiState.asStateFlow()
 
     init {
-        loadMetadata()
-        loadAssessmentResults()
+        viewModelScope.launch {
+            launch { loadMetadata() }
+            launch { loadAssessmentResults() }
+        }
     }
 
     private fun loadMetadata() {

@@ -202,7 +202,9 @@ fun CreateEditActivitiesInModuleScreen(
                             windowInfo = windowInfo,
                             activities = quizzes,
                             activityType = "QUIZ",
-                            onEdit = { /* … */ },
+                            onEdit = {
+                                navController.navigate(Screen.TeacherEditQuiz.createRoute(it.activityId, moduleId))
+                            },
                             onDeleteClick = { activityId ->
                                 selectedToDeleteId = activityId
                             }

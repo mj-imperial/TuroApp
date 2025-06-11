@@ -3,10 +3,10 @@ package com.example.turomobileapp.repositories
 import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.QuizApiService
+import com.example.turomobileapp.models.ActivityActionResponse
 import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.CreateQuizRequest
-import com.example.turomobileapp.models.Quiz
 import com.example.turomobileapp.models.QuizContentResponse
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.models.QuizUploadResponse
@@ -22,13 +22,6 @@ class QuizRepository @Inject constructor(private val quizApiService: QuizApiServ
             errorMessage = "Failed to create quiz"
         )
 
-    fun isQuizDuplicate(moduleId: String, quiz: Quiz): Flow<Result<Boolean>> = flow {
-        handleApiResponse(
-            call = { quizApiService.isQuizDuplicate(moduleId, quiz) },
-            errorMessage = "Failed to check quiz $quiz duplication in module $moduleId"
-        )
-    }
-
     fun getQuiz(quizId: String): Flow<Result<QuizResponse>> =
         handleApiResponse(
             call = { quizApiService.getQuiz(quizId) },
@@ -42,12 +35,11 @@ class QuizRepository @Inject constructor(private val quizApiService: QuizApiServ
         )
 
 
-    fun updateQuiz(quizId: String, quiz: Quiz): Flow<Result<Unit>> = flow {
+    fun updateQuiz(quizId: String, moduleId: String, quiz: CreateQuizRequest): Flow<Result<ActivityActionResponse>> =
         handleApiResponse(
-            call = { quizApiService.updateQuiz(quizId, quiz) },
+            call = { quizApiService.updateQuiz(quizId, moduleId, quiz) },
             errorMessage = "Failed to update quiz $quizId"
         )
-    }
 
     fun deleteQuiz(quizId: String): Flow<Result<Unit>> = flow {
         handleApiResponse(

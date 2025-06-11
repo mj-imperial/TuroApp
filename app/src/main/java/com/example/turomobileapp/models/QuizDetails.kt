@@ -153,6 +153,7 @@ data class CreateQuizRequest(
 
 @JsonClass(generateAdapter = true)
 data class CreateQuizQuestions(
+    @Json(name = "question_id") val questionId: String? = null,
     @Json(name = "question_text") val questionText: String = "",
     @Json(name = "type_name") val questionType: String = "",
     @Json(name = "score") val score: Int = 0,
@@ -161,6 +162,7 @@ data class CreateQuizQuestions(
 
 @JsonClass(generateAdapter = true)
 data class CreateQuizOptions(
+    @Json(name = "option_id") val optionId: String? = null,
     @Json(name = "option_text") val optionText: String = "",
     @Json(name = "is_correct") val isCorrect: Boolean = false
 )

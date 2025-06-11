@@ -1,19 +1,14 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.ApiResponse
-import com.example.turomobileapp.models.Student
-import com.example.turomobileapp.models.Teacher
-import com.example.turomobileapp.models.User
+import com.example.turomobileapp.models.StudentProfileProgress
 import com.example.turomobileapp.models.UserResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
-import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface UserApiService {
@@ -26,22 +21,6 @@ interface UserApiService {
 
     @POST("logout.php")
     suspend fun logout(): Response<ResponseBody>
-
-    @GET("get_user_by_id.php")
-    suspend fun getUserById(
-        @Query("user_id") userId: String
-    ): Response<UserResponse>
-
-    @GET("/users/{userEmail}")
-    suspend fun getUserByEmail(
-        @Path("userEmail") userEmail: String
-    ): Response<UserResponse>
-
-    @GET("/teachers")
-    suspend fun getAllTeachers(): Response<List<Teacher>>
-
-    @GET("/students")
-    suspend fun getAllStudents(): Response<List<Student>>
 
     @FormUrlEncoded
     @POST("request_password_reset.php")
@@ -73,12 +52,6 @@ interface UserApiService {
         @Field("new_password") newPassword: String
     ): Response<ApiResponse>
 
-    @PUT("/users/{userId}")
-    suspend fun updateUser(
-        @Path("userId") userId: String,
-        @Body user: User
-    ): Response<ResponseBody>
-
     @FormUrlEncoded
     @POST("terms_and_agreement.php")
     suspend fun setTermsAgreementStatus(
@@ -86,4 +59,8 @@ interface UserApiService {
         @Field("agreed_to_terms") agreedToTerms: Boolean
     ): Response<ApiResponse>
 
+    @GET("get_student_profile_progress.php")
+    suspend fun getStudentProfileProgress(
+        @Query("student_id") studentId: String
+    ): Response<StudentProfileProgress>
 }

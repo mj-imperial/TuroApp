@@ -59,3 +59,10 @@ data class StudentProgressResponse(
     @Json(name = "total_points") val totalPoints: Int,
     @Json(name = "average_score") val averageScore: Double
 )
+
+@JsonClass(generateAdapter = true)
+data class StudentProfileProgress(
+    @Json(name = "course_name") val courseName: String,
+    @Json(name = "total_points") val totalPoints: Int,
+    @Json(name = "average_score") val averageScore: Double
+)

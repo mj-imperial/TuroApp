@@ -33,8 +33,10 @@ class QuizDetailViewModel @Inject constructor(
     val uiState: StateFlow<QuizDetailUIState> = _uiState.asStateFlow()
 
     init {
-        loadQuizMetadata()
-        loadAttemptHistory()
+        viewModelScope.launch {
+            launch { loadQuizMetadata() }
+            launch { loadAttemptHistory() }
+        }
     }
 
     private fun loadQuizMetadata(){

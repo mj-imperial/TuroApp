@@ -5,10 +5,8 @@ import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.UserApiService
 import com.example.turomobileapp.models.ApiResponse
-import com.example.turomobileapp.models.Student
-import com.example.turomobileapp.models.Teacher
+import com.example.turomobileapp.models.StudentProfileProgress
 import com.example.turomobileapp.models.User
-import com.example.turomobileapp.models.UserResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -36,28 +34,6 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
         handleApiResponse(
             call = { userApiService.logout() },
             errorMessage = "Logout failed"
-        )
-    }
-
-    fun getUserById(userId: String): Flow<Result<UserResponse>> = flow {
-        handleApiResponse(
-            call = { userApiService.getUserById(userId) },
-            errorMessage = "Failed to get user by ID $userId"
-        )
-    }
-
-
-    fun getUserByEmail(email: String): Flow<Result<User>> = flow {
-        handleApiResponse(
-            call = { userApiService.getUserByEmail(email) },
-            errorMessage = "Failed to get user by email $email"
-        )
-    }
-
-    fun updateUser(userId: String, user: User): Flow<Result<Unit>> = flow {
-        handleApiResponse(
-            call = { userApiService.updateUser(userId, user) },
-            errorMessage = "User $userId update failed"
         )
     }
 
@@ -91,32 +67,9 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
             errorMessage = "Failed to set terms agreement status for $userId"
         )
 
-    fun getDefaultPasswordChangeStatus(userId: String): Flow<Result<Boolean>> = flow {
+    fun getStudentProfileProgress(studentId: String): Flow<Result<StudentProfileProgress>> =
         handleApiResponse(
-            call = { userApiService.getUserById(userId) },
-            errorMessage = "Failed to get user $userId"
+            call = { userApiService.getStudentProfileProgress(studentId) },
+            errorMessage = "Failed to get student profile progress for $studentId"
         )
-    }
-
-    fun getTermsAgreementStatus(userId: String): Flow<Result<Boolean>> = flow {
-        handleApiResponse(
-            call = { userApiService.getUserById(userId) },
-            errorMessage = "Failed to get user $userId"
-        )
-    }
-
-    fun getAllStudents(): Flow<Result<List<Student>>> = flow {
-        handleApiResponse(
-            call = { userApiService.getAllStudents() },
-            errorMessage = "Failed to get all students"
-        )
-    }
-
-    fun getAllTeachers(): Flow<Result<List<Teacher>>> = flow {
-        handleApiResponse(
-            call = { userApiService.getAllTeachers() },
-            errorMessage = "Failed to get all teachers"
-        )
-    }
-
 }

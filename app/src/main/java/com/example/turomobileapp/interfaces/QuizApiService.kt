@@ -1,9 +1,9 @@
 package com.example.turomobileapp.interfaces
 
+import com.example.turomobileapp.models.ActivityActionResponse
 import com.example.turomobileapp.models.Answers
 import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.CreateQuizRequest
-import com.example.turomobileapp.models.Quiz
 import com.example.turomobileapp.models.QuizContentResponses
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.models.QuizUploadResponse
@@ -14,7 +14,6 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -24,12 +23,6 @@ interface QuizApiService {
         @Query("module_id") moduleId: String,
         @Body quiz: CreateQuizRequest
     ): Response<QuizUploadResponse>
-
-    @POST("/modules/{moduleId}/quizzes/validateDuplication")
-    suspend fun isQuizDuplicate(
-        @Path("moduleId") moduleId: String,
-        @Body quiz: Quiz
-    ): Response<Boolean>
 
     @GET("get_course_quizzes.php")
     suspend fun getQuizzesInCourse(
@@ -46,11 +39,12 @@ interface QuizApiService {
         @Query("activity_id") quizId: String
     ): Response<QuizContentResponses>
 
-    @PUT("/quizzes/{quizId}")
+    @POST("update_quiz.php")
     suspend fun updateQuiz(
-        @Path("quizId") quizId: String,
-        @Body quiz: Quiz
-    ): Response<ResponseBody>
+        @Query("activity_id") quizId: String,
+        @Query("module_id") moduleId: String,
+        @Body quiz: CreateQuizRequest
+    ): Response<ActivityActionResponse>
 
     @DELETE("/quizzes/{quizId}")
     suspend fun deleteQuiz(

@@ -304,16 +304,16 @@ data class CreateQuizUIState(
     val questions: List<CreateQuizQuestions> = emptyList()
 )
 
-data class PendingOption(
-    val tempId: String = UUID.randomUUID().toString(),
-    var text: String = "",
-    var isCorrect: Boolean = false
-)
-
 data class PendingQuestion(
     val tempId: String = UUID.randomUUID().toString(),
     var text: String = "",
     val options: MutableList<PendingOption> = mutableListOf(),
     var score: Int = 1
+)
+
+data class PendingOption(
+    val tempId: String = UUID.randomUUID().toString(),
+    var text: String = "",
+    var isCorrect: Boolean = false
 )
 
