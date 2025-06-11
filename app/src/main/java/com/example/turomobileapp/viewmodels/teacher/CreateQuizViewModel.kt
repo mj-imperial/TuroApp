@@ -49,11 +49,7 @@ class CreateQuizViewModel @Inject constructor(
     }
 
     fun updateQuizType(newQuizType: String){
-        if (newQuizType == "SCREENING"){
-            _uiState.update { it.copy(quizType = "SCREENING_EXAM") }
-        }else{
-            _uiState.update { it.copy(quizType = newQuizType) }
-        }
+        _uiState.update { it.copy(quizType = newQuizType) }
         _isFormValid.value = isFormValid()
     }
 
@@ -248,6 +244,12 @@ class CreateQuizViewModel @Inject constructor(
                     score = question.score,
                     options = options
                 )
+            }
+
+            if (uiState.value.quizType == "SCREENING"){
+                _uiState.update { it.copy(quizType = "SCREENING_EXAM") }
+            }else{
+                uiState.value.quizType
             }
 
             val quizRequest = CreateQuizRequest(

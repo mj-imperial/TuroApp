@@ -336,8 +336,6 @@ fun CreateQuizHeader(
     quizDescription: String,
     onUpdateQuizDescription: (String) -> Unit
 ){
-    var currentQuizType by remember { mutableStateOf(quizType) }
-
     val menuList = listOf(
         DropdownMenuItem(
             itemName = "SHORT",
@@ -373,7 +371,7 @@ fun CreateQuizHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         CustomDropDownMenu(
-            menuText = currentQuizType,
+            menuText = quizType,
             dropdownMenuItems = menuList,
             maxWidthFloat = 0.3f
         )

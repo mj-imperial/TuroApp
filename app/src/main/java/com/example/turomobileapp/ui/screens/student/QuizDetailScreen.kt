@@ -85,7 +85,7 @@ fun QuizDetailScreen(
                     .verticalScroll(rememberScrollState())
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceAround,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.Start
             ) {
                 QuizTitle(
                     height = windowInfo.screenHeight * 0.2f,

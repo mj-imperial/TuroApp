@@ -116,12 +116,17 @@ data class ModuleActivitiesResponse(
 
 @JsonClass(generateAdapter = true)
 data class ModuleActivityResponse(
+    @Json(name = "module_id") val moduleId: String,
     @Json(name = "activity_id") val activityId: String,
     @Json(name = "activity_type") val activityType: String,
     @Json(name = "activity_name") val activityName: String,
+    @Json(name = "quiz_type_name") val quizTypeName: String? = null,
     @Json(name = "activity_description") val activityDescription: String,
     @Json(name = "unlock_date") val unlockDate: String,
-    @Json(name = "deadline_date") val deadlineDate: String? = null
+    @Json(name = "deadline_date") val deadlineDate: String? = null,
+
+    val isUnlocked: Boolean = false,
+    val hasAnswered: Boolean = false
 )
 
 @JsonClass(generateAdapter = true)
@@ -220,7 +225,10 @@ data class QuizResponse(
     @Json(name = "time_limit") val timeLimit: Int,
     @Json(name = "number_of_questions") val numberOfQuestions: Int,
     @Json(name = "overall_points") val overallPoints: Int,
-    @Json(name = "has_answers_shown") val hasAnswersShownInt: Int
+    @Json(name = "has_answers_shown") val hasAnswersShownInt: Int,
+
+    val isUnlocked: Boolean? = false,
+    val hasAnswered: Boolean? = false
 ) : Parcelable{
     val hasAnswersShown: Boolean get() = hasAnswersShownInt != 0
 }

@@ -94,7 +94,7 @@ fun CourseDetailScreen(
                 CourseViewModules(
                     windowInfo = windowInfo,
                     onClickViewAllModules = {
-                        navController.navigate(Screen.StudentModules.route)
+                        navController.navigate(Screen.StudentModules.createRoute(courseId))
                     }
                 )
 

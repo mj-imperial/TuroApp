@@ -335,10 +335,11 @@ fun ActivityItem(
                 .background(Brush.verticalGradient(colors = listOf(LighterOrange,practice2)))
                 .padding(horizontal = 15.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Start
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
             ) {
                 Image(
                     painter = if (activityType == "TUTORIAL") painterResource(R.drawable.tutorial_icon)
@@ -355,8 +356,9 @@ fun ActivityItem(
                     fontSize = ResponsiveFont.heading2(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alata)),
                     overflow = TextOverflow.Ellipsis,
-                    minLines = 1,
-                    fontWeight = FontWeight.Medium
+                    maxLines = 1,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
                 )
             }
 

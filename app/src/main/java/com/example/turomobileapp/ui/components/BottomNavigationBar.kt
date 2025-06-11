@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.navigation.navigationItems
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
@@ -53,10 +54,17 @@ fun BottomNavigationBar(
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
-                    if (!isSelected) {
+                    if (item.route == Screen.Dashboard.route) {
+                        navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    } else if (!isSelected) {
                         navController.navigate(item.route) {
                             launchSingleTop = true
-                            restoreState    = true
+                            restoreState = true
                             popUpTo(navController.graph.startDestinationId) {
                                 saveState = true
                             }
@@ -92,9 +100,3 @@ fun BottomNavigationBar(
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun BottomNavigationBarPreview(){
-//    BottomNavigationBar()
-//}

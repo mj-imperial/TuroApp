@@ -32,6 +32,7 @@ import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizListScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.ui.screens.student.StudentModulesScreen
+import com.example.turomobileapp.ui.screens.student.ViewAllModulesScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateEditActivitiesInModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateLectureScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
@@ -48,6 +49,7 @@ import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizListViewModel
+import com.example.turomobileapp.viewmodels.student.ViewAllModulesViewModel
 import com.example.turomobileapp.viewmodels.teacher.ActivityActionsViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateLectureViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateModuleViewModel
@@ -244,6 +246,17 @@ fun NavGraphBuilder.studentNavGraph(
 
     composable(Screen.Leaderboard.route) {
         LeaderboardScreen(navController, sessionManager)
+    }
+
+    composable(
+        route = Screen.StudentModules.route,
+        arguments = listOf(
+            navArgument(name = "courseId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel: ViewAllModulesViewModel = hiltViewModel()
+
+        ViewAllModulesScreen(navController, sessionManager, viewModel)
     }
 }
 
