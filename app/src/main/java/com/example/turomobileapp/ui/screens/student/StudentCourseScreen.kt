@@ -277,6 +277,7 @@ fun CourseActivities(
             route = Screen.StudentCourseQuizzes.createRoute(courseId = courseId, type = QuizType.LONG),
             colors = listOf(longquiz1,longquiz2)
         ),
+        //TODO change screening exam since screening exam will have a special ui
         Activities(
             name = R.string.ScreeningExam,
             icon = R.drawable.screeningexam_icon,

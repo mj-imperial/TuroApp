@@ -62,12 +62,25 @@ fun QuizDetailScreen(
     navController: NavController,
     sessionManager: SessionManager,
     onClickTakeQuiz: (QuizResponse) -> Unit,
-    viewModel: QuizDetailViewModel
+    viewModel: QuizDetailViewModel,
+    courseId: String,
+    type: String
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
     val quiz = uiState.quiz
     val scoresList = uiState.scores.sortedBy { it.attemptNumber }
+
+    val quizList = uiState.quizList
+    val currentIndex = quiz?.quizId?.let { id ->
+        quizList.indexOfFirst { it.quizId == id }
+    } ?: -1
+
+    val hasPrevious = currentIndex > 0
+    val hasNext = currentIndex != -1 && currentIndex < quizList.lastIndex
+
+    val previousQuiz = quizList.getOrNull(currentIndex - 1)
+    val nextQuiz = quizList.getOrNull(currentIndex + 1)
 
     AppScaffold(
         navController = navController,
@@ -146,11 +159,25 @@ fun QuizDetailScreen(
                 PreviousNextButton(
                     windowInfo = windowInfo,
                     onClickPrevious = {
-                        //TODO
+                        previousQuiz?.let {
+                            navController.navigate(Screen.StudentQuizDetail.createRoute(
+                                courseId = courseId,
+                                quizId = it.quizId,
+                                type = type
+                            ))
+                        }
                     },
                     onClickNext = {
-                        //TODO
-                    }
+                        nextQuiz?.let {
+                            navController.navigate(Screen.StudentQuizDetail.createRoute(
+                                courseId = courseId,
+                                quizId = it.quizId,
+                                type = type
+                            ))
+                        }
+                    },
+                    enablePrevious = hasPrevious,
+                    enableNext = hasNext
                 )
             }
         }
@@ -390,14 +417,13 @@ fun QuizBody(
     }
 }
 
-/*
-* TODO implement previous and next, enabled code if there is no next or previous
-* */
 @Composable
 fun PreviousNextButton(
     windowInfo: WindowInfo,
     onClickPrevious: () -> Unit,
-    onClickNext: () -> Unit
+    onClickNext: () -> Unit,
+    enablePrevious: Boolean,
+    enableNext: Boolean
 ){
     val buttonWidth = (windowInfo.screenWidth) * 0.3f
     Row(
@@ -422,7 +448,7 @@ fun PreviousNextButton(
             buttonElevation = ButtonDefaults.buttonElevation(0.dp),
             contentPadding = PaddingValues(vertical = 10.dp),
             buttonColors = ButtonDefaults.buttonColors(Color.Transparent),
-            enabled = true
+            enabled = enablePrevious
         )
 
         CapsuleButton(
@@ -442,7 +468,7 @@ fun PreviousNextButton(
             buttonElevation = ButtonDefaults.buttonElevation(0.dp),
             contentPadding = PaddingValues(10.dp),
             buttonColors = ButtonDefaults.buttonColors(Color.Transparent),
-            enabled = true
+            enabled = enableNext
         )
     }
 }

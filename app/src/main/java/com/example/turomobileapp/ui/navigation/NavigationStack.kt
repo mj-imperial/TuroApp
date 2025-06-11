@@ -185,31 +185,39 @@ fun NavGraphBuilder.studentNavGraph(
             navArgument(name = "type") { type = NavType.StringType }
         )
     ) {backStackEntry ->
+        val courseId = backStackEntry.arguments?.getString("courseId")
+        val type = backStackEntry.arguments?.getString("type")
         val viewModel: QuizListViewModel = hiltViewModel()
         QuizListScreen(
             navController = navController,
             viewModel = viewModel,
             sessionManager = sessionManager,
             onClickQuiz = { quiz ->
-                navController.navigate(Screen.StudentQuizDetail.createRoute(quiz.quizId))
+                navController.navigate(Screen.StudentQuizDetail.createRoute(courseId.toString(),quiz.quizId, type))
             }
         )
     }
     composable(
         route = Screen.StudentQuizDetail.route,
         arguments = listOf(
-            navArgument("quizId"){ type = NavType.StringType }
+            navArgument(name = "quizId"){ type = NavType.StringType },
+            navArgument(name = "courseId") { type = NavType.StringType },
+            navArgument(name = "type") { type = NavType.StringType }
         )
     ) {  backStackEntry ->
+        val courseId = backStackEntry.arguments?.getString("courseId")
+        val type = backStackEntry.arguments?.getString("type")
         val viewModel: QuizDetailViewModel = hiltViewModel()
 
         QuizDetailScreen(
-            viewModel       = viewModel,
-            navController   = navController,
-            sessionManager  = sessionManager,
+            viewModel = viewModel,
+            navController = navController,
+            sessionManager = sessionManager,
             onClickTakeQuiz = { quiz ->
                 navController.navigate(Screen.StudentQuizAttempt.createRoute(quiz.quizId))
-            }
+            },
+            courseId = courseId.toString(),
+            type = type.toString(),
         )
     }
     composable(
