@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
@@ -27,11 +28,11 @@ import com.example.turomobileapp.ui.screens.shared.NotificationScreen
 import com.example.turomobileapp.ui.screens.shared.ProfileScreen
 import com.example.turomobileapp.ui.screens.student.CourseDetailScreen
 import com.example.turomobileapp.ui.screens.student.LeaderboardScreen
+import com.example.turomobileapp.ui.screens.student.LectureDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizAttemptScreen
 import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
-import com.example.turomobileapp.ui.screens.student.QuizListScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
-import com.example.turomobileapp.ui.screens.student.StudentModulesScreen
+import com.example.turomobileapp.ui.screens.student.TutorialDetailScreen
 import com.example.turomobileapp.ui.screens.student.ViewAllModulesScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateEditActivitiesInModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateLectureScreen
@@ -45,10 +46,12 @@ import com.example.turomobileapp.ui.screens.teacher.EditTutorialScreen
 import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
+import com.example.turomobileapp.viewmodels.student.LectureDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
-import com.example.turomobileapp.viewmodels.student.QuizListViewModel
+import com.example.turomobileapp.viewmodels.student.TutorialDetailViewModel
 import com.example.turomobileapp.viewmodels.student.ViewAllModulesViewModel
 import com.example.turomobileapp.viewmodels.teacher.ActivityActionsViewModel
 import com.example.turomobileapp.viewmodels.teacher.CreateLectureViewModel
@@ -175,50 +178,74 @@ fun NavGraphBuilder.studentNavGraph(
         val coursePic = backStackEntry.arguments?.getString("coursePic")
         CourseDetailScreen(navController,courseId.toString(), sessionManager,coursePic.toString())
     }
-    composable(Screen.StudentModules.route) {
-        StudentModulesScreen(navController, sessionManager)
-    }
     composable(
-        route = Screen.StudentCourseQuizzes.route,
+        route = Screen.StudentModules.route,
         arguments = listOf(
-            navArgument(name = "courseId") { type = NavType.StringType },
-            navArgument(name = "type") { type = NavType.StringType }
+            navArgument(name = "courseId") { type = NavType.StringType }
         )
     ) {backStackEntry ->
+        val activityFlowViewModel: ActivityFlowViewModel = hiltViewModel(backStackEntry)
         val courseId = backStackEntry.arguments?.getString("courseId")
-        val type = backStackEntry.arguments?.getString("type")
-        val viewModel: QuizListViewModel = hiltViewModel()
-        QuizListScreen(
-            navController = navController,
-            viewModel = viewModel,
-            sessionManager = sessionManager,
-            onClickQuiz = { quiz ->
-                navController.navigate(Screen.StudentQuizDetail.createRoute(courseId.toString(),quiz.quizId, type))
-            }
-        )
+        val viewModel: ViewAllModulesViewModel = hiltViewModel()
+
+        ViewAllModulesScreen(navController, sessionManager, viewModel, courseId.toString(), activityFlowViewModel)
     }
     composable(
-        route = Screen.StudentQuizDetail.route,
+        route = Screen.StudentActivityDetail.route,
         arguments = listOf(
-            navArgument(name = "quizId"){ type = NavType.StringType },
-            navArgument(name = "courseId") { type = NavType.StringType },
-            navArgument(name = "type") { type = NavType.StringType }
+            navArgument("courseId") { type = NavType.StringType },
+            navArgument("moduleId") { type = NavType.StringType },
+            navArgument("activityId") { type = NavType.StringType },
+            navArgument("activityType") { type = NavType.StringType }
         )
-    ) {  backStackEntry ->
-        val courseId = backStackEntry.arguments?.getString("courseId")
-        val type = backStackEntry.arguments?.getString("type")
-        val viewModel: QuizDetailViewModel = hiltViewModel()
+    ) { backStackEntry ->
+        val courseId = backStackEntry.arguments?.getString("courseId")!!
+        val activityId = backStackEntry.arguments?.getString("activityId")!!
+        val activityType = backStackEntry.arguments?.getString("activityType")!!
 
-        QuizDetailScreen(
-            viewModel = viewModel,
-            navController = navController,
-            sessionManager = sessionManager,
-            onClickTakeQuiz = { quiz ->
-                navController.navigate(Screen.StudentQuizAttempt.createRoute(quiz.quizId))
-            },
-            courseId = courseId.toString(),
-            type = type.toString(),
-        )
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry("student_modules_screen/$courseId")
+        }
+        val activityFlowViewModel: ActivityFlowViewModel = hiltViewModel(parentEntry)
+
+        when(activityType.toUpperCase()){
+            "LECTURE" -> {
+                val viewModel: LectureDetailViewModel = hiltViewModel()
+                LectureDetailScreen(
+                    viewModel = viewModel,
+                    navController = navController,
+                    sessionManager = sessionManager,
+                    activityId = activityId,
+                    courseId = courseId,
+                    activityFlowViewModel = activityFlowViewModel
+                )
+            }
+            "TUTORIAL" -> {
+                val viewModel: TutorialDetailViewModel = hiltViewModel()
+                TutorialDetailScreen(
+                    viewModel = viewModel,
+                    navController = navController,
+                    sessionManager = sessionManager,
+                    activityId = activityId,
+                    courseId = courseId,
+                    activityFlowViewModel = activityFlowViewModel
+                )
+            }
+            "QUIZ" -> {
+                val viewModel: QuizDetailViewModel = hiltViewModel()
+                QuizDetailScreen(
+                    viewModel = viewModel,
+                    navController = navController,
+                    sessionManager = sessionManager,
+                    onClickTakeQuiz = { quiz ->
+                        navController.navigate(Screen.StudentQuizAttempt.createRoute(quiz.quizId))
+                    },
+                    activityId = activityId,
+                    courseId = courseId,
+                    activityFlowViewModel = activityFlowViewModel
+                )
+            }
+        }
     }
     composable(
         route = Screen.StudentQuizAttempt.route,
@@ -254,17 +281,6 @@ fun NavGraphBuilder.studentNavGraph(
 
     composable(Screen.Leaderboard.route) {
         LeaderboardScreen(navController, sessionManager)
-    }
-
-    composable(
-        route = Screen.StudentModules.route,
-        arguments = listOf(
-            navArgument(name = "courseId") { type = NavType.StringType }
-        )
-    ) {
-        val viewModel: ViewAllModulesViewModel = hiltViewModel()
-
-        ViewAllModulesScreen(navController, sessionManager, viewModel)
     }
 }
 

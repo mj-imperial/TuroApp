@@ -106,8 +106,10 @@ class ViewAllModulesViewModel @Inject constructor(
                             finalActivities += screeningExam.map { it.copy(isUnlocked = true) }
                             finalActivities += unlockedQuizzes
 
+                            val sortedActivities = finalActivities.sortedBy { it.displayOrder }
+
                             _uiState.update {
-                                it.copy(loading = false, activities = finalActivities)
+                                it.copy(loading = false, activities = sortedActivities)
                             }
                         }
                     },

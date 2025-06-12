@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.ModuleActivityResponse
@@ -50,13 +51,16 @@ import com.example.turomobileapp.ui.theme.screeningExam11
 import com.example.turomobileapp.ui.theme.shortquiz1
 import com.example.turomobileapp.ui.theme.shortquiz2
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.ViewAllModulesViewModel
 
 @Composable
 fun ViewAllModulesScreen(
     navController: NavController,
     sessionManager: SessionManager,
-    viewModel: ViewAllModulesViewModel
+    viewModel: ViewAllModulesViewModel,
+    courseId: String,
+    activityFlowViewModel: ActivityFlowViewModel,
 ){
     val windowInfo = rememberWindowInfo()
 
@@ -109,7 +113,9 @@ fun ViewAllModulesScreen(
                                 expandedModules.value + module.moduleId
                             }
                         },
-                        navController = navController
+                        navController = navController,
+                        courseId = courseId,
+                        viewModel = activityFlowViewModel
                     )
                 }
             }
@@ -134,6 +140,7 @@ fun ScreeningExamCard(
     ) {
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .background(
                     brush = Brush.linearGradient(colors = listOf(screeningExam1, screeningExam11)),
                     shape = RoundedCornerShape(14.dp)
@@ -166,7 +173,9 @@ fun ModuleContentCollapsable(
     activities: List<ModuleActivityResponse>,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    courseId: String,
+    viewModel: ActivityFlowViewModel
 ){
     Card(
         modifier = Modifier
@@ -230,7 +239,21 @@ fun ModuleContentCollapsable(
 
                     val lectures = activities.filter { it.activityType == "LECTURE" }
                     val tutorials = activities.filter { it.activityType == "TUTORIAL" }
-                    val quizzes = activities.filter { it.activityType == "QUIZ"  && it.quizTypeName != "SCREENING_EXAM"}
+                    val quizzes = activities.filter { it.activityType == "QUIZ" && it.quizTypeName != "SCREENING_EXAM" }
+
+                    val onNavigateToActivity: (ModuleActivityResponse) -> Unit = { activity ->
+                        viewModel.setActivityList(activities)
+                        viewModel.setCurrentActivityId(activity.activityId)
+
+                        val route = Screen.StudentActivityDetail.createRoute(
+                            moduleId = activity.moduleId,
+                            activityId = activity.activityId,
+                            activityType = activity.activityType,
+                            courseId = courseId
+                        )
+
+                        navController.navigate(route)
+                    }
 
                     if (lectures.isNotEmpty()){
                         Text(
@@ -246,9 +269,7 @@ fun ModuleContentCollapsable(
                             ActivitiesCard(
                                 windowInfo = windowInfo,
                                 isUnlocked = it.isUnlocked,
-                                onNavigateActivity = {
-                                    //TODO
-                                },
+                                onNavigateActivity = { onNavigateToActivity(it) },
                                 activityName = it.activityName,
                                 colors = listOf(Color(0xFFFFF59D), Color(0xFFFFD54F))
                             )
@@ -272,9 +293,7 @@ fun ModuleContentCollapsable(
                             ActivitiesCard(
                                 windowInfo = windowInfo,
                                 isUnlocked = it.isUnlocked,
-                                onNavigateActivity = {
-                                    //TODO
-                                },
+                                onNavigateActivity = { onNavigateToActivity(it) },
                                 activityName = it.activityName,
                                 colors = listOf(Color(0xFFB2EBF2), Color(0xFF4DD0E1))
                             )
@@ -298,9 +317,7 @@ fun ModuleContentCollapsable(
                             ActivitiesCard(
                                 windowInfo = windowInfo,
                                 isUnlocked = it.isUnlocked,
-                                onNavigateActivity = {
-                                    navController.navigate(Screen.StudentQuizDetail.createRoute(it.activityId))
-                                },
+                                onNavigateActivity = { onNavigateToActivity(it) },
                                 activityName = it.activityName,
                                 colors = listOf(shortquiz1, shortquiz2)
                             )

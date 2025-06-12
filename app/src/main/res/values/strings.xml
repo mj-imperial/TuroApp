@@ -40,9 +40,7 @@
     <string name="ViewModules">VIEW ALL MODULES</string>
     <string name="Continue">Continue where you left off</string>
     <string name="Tutorials">SKILL HONING TUTORIALS</string>
-    <string name="ShortQuiz">SHORT QUIZ</string>
-    <string name="PracticeQuiz">PRACTICE QUIZ</string>
-    <string name="LongQuiz">LONG QUIZ</string>
+]    <string name="Grades">GRADES</string>
     <string name="ScreeningExam">SCREENING EXAM</string>
     <string name="TeacherModules">CREATE MODULES</string>
     <string name="TeacherActivity">CREATE / EDIT ACTIVITIES</string>

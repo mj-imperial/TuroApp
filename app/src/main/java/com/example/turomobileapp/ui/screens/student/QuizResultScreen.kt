@@ -129,7 +129,7 @@ fun QuizResultScreen(
                     )
                 },
                 modifier = Modifier.size(windowInfo.screenWidth*0.2f),
-                onClick = { navController.navigate(Screen.StudentQuizDetail.route) },
+                onClick = { navController.navigate(Screen.StudentActivityDetail.route) },
                 roundedCornerShape = 10.dp,
                 buttonElevation = ButtonDefaults.buttonElevation(8.dp),
                 contentPadding = PaddingValues(5.dp),
@@ -215,7 +215,7 @@ fun QuizResultScreen(
                     TakeQuizAgainButton(
                         windowInfo = windowInfo,
                         onClickTakeQuizAgain = {
-                            navController.navigate(Screen.StudentQuizDetail.route)
+                            navController.navigate(Screen.StudentActivityDetail.route)
                         }
                     )
                 }

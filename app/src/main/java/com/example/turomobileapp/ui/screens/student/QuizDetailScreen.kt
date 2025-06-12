@@ -1,6 +1,7 @@
 package com.example.turomobileapp.ui.screens.student
 
 import AppScaffold
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -23,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.AssessmentScoreResponse
@@ -52,10 +55,12 @@ import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun QuizDetailScreen(
@@ -63,24 +68,23 @@ fun QuizDetailScreen(
     sessionManager: SessionManager,
     onClickTakeQuiz: (QuizResponse) -> Unit,
     viewModel: QuizDetailViewModel,
+    activityId: String,
     courseId: String,
-    type: String
+    activityFlowViewModel: ActivityFlowViewModel
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
     val quiz = uiState.quiz
     val scoresList = uiState.scores.sortedBy { it.attemptNumber }
 
-    val quizList = uiState.quizList
-    val currentIndex = quiz?.quizId?.let { id ->
-        quizList.indexOfFirst { it.quizId == id }
-    } ?: -1
+    LaunchedEffect(activityId) {
+        activityFlowViewModel.setCurrentActivityId(activityId)
+    }
 
-    val hasPrevious = currentIndex > 0
-    val hasNext = currentIndex != -1 && currentIndex < quizList.lastIndex
-
-    val previousQuiz = quizList.getOrNull(currentIndex - 1)
-    val nextQuiz = quizList.getOrNull(currentIndex + 1)
+    val previous = activityFlowViewModel.goToPrevious()
+    val next = activityFlowViewModel.goToNext()
+    val hasPrevious = previous != null
+    val hasNext = next != null
 
     AppScaffold(
         navController = navController,
@@ -159,25 +163,31 @@ fun QuizDetailScreen(
                 PreviousNextButton(
                     windowInfo = windowInfo,
                     onClickPrevious = {
-                        previousQuiz?.let {
-                            navController.navigate(Screen.StudentQuizDetail.createRoute(
-                                courseId = courseId,
-                                quizId = it.quizId,
-                                type = type
-                            ))
+                        previous?.let {
+                            activityFlowViewModel.setCurrentActivityId(it.activityId)
+                            val route = Screen.StudentActivityDetail.createRoute(
+                                moduleId = it.moduleId,
+                                activityId = it.activityId,
+                                activityType = it.activityType,
+                                courseId = courseId
+                            )
+                            navController.navigate(route)
                         }
                     },
                     onClickNext = {
-                        nextQuiz?.let {
-                            navController.navigate(Screen.StudentQuizDetail.createRoute(
-                                courseId = courseId,
-                                quizId = it.quizId,
-                                type = type
-                            ))
+                        next?.let {
+                            activityFlowViewModel.setCurrentActivityId(it.activityId)
+                            val route = Screen.StudentActivityDetail.createRoute(
+                                moduleId = it.moduleId,
+                                activityId = it.activityId,
+                                activityType = it.activityType,
+                                courseId = courseId
+                            )
+                            navController.navigate(route)
                         }
                     },
-                    enablePrevious = hasPrevious,
-                    enableNext = hasNext
+                    isPreviousEnabled = hasPrevious,
+                    isNextEnabled = hasNext,
                 )
             }
         }
@@ -422,8 +432,8 @@ fun PreviousNextButton(
     windowInfo: WindowInfo,
     onClickPrevious: () -> Unit,
     onClickNext: () -> Unit,
-    enablePrevious: Boolean,
-    enableNext: Boolean
+    isPreviousEnabled: Boolean,
+    isNextEnabled: Boolean
 ){
     val buttonWidth = (windowInfo.screenWidth) * 0.3f
     Row(
@@ -448,7 +458,7 @@ fun PreviousNextButton(
             buttonElevation = ButtonDefaults.buttonElevation(0.dp),
             contentPadding = PaddingValues(vertical = 10.dp),
             buttonColors = ButtonDefaults.buttonColors(Color.Transparent),
-            enabled = enablePrevious
+            enabled = isPreviousEnabled
         )
 
         CapsuleButton(
@@ -468,7 +478,7 @@ fun PreviousNextButton(
             buttonElevation = ButtonDefaults.buttonElevation(0.dp),
             contentPadding = PaddingValues(10.dp),
             buttonColors = ButtonDefaults.buttonColors(Color.Transparent),
-            enabled = enableNext
+            enabled = isNextEnabled
         )
     }
 }

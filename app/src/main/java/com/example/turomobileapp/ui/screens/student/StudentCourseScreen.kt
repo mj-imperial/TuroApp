@@ -39,7 +39,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -53,8 +52,6 @@ import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
-import com.example.turomobileapp.ui.theme.longquiz1
-import com.example.turomobileapp.ui.theme.longquiz2
 import com.example.turomobileapp.ui.theme.practice1
 import com.example.turomobileapp.ui.theme.practice2
 import com.example.turomobileapp.ui.theme.screeningExam1
@@ -91,13 +88,6 @@ fun CourseDetailScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.SpaceAround
             ) {
-                CourseViewModules(
-                    windowInfo = windowInfo,
-                    onClickViewAllModules = {
-                        navController.navigate(Screen.StudentModules.createRoute(courseId))
-                    }
-                )
-
                 CourseHeader(
                     windowInfo = windowInfo,
                     height = height,
@@ -117,42 +107,6 @@ fun CourseDetailScreen(
     )
 }
 
-@Composable
-fun CourseViewModules(
-    windowInfo: WindowInfo,
-    onClickViewAllModules: () -> Unit
-){
-    Row(
-        horizontalArrangement = Arrangement.End,
-        modifier = Modifier
-            .padding(top = 10.dp,bottom = 2.dp)
-            .fillMaxWidth()
-            .clickable(onClick = onClickViewAllModules)
-    ) {
-        Text(
-            text = stringResource(R.string.ViewModules),
-            fontFamily = FontFamily(Font(R.font.alexandria)),
-            fontSize = ResponsiveFont.body(windowInfo),
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier.padding(end = 5.dp),
-            textAlign = TextAlign.End
-        )
-
-        Icon(
-            painter = painterResource(R.drawable.rightarrow_icon),
-            contentDescription = stringResource(R.string.ViewModules),
-            tint = TextBlack
-        )
-    }
-
-    Text(
-        text = stringResource(R.string.Continue),
-        fontFamily = FontFamily(Font(R.font.alexandria)),
-        fontSize = ResponsiveFont.body(windowInfo),
-        textAlign = TextAlign.Start,
-        modifier = Modifier.padding(start = 10.dp)
-    )
-}
 
 /*
 * TODO add logic for progress percentage and module name placeholder
@@ -245,7 +199,7 @@ fun CourseActivities(
     windowInfo: WindowInfo,
     width: Dp,
     height: Dp,
-    courseId: String
+    courseId: String,
 ){
     val cardWidth = width * 0.7f
     val columnHeight = height * 0.5f
@@ -254,28 +208,22 @@ fun CourseActivities(
 
     val activitiesList = listOf(
         Activities(
+            name = R.string.ViewModules,
+            icon = R.drawable.shortquiz_icon,
+            route = Screen.StudentModules.createRoute(courseId),
+            colors = listOf(shortquiz1,shortquiz2)
+        ),
+        Activities(
             name = R.string.Tutorials,
             icon = R.drawable.tutorial_icon,
             route = Screen.StudentCourseActivity.route,
             colors = listOf(tutorial1,tutorial2)
         ),
         Activities(
-            name = R.string.ShortQuiz,
-            icon = R.drawable.shortquiz_icon,
-            route = Screen.StudentCourseQuizzes.createRoute(courseId = courseId, type = QuizType.SHORT),
-            colors = listOf(shortquiz1,shortquiz2)
-        ),
-        Activities(
-            name = R.string.PracticeQuiz,
+            name = R.string.Grades,
             icon = R.drawable.practicequiz_icon,
             route = Screen.StudentCourseQuizzes.createRoute(courseId = courseId, type = QuizType.PRACTICE),
             colors = listOf(practice1,practice2)
-        ),
-        Activities(
-            name = R.string.LongQuiz,
-            icon = R.drawable.longquiz_icon,
-            route = Screen.StudentCourseQuizzes.createRoute(courseId = courseId, type = QuizType.LONG),
-            colors = listOf(longquiz1,longquiz2)
         ),
         //TODO change screening exam since screening exam will have a special ui
         Activities(

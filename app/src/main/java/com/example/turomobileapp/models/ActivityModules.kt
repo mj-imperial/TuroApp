@@ -114,6 +114,7 @@ data class ModuleActivitiesResponse(
     @Json(name = "activities") val activities: List<ModuleActivityResponse>
 )
 
+@Parcelize
 @JsonClass(generateAdapter = true)
 data class ModuleActivityResponse(
     @Json(name = "module_id") val moduleId: String,
@@ -126,8 +127,9 @@ data class ModuleActivityResponse(
     @Json(name = "deadline_date") val deadlineDate: String? = null,
 
     val isUnlocked: Boolean = false,
-    val hasAnswered: Boolean = false
-)
+    val hasAnswered: Boolean = false,
+    val displayOrder: Int = 0
+): Parcelable
 
 @JsonClass(generateAdapter = true)
 data class ActivityActionResponse(
