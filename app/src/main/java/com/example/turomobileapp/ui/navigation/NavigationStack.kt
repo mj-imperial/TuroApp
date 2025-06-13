@@ -23,7 +23,11 @@ import com.example.turomobileapp.ui.screens.authentication.LoginScreen
 import com.example.turomobileapp.ui.screens.authentication.SplashScreen
 import com.example.turomobileapp.ui.screens.authentication.TermsAgreementScreen
 import com.example.turomobileapp.ui.screens.shared.CalendarScreen
+import com.example.turomobileapp.ui.screens.shared.CreateMessageScreen
+import com.example.turomobileapp.ui.screens.shared.CreateMessageSelectCourseScreen
+import com.example.turomobileapp.ui.screens.shared.CreateMessageSelectRecipients
 import com.example.turomobileapp.ui.screens.shared.DashboardScreen
+import com.example.turomobileapp.ui.screens.shared.InboxScreen
 import com.example.turomobileapp.ui.screens.shared.NotificationScreen
 import com.example.turomobileapp.ui.screens.shared.ProfileScreen
 import com.example.turomobileapp.ui.screens.student.CourseDetailScreen
@@ -46,6 +50,7 @@ import com.example.turomobileapp.ui.screens.teacher.EditTutorialScreen
 import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.shared.CreateMessageViewModel
 import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 import com.example.turomobileapp.viewmodels.student.LectureDetailViewModel
@@ -157,6 +162,33 @@ fun NavGraphBuilder.commonNavGraph(
     }
     composable(Screen.Notification.route) {
         NotificationScreen(navController, sessionManager)
+    }
+    composable(Screen.Inbox.route) {
+        InboxScreen(navController, sessionManager)
+    }
+    composable(Screen.CreateMessage.route) {navBackStackEntry ->
+        val viewModel: CreateMessageViewModel = hiltViewModel(navBackStackEntry)
+        CreateMessageScreen(navController, sessionManager, viewModel)
+    }
+    composable(Screen.CreateMessageSelectCourse.route) { backStackEntry ->
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry("create_message_screen")
+        }
+        val viewModel: CreateMessageViewModel = hiltViewModel(parentEntry)
+        CreateMessageSelectCourseScreen(navController, sessionManager, viewModel)
+    }
+    composable(
+        route = Screen.CreateMessageSelectRecipients.route,
+        arguments = listOf(
+            navArgument("courseName") { type = NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry("create_message_screen")
+        }
+        val viewModel: CreateMessageViewModel = hiltViewModel(parentEntry)
+        val courseName = backStackEntry.arguments?.getString("courseName")
+        CreateMessageSelectRecipients(navController, sessionManager, viewModel, courseName.toString())
     }
 }
 

@@ -1,6 +1,7 @@
 package com.example.turomobileapp.models
 
 import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -19,15 +20,6 @@ data class Message(
 )
 
 @JsonClass(generateAdapter = true)
-data class Attachment(
-    @SerializedName("attachment_id") val attachmentId: String,
-    @SerializedName("file_name") val fileName: String,
-    @SerializedName("file_url") val fileUrl: String,
-    @SerializedName("file_size") val fileSize: Long,
-    @SerializedName("mime_type") val mimeType: String,
-)
-
-@JsonClass(generateAdapter = true)
 data class Inbox(
     @SerializedName("inbox_id") val inboxId: String,
     @SerializedName("participant_ids") val participantIds: List<String>,
@@ -35,4 +27,64 @@ data class Inbox(
     @SerializedName("last_message") val lastMessage: Message?,
     @SerializedName("unread_count") val unreadCount: Int,
     @SerializedName("timestamp") val timestamp: Long
+)
+
+@JsonClass(generateAdapter = true)
+data class InboxItems(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "inboxes") val inboxes: List<InboxItem>
+)
+
+@JsonClass(generateAdapter = true)
+data class InboxItem(
+    @Json(name = "inbox_id") val inboxId: String,
+    @Json(name = "last_message_preview") val lastMessagePreview: String,
+    @Json(name = "inbox_timestamp") val lastMessageTimestamp: Long,
+    @Json(name = "unread_count") val unreadCount: Int,
+    @Json(name = "participants") val participants: List<UserInfo>
+)
+
+@JsonClass(generateAdapter = true)
+data class UserInfo(
+    @Json(name = "participant_id") val userId: String,
+    @Json(name = "first_name") val firstName: String,
+    @Json(name = "last_name") val lastName: String,
+    @Json(name = "profile_pic") val profileImageUrl: String?
+)
+
+@JsonClass(generateAdapter = true)
+data class CreateMessageRequest(
+    @Json(name = "sender_id") val senderId: String,
+    @Json(name = "recipient_ids") val recipientIds: List<String>,
+    @Json(name = "subject") val subject: String,
+    @Json(name = "body") val body: String
+)
+
+@JsonClass(generateAdapter = true)
+data class CreateMessageResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "message") val message: String
+)
+
+@JsonClass(generateAdapter = true)
+data class InboxCourseUserListsResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "courses") val courses: List<InboxCourseUserListResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class InboxCourseUserListResponse(
+    @Json(name = "course_name") val courseName: String,
+    @Json(name = "teacher_id") val teacherId: String,
+    @Json(name = "teacher_pic") val teacherPic: String,
+    @Json(name = "teacher_email") val teacherEmail: String,
+    @Json(name = "teacher_name") val teacherName: String,
+    @Json(name = "students") val students: List<InboxCourseStudent>
+)
+
+data class InboxCourseStudent(
+    @Json(name = "user_id") val userId: String,
+    @Json(name = "student_pic") val studentPic: String,
+    @Json(name = "student_name") val studentName: String,
+    @Json(name = "student_email") val email: String
 )

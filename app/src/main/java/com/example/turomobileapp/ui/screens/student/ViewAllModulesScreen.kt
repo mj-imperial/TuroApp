@@ -37,7 +37,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.ModuleActivityResponse
@@ -83,7 +82,9 @@ fun ViewAllModulesScreen(
                     .padding(20.dp)
             ) {
                 items(modules) { module ->
-                    val activities = uiState.activities.filter { it.moduleId == module.moduleId }
+                    val activities = uiState.activities
+                        .filter { it.moduleId == module.moduleId }
+                        .filterNot { it.quizTypeName == "SCREENING_EXAM" }
                     val isExpanded = expandedModules.value.contains(module.moduleId)
 
                     val screeningExam = activities.filter { it.quizTypeName == "SCREENING_EXAM" }
@@ -239,7 +240,9 @@ fun ModuleContentCollapsable(
 
                     val lectures = activities.filter { it.activityType == "LECTURE" }
                     val tutorials = activities.filter { it.activityType == "TUTORIAL" }
-                    val quizzes = activities.filter { it.activityType == "QUIZ" && it.quizTypeName != "SCREENING_EXAM" }
+                    val quizzes = activities.filter {
+                        it.activityType == "QUIZ" && (it.quizTypeName?.uppercase() != "SCREENING_EXAM")
+                    }
 
                     val onNavigateToActivity: (ModuleActivityResponse) -> Unit = { activity ->
                         viewModel.setActivityList(activities)

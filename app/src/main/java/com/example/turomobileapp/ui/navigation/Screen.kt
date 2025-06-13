@@ -19,6 +19,11 @@ sealed class Screen(val route: String) {
     object Calendar: Screen("calendar_screen")
     object Profile: Screen("profile_screen")
     object Inbox: Screen("inbox_screen")
+    object CreateMessage: Screen("create_message_screen")
+    object CreateMessageSelectCourse: Screen("create_message_select_course_screen")
+    object CreateMessageSelectRecipients: Screen("create_message_select_recipient/{courseName}"){
+        fun createRoute(courseName: String) = "create_message_select_recipient/$courseName"
+    }
     object Notification: Screen("notification_screen")
     object Help: Screen("help_screen")
 

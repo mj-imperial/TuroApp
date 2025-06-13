@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.AssessmentScoreResponse
-import com.example.turomobileapp.models.ModuleActivityResponse
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.repositories.AssessmentResultRepository
 import com.example.turomobileapp.repositories.QuizRepository

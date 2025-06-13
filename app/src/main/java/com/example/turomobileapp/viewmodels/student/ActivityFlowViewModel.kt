@@ -37,13 +37,13 @@ class ActivityFlowViewModel @Inject constructor(
     }
 
     fun goToPrevious(): ModuleActivityResponse? {
-        val list = _uiState.value.activityList
+        val list = _uiState.value.activityList.filter { it.isUnlocked }
         val index = list.indexOfFirst { it.activityId == _uiState.value.currentActivityId }
         return if (index > 0) list[index - 1] else null
     }
 
     fun goToNext(): ModuleActivityResponse? {
-        val list = _uiState.value.activityList
+        val list = _uiState.value.activityList.filter { it.isUnlocked }
         val index = list.indexOfFirst { it.activityId == _uiState.value.currentActivityId }
         return if (index >= 0 && index < list.lastIndex) list[index + 1] else null
     }
