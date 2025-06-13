@@ -24,6 +24,9 @@ sealed class Screen(val route: String) {
     object CreateMessageSelectRecipients: Screen("create_message_select_recipient/{courseName}"){
         fun createRoute(courseName: String) = "create_message_select_recipient/$courseName"
     }
+    object InboxDetail: Screen("inbox_detail_screen/{inboxId}"){
+        fun createRoute(inboxId: String) = "inbox_detail_screen/$inboxId"
+    }
     object Notification: Screen("notification_screen")
     object Help: Screen("help_screen")
 

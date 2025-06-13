@@ -1,15 +1,15 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.CreateMessageRequest
-import com.example.turomobileapp.models.CreateMessageResponse
 import com.example.turomobileapp.models.InboxCourseUserListsResponse
+import com.example.turomobileapp.models.InboxItems
 import com.example.turomobileapp.models.Message
+import com.example.turomobileapp.models.MessageActionResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
-import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -31,23 +31,29 @@ interface MessageApiService {
     suspend fun sendMessage(
         @Query("user_id") userId: String,
         @Body message: CreateMessageRequest
-    ): Response<CreateMessageResponse>
+    ): Response<MessageActionResponse>
 
-    @GET("/users/{userId}/messages/inbox")
+    @GET("get_inbox_for_user.php")
     suspend fun getInboxMessages(
-        @Path("userId") userId: String,
-    ): Response<List<Message>>
+        @Query("user_id") userId: String
+    ): Response<InboxItems>
+
+    @DELETE("delete_inbox.php")
+    suspend fun deleteInboxMessage(
+        @Query("inbox_id") inboxId: String,
+        @Query("user_id") userId: String
+    ): Response<MessageActionResponse>
+
+    @POST("mark_message_as_read.php")
+    suspend fun markMessageAsRead(
+        @Query("user_id") userId: String,
+        @Query("message_id") messageId: String,
+    ): Response<MessageActionResponse>
 
     @GET("/messages/{messageId}")
     suspend fun getMessage(
         @Path("messageId") messageId: String
     ): Response<Message>
-
-    @PATCH("/messages/{messageId}/isRead")
-    suspend fun markMessageAsRead(
-        @Path("messageId") messageId: String,
-        @Query("isRead") isRead: Boolean
-    ): Response<ResponseBody>
 
     @DELETE("/messages/{messageId}")
     suspend fun deleteMessage(

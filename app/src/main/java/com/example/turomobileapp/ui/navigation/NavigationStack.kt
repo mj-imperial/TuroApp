@@ -27,6 +27,7 @@ import com.example.turomobileapp.ui.screens.shared.CreateMessageScreen
 import com.example.turomobileapp.ui.screens.shared.CreateMessageSelectCourseScreen
 import com.example.turomobileapp.ui.screens.shared.CreateMessageSelectRecipients
 import com.example.turomobileapp.ui.screens.shared.DashboardScreen
+import com.example.turomobileapp.ui.screens.shared.InboxDetailScreen
 import com.example.turomobileapp.ui.screens.shared.InboxScreen
 import com.example.turomobileapp.ui.screens.shared.NotificationScreen
 import com.example.turomobileapp.ui.screens.shared.ProfileScreen
@@ -51,6 +52,8 @@ import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.shared.CreateMessageViewModel
+import com.example.turomobileapp.viewmodels.shared.InboxDetailViewModel
+import com.example.turomobileapp.viewmodels.shared.InboxViewModel
 import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 import com.example.turomobileapp.viewmodels.student.LectureDetailViewModel
@@ -164,7 +167,8 @@ fun NavGraphBuilder.commonNavGraph(
         NotificationScreen(navController, sessionManager)
     }
     composable(Screen.Inbox.route) {
-        InboxScreen(navController, sessionManager)
+        val viewModel: InboxViewModel = hiltViewModel()
+        InboxScreen(navController, sessionManager, viewModel)
     }
     composable(Screen.CreateMessage.route) {navBackStackEntry ->
         val viewModel: CreateMessageViewModel = hiltViewModel(navBackStackEntry)
@@ -189,6 +193,16 @@ fun NavGraphBuilder.commonNavGraph(
         val viewModel: CreateMessageViewModel = hiltViewModel(parentEntry)
         val courseName = backStackEntry.arguments?.getString("courseName")
         CreateMessageSelectRecipients(navController, sessionManager, viewModel, courseName.toString())
+    }
+    composable(
+        route = Screen.InboxDetail.route,
+        arguments = listOf(
+            navArgument("inboxId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel: InboxDetailViewModel = hiltViewModel()
+
+        InboxDetailScreen(navController, sessionManager, viewModel)
     }
 }
 

@@ -38,6 +38,8 @@ data class InboxItems(
 @JsonClass(generateAdapter = true)
 data class InboxItem(
     @Json(name = "inbox_id") val inboxId: String,
+    @Json(name = "latest_message_id") val latestMessageId: String?,
+    @Json(name = "last_message_subject") val lastMessageSubject: String?,
     @Json(name = "last_message_preview") val lastMessagePreview: String,
     @Json(name = "inbox_timestamp") val lastMessageTimestamp: Long,
     @Json(name = "unread_count") val unreadCount: Int,
@@ -46,9 +48,8 @@ data class InboxItem(
 
 @JsonClass(generateAdapter = true)
 data class UserInfo(
-    @Json(name = "participant_id") val userId: String,
-    @Json(name = "first_name") val firstName: String,
-    @Json(name = "last_name") val lastName: String,
+    @Json(name = "user_id") val userId: String,
+    @Json(name = "name") val name: String,
     @Json(name = "profile_pic") val profileImageUrl: String?
 )
 
@@ -61,7 +62,7 @@ data class CreateMessageRequest(
 )
 
 @JsonClass(generateAdapter = true)
-data class CreateMessageResponse(
+data class MessageActionResponse(
     @Json(name = "success") val success: Boolean,
     @Json(name = "message") val message: String
 )
