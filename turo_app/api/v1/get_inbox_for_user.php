@@ -31,6 +31,13 @@ try {
                    ORDER BY m.timestamp DESC
                    LIMIT 1
                ) AS last_message_subject,
+                (
+                SELECT m.message_id
+                FROM Message m
+                WHERE m.inbox_id = i.inbox_id
+                ORDER BY m.timestamp DESC
+                LIMIT 1
+                ) AS latest_message_id,
                (
                    SELECT m.body
                    FROM Message m

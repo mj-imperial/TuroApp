@@ -9,10 +9,8 @@ if (!file_exists($configFile)) {
 }
 require_once $configFile;
 
-$input = $_SERVER['REQUEST_METHOD'] === 'POST' ? ($_POST ?: json_decode(file_get_contents('php://input'), true)) : [];
-
-$messageId = $input['message_id'] ?? null;
-$userId = $input['user_id'] ?? null;
+$messageId = $_GET['message_id'] ?? null;
+$userId = $_GET['user_id'] ?? null;
 
 if (!$messageId || !$userId) {
     http_response_code(400);
@@ -23,7 +21,7 @@ if (!$messageId || !$userId) {
 try {
     $stmt = $conn->prepare("
         UPDATE MessageUserState
-        SET is_read = TRUE
+        SET is_read = 1
         WHERE message_id = ? AND user_id = ?
     ");
     if (!$stmt) {
