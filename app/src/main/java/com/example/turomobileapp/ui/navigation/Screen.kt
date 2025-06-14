@@ -27,6 +27,9 @@ sealed class Screen(val route: String) {
     object InboxDetail: Screen("inbox_detail_screen/{inboxId}"){
         fun createRoute(inboxId: String) = "inbox_detail_screen/$inboxId"
     }
+    object ReplyScreen: Screen("reply_screen/{inboxId}"){
+        fun createRoute(inboxId: String) = "reply_screen/$inboxId"
+    }
     object Notification: Screen("notification_screen")
     object Help: Screen("help_screen")
 

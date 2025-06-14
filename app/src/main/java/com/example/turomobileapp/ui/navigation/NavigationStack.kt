@@ -31,6 +31,7 @@ import com.example.turomobileapp.ui.screens.shared.InboxDetailScreen
 import com.example.turomobileapp.ui.screens.shared.InboxScreen
 import com.example.turomobileapp.ui.screens.shared.NotificationScreen
 import com.example.turomobileapp.ui.screens.shared.ProfileScreen
+import com.example.turomobileapp.ui.screens.shared.ReplyScreen
 import com.example.turomobileapp.ui.screens.student.CourseDetailScreen
 import com.example.turomobileapp.ui.screens.student.LeaderboardScreen
 import com.example.turomobileapp.ui.screens.student.LectureDetailScreen
@@ -199,10 +200,24 @@ fun NavGraphBuilder.commonNavGraph(
         arguments = listOf(
             navArgument("inboxId") { type = NavType.StringType }
         )
-    ) {
-        val viewModel: InboxDetailViewModel = hiltViewModel()
+    ) { navBackStackEntry ->
+        val inboxId = navBackStackEntry.arguments?.getString("inboxId")!!
+        val viewModel: InboxDetailViewModel = hiltViewModel(navBackStackEntry)
 
-        InboxDetailScreen(navController, sessionManager, viewModel)
+        InboxDetailScreen(navController, sessionManager, viewModel, inboxId.toString())
+    }
+    composable(
+        route = Screen.ReplyScreen.route,
+        arguments = listOf(
+            navArgument("inboxId") { type = NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val inboxId = backStackEntry.arguments?.getString("inboxId")!!
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry("inbox_detail_screen/$inboxId")
+        }
+        val viewModel: InboxDetailViewModel = hiltViewModel(parentEntry)
+        ReplyScreen(navController, sessionManager, viewModel)
     }
 }
 

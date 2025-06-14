@@ -2,16 +2,14 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.CreateMessageRequest
 import com.example.turomobileapp.models.InboxCourseUserListsResponse
+import com.example.turomobileapp.models.InboxDetails
 import com.example.turomobileapp.models.InboxItems
-import com.example.turomobileapp.models.Message
 import com.example.turomobileapp.models.MessageActionResponse
-import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MessageApiService {
@@ -50,14 +48,9 @@ interface MessageApiService {
         @Query("message_id") messageId: String,
     ): Response<MessageActionResponse>
 
-    @GET("/messages/{messageId}")
-    suspend fun getMessage(
-        @Path("messageId") messageId: String
-    ): Response<Message>
-
-    @DELETE("/messages/{messageId}")
-    suspend fun deleteMessage(
-        @Path("messageId") messageId: String,
-        @Query("deleteForUser") deleteForUser: Boolean
-    ): Response<ResponseBody>
+    @GET("get_inbox_details.php")
+    suspend fun getInboxDetails(
+        @Query("inbox_id") inboxId: String,
+        @Query("user_id") userId: String
+    ): Response<InboxDetails>
 }

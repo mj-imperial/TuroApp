@@ -5,11 +5,10 @@ import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.MessageApiService
 import com.example.turomobileapp.models.CreateMessageRequest
 import com.example.turomobileapp.models.InboxCourseUserListResponse
+import com.example.turomobileapp.models.InboxDetails
 import com.example.turomobileapp.models.InboxItem
-import com.example.turomobileapp.models.Message
 import com.example.turomobileapp.models.MessageActionResponse
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class MessageRepository @Inject constructor(private val messageApiService: MessageApiService){
@@ -50,17 +49,14 @@ class MessageRepository @Inject constructor(private val messageApiService: Messa
             errorMessage = "Failed to mark message $messageId as read"
         )
 
-    fun getMessage(messageId: String): Flow<Result<Message>> = flow {
-        handleApiResponse(
-            call = { messageApiService.getMessage(messageId) },
-            errorMessage = "Failed to get message $messageId"
+    fun getInboxDetails(inboxId: String, userId: String): Flow<Result<InboxDetails>> =
+        requestAndMap(
+            call = { messageApiService.getInboxDetails(inboxId, userId) },
+            mapper = { dto ->
+                InboxDetails(
+                    success = dto.success,
+                    messages = dto.messages,
+                )
+            }
         )
-    }
-
-    fun deleteMessage(messageId: String, deleteForUser: Boolean = true): Flow<Result<Unit>> = flow {
-        handleApiResponse(
-            call = { messageApiService.deleteMessage(messageId, deleteForUser) },
-            errorMessage = "Failed to delete message $messageId"
-        )
-    }
 }

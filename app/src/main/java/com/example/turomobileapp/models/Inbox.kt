@@ -83,9 +83,30 @@ data class InboxCourseUserListResponse(
     @Json(name = "students") val students: List<InboxCourseStudent>
 )
 
+@JsonClass(generateAdapter = true)
 data class InboxCourseStudent(
     @Json(name = "user_id") val userId: String,
     @Json(name = "student_pic") val studentPic: String,
     @Json(name = "student_name") val studentName: String,
     @Json(name = "student_email") val email: String
+)
+
+@JsonClass(generateAdapter = true)
+data class InboxDetails(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "messages") val messages: List<InboxDetail>,
+)
+
+@JsonClass(generateAdapter = true)
+data class InboxDetail(
+    @Json(name = "message_id") val messageId: String,
+    @Json(name = "sender_id") val senderId: String,
+    @Json(name = "sender_name") val senderName: String,
+    @Json(name = "sender_pic") val senderPic: String?,
+    @Json(name = "recipient_id") val recipientId: String,
+    @Json(name = "recipient_name") val recipientName: String,
+    @Json(name = "recipient_pic") val recipientPic: String?,
+    @Json(name = "subject") val subject: String,
+    @Json(name = "body") val body: String,
+    @Json(name = "timestamp") val timestamp: Long
 )
