@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
-import com.example.turomobileapp.models.StudentProgressResponse
+import com.example.turomobileapp.models.StudentLeaderboardResponse
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.theme.MainOrange
@@ -38,7 +38,7 @@ import com.example.turomobileapp.ui.theme.TextBlack
 
 @Composable
 fun FirstPlaceRow(
-    student: StudentProgressResponse,
+    student: StudentLeaderboardResponse,
     windowInfo: WindowInfo,
     height: Dp
 ) {
@@ -112,7 +112,7 @@ fun FirstPlaceRow(
 
 @Composable
 fun SecondPlaceRow(
-    student: StudentProgressResponse,
+    student: StudentLeaderboardResponse,
     windowInfo: WindowInfo,
     height: Dp
 ) {
@@ -185,7 +185,7 @@ fun SecondPlaceRow(
 
 @Composable
 fun ThirdPlaceRow(
-    student: StudentProgressResponse,
+    student: StudentLeaderboardResponse,
     windowInfo: WindowInfo,
     height: Dp
 ) {
@@ -258,7 +258,7 @@ fun ThirdPlaceRow(
 
 @Composable
 fun RegularPlaceRow(
-    student: StudentProgressResponse,
+    student: StudentLeaderboardResponse,
     position: Int,
     windowInfo: WindowInfo,
     height: Dp

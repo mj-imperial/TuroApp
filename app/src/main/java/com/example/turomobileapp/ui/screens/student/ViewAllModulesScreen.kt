@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,9 +21,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +50,7 @@ import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.screeningExam1
 import com.example.turomobileapp.ui.theme.screeningExam11
 import com.example.turomobileapp.ui.theme.shortquiz1
@@ -53,6 +59,7 @@ import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.ViewAllModulesViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewAllModulesScreen(
     navController: NavController,
@@ -62,11 +69,14 @@ fun ViewAllModulesScreen(
     activityFlowViewModel: ActivityFlowViewModel,
 ){
     val windowInfo = rememberWindowInfo()
+    val pullRefreshState = rememberPullToRefreshState()
 
     val uiState by viewModel.uiState.collectAsState()
     val modules = uiState.modules
 
-    val expandedModules = remember { mutableStateOf(setOf<String>()) }
+    val expandedModules = remember(modules) {
+        mutableStateOf(modules.map { it.moduleId }.toSet())
+    }
 
     AppScaffold(
         navController = navController,
@@ -75,49 +85,63 @@ fun ViewAllModulesScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-                    .padding(20.dp)
-            ) {
-                items(modules) { module ->
-                    val activities = uiState.activities
-                        .filter { it.moduleId == module.moduleId }
-                        .filterNot { it.quizTypeName == "SCREENING_EXAM" }
-                    val isExpanded = expandedModules.value.contains(module.moduleId)
+            if (uiState.loading){
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    CircularProgressIndicator()
+                }
+            }else{
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getModules()
+                    },
+                ) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .padding(20.dp)
+                    ) {
+                        items(modules) { module ->
+                            val activities = uiState.activities
+                                .filter { it.moduleId == module.moduleId }
+                                .filterNot { it.quizTypeName == "SCREENING_EXAM" }
+                            val isExpanded = expandedModules.value.contains(module.moduleId)
 
-                    val screeningExam = activities.filter { it.quizTypeName == "SCREENING_EXAM" }
+                            val screeningExam = activities.filter { it.quizTypeName == "SCREENING_EXAM" }
 
-                    screeningExam.forEach {
-                        ScreeningExamCard(
-                            windowInfo = windowInfo,
-                            screeningExam = it,
-                            onNavigateActivity = {
-                                //TODO screening navigation
+                            screeningExam.forEach {
+                                ScreeningExamCard(
+                                    windowInfo = windowInfo,
+                                    screeningExam = it,
+                                    onNavigateActivity = {
+                                        navController.navigate(Screen.ScreeningExamDetail.createRoute(it.activityId))
+                                    }
+                                )
                             }
-                        )
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            ModuleContentCollapsable(
+                                windowInfo = windowInfo,
+                                moduleName = module.moduleName,
+                                moduleDescription = module.moduleDescription,
+                                activities = activities,
+                                isExpanded = isExpanded,
+                                onToggleExpand = {
+                                    expandedModules.value = if (expandedModules.value.contains(module.moduleId)) {
+                                        expandedModules.value - module.moduleId
+                                    } else {
+                                        expandedModules.value + module.moduleId
+                                    }
+                                },
+                                navController = navController,
+                                courseId = courseId,
+                                viewModel = activityFlowViewModel
+                            )
+                        }
                     }
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    ModuleContentCollapsable(
-                        windowInfo = windowInfo,
-                        moduleName = module.moduleName,
-                        moduleDescription = module.moduleDescription,
-                        activities = activities,
-                        isExpanded = isExpanded,
-                        onToggleExpand = {
-                            expandedModules.value = if (expandedModules.value.contains(module.moduleId)) {
-                                expandedModules.value - module.moduleId
-                            } else {
-                                expandedModules.value + module.moduleId
-                            }
-                        },
-                        navController = navController,
-                        courseId = courseId,
-                        viewModel = activityFlowViewModel
-                    )
                 }
             }
         }
@@ -210,7 +234,8 @@ fun ModuleContentCollapsable(
                     Text(
                         text = moduleName,
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading1(windowInfo)
+                        fontSize = ResponsiveFont.heading1(windowInfo),
+                        color = TextBlack
                     )
                     Text(
                         text = moduleDescription,

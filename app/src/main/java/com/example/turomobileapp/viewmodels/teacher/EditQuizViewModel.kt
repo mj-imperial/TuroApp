@@ -53,14 +53,14 @@ class EditQuizViewModel @Inject constructor(
 
     fun getQuiz(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingMetadata = true, errorMessage = null) }
 
             quizRepository.getQuiz(_activityId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { quiz ->
                         _uiState.update { it.copy(
-                            loading = false,
+                            loadingMetadata = false,
                             quizTitle = quiz.quizName,
                             quizType = quiz.quizTypeName,
                             quizDescription = quiz.quizDescription,
@@ -72,7 +72,7 @@ class EditQuizViewModel @Inject constructor(
                         ) }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        _uiState.update { it.copy(loadingMetadata = false, errorMessage = err) }
                     }
                 )
             }
@@ -81,16 +81,16 @@ class EditQuizViewModel @Inject constructor(
 
     fun getQuizContent(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingContent = true, errorMessage = null) }
 
             quizRepository.getQuizContent(_activityId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { content ->
-                        _uiState.update { it.copy(loading = false, questions = content) }
+                        _uiState.update { it.copy(loadingContent = false, questions = content) }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        _uiState.update { it.copy(loadingContent = false, errorMessage = err) }
                     }
                 )
             }
@@ -404,7 +404,7 @@ class EditQuizViewModel @Inject constructor(
 
     fun updateQuiz(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingUpdate = true, errorMessage = null) }
 
             val state = _uiState.value
             val newQuestions = _pendingQuestions.value
@@ -473,7 +473,7 @@ class EditQuizViewModel @Inject constructor(
                 handleResult(
                     result = result,
                     onSuccess = {
-                        _uiState.update { it.copy(loading = false, editQuizStatus = Result.Success(Unit)) }
+                        _uiState.update { it.copy(loadingUpdate = false, editQuizStatus = Result.Success(Unit)) }
 
                         notificationService.showNotification(
                             notificationTitle = "QUIZ UPDATED",
@@ -482,7 +482,7 @@ class EditQuizViewModel @Inject constructor(
                         )
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err, editQuizStatus = null) }
+                        _uiState.update { it.copy(loadingUpdate = false, errorMessage = err, editQuizStatus = null) }
                     }
                 )
             }
@@ -495,7 +495,9 @@ class EditQuizViewModel @Inject constructor(
 }
 
 data class EditQuizUIState(
-    val loading: Boolean = false,
+    val loadingMetadata: Boolean = false,
+    val loadingContent: Boolean = false,
+    val loadingUpdate: Boolean = false,
     val errorMessage: String? = null,
     val editQuizStatus: Result<Unit>? = null,
     val quizTitle: String = "",
@@ -507,4 +509,6 @@ data class EditQuizUIState(
     val timeLimit: Int = 0,
     val hasAnswersShown: Boolean = false,
     val questions: List<QuizContentResponse> = emptyList()
-)
+){
+    val loading: Boolean get() = loadingMetadata || loadingContent
+}

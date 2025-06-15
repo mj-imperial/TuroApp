@@ -22,9 +22,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,6 +64,7 @@ import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModuleFoldersScreen(
     navController: NavController,
@@ -70,6 +74,8 @@ fun ModuleFoldersScreen(
 ){
     val context = LocalContext.current
     val windowInfo = rememberWindowInfo()
+    val pullRefreshState = rememberPullToRefreshState()
+
     val uiState by viewModel.uiState.collectAsState()
     val modules = uiState.modules
 
@@ -138,46 +144,54 @@ fun ModuleFoldersScreen(
                         CircularProgressIndicator()
                     }
                 }else{
-                    LazyVerticalGrid(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(20.dp),
-                        columns = GridCells.FixedSize(windowInfo.screenWidth * 0.90f),
-                        contentPadding = PaddingValues(15.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        horizontalArrangement = Arrangement.Center
+                    PullToRefreshBox(
+                        isRefreshing = uiState.loading,
+                        state = pullRefreshState,
+                        onRefresh = {
+                            viewModel.getModulesInCourse()
+                        },
                     ) {
-                        item {
-                            Text(
-                                text = "MODULES",
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                fontSize = ResponsiveFont.title(windowInfo),
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                        LazyVerticalGrid(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(20.dp),
+                            columns = GridCells.FixedSize(windowInfo.screenWidth * 0.90f),
+                            contentPadding = PaddingValues(15.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            item {
+                                Text(
+                                    text = "MODULES",
+                                    fontFamily = FontFamily(Font(R.font.alata)),
+                                    fontSize = ResponsiveFont.title(windowInfo),
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
 
-                        items(
-                            items = modules,
-                            key = { it.moduleId }
-                        ) {  module ->
-                            ModuleFolders(
-                                windowInfo = windowInfo,
-                                cardHeight = windowInfo.screenHeight * 0.09f,
-                                moduleName = module.moduleName,
-                                onFolderClick = {
-                                    navController.navigate(
-                                        Screen.TeacherCreateEditActivitiesInModule.createRoute(
-                                            module.moduleId
+                            items(
+                                items = modules,
+                                key = { it.moduleId }
+                            ) {  module ->
+                                ModuleFolders(
+                                    windowInfo = windowInfo,
+                                    cardHeight = windowInfo.screenHeight * 0.09f,
+                                    moduleName = module.moduleName,
+                                    onFolderClick = {
+                                        navController.navigate(
+                                            Screen.TeacherCreateEditActivitiesInModule.createRoute(
+                                                module.moduleId
+                                            )
                                         )
-                                    )
-                                },
-                                onClickEdit = {
-                                    navController.navigate(Screen.TeacherEditModule.createRoute(courseId,module.moduleId))
-                                },
-                                onDeleteClick = {
-                                    selectedToDeleteId = module.moduleId
-                                },
-                            )
+                                    },
+                                    onClickEdit = {
+                                        navController.navigate(Screen.TeacherEditModule.createRoute(courseId,module.moduleId))
+                                    },
+                                    onDeleteClick = {
+                                        selectedToDeleteId = module.moduleId
+                                    },
+                                )
+                            }
                         }
                     }
                 }

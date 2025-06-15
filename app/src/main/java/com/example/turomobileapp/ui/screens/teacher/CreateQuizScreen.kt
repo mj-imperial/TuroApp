@@ -209,7 +209,8 @@ fun CreateQuizScreen(
                         quizType = uiState.quizType,
                         onUpdateQuizType = viewModel::updateQuizType,
                         quizDescription = uiState.quizDescription,
-                        onUpdateQuizDescription = viewModel::updateQuizDescription
+                        onUpdateQuizDescription = viewModel::updateQuizDescription,
+                        onUpdateNumberOfAttempts = viewModel::updateNumberOfAttempts
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -227,7 +228,8 @@ fun CreateQuizScreen(
                         onUpdateNumberOfAttempts = viewModel::updateNumberOfAttempts,
                         onUpdateDuration = viewModel::updateTimeLimit,
                         hasAnswersShown = uiState.hasAnswersShown,
-                        onUpdateShowAnswers = viewModel::updateShowAnswers
+                        onUpdateShowAnswers = viewModel::updateShowAnswers,
+                        quizType = uiState.quizType
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -333,6 +335,7 @@ fun CreateQuizHeader(
     onUpdateName: (String) -> Unit,
     quizType: String,
     onUpdateQuizType: (String) -> Unit,
+    onUpdateNumberOfAttempts: (Int) -> Unit,
     quizDescription: String,
     onUpdateQuizDescription: (String) -> Unit
 ){
@@ -359,6 +362,7 @@ fun CreateQuizHeader(
             itemName = "SCREENING",
             onClick = {
                 onUpdateQuizType("SCREENING")
+                onUpdateNumberOfAttempts(3)
             }
         )
     )
@@ -458,7 +462,8 @@ fun CreateQuizMoreInfo(
     onUpdateNumberOfAttempts: (Int) -> Unit,
     onUpdateDuration: (Int) -> Unit,
     hasAnswersShown: Boolean?,
-    onUpdateShowAnswers: (Boolean) -> Unit
+    onUpdateShowAnswers: (Boolean) -> Unit,
+    quizType: String
 ){
     Card(
         modifier = Modifier
@@ -499,15 +504,17 @@ fun CreateQuizMoreInfo(
                     color = LoginText
                 )
 
-                IconButton(onClick = {
-                    if (numberOfAttempts > 1) {
-                        onUpdateNumberOfAttempts(numberOfAttempts - 1)
+                if (quizType != "SCREENING") {
+                    IconButton(onClick = {
+                        if (numberOfAttempts > 1) {
+                            onUpdateNumberOfAttempts(numberOfAttempts - 1)
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.subtract_circle),
+                            contentDescription = null
+                        )
                     }
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.subtract_circle),
-                        contentDescription = null
-                    )
                 }
 
                 Box(
@@ -521,11 +528,13 @@ fun CreateQuizMoreInfo(
                     )
                 }
 
-                IconButton(onClick = { onUpdateNumberOfAttempts(numberOfAttempts + 1) }) {
-                    Icon(
-                        painter = painterResource(R.drawable.add_circle),
-                        contentDescription = null
-                    )
+                if (quizType != "SCREENING") {
+                    IconButton(onClick = { onUpdateNumberOfAttempts(numberOfAttempts + 1) }) {
+                        Icon(
+                            painter = painterResource(R.drawable.add_circle),
+                            contentDescription = null
+                        )
+                    }
                 }
             }
 

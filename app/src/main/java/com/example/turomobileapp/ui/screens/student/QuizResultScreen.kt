@@ -24,10 +24,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,6 +69,7 @@ import com.example.turomobileapp.ui.theme.hiddenAnswers2
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuizResultScreen(
     navController: NavController,
@@ -75,18 +79,9 @@ fun QuizResultScreen(
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
+    val pullRefreshState = rememberPullToRefreshState()
 
     val quiz = uiState.quiz
-    val results = uiState.results
-    if (uiState.loading) {
-        Box(
-            Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-        return
-    }
 
     uiState.errorMessage?.let { message ->
         Box(
@@ -178,46 +173,64 @@ fun QuizResultScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = { paddingValues ->
-            LazyColumn(
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.Start
-            ) {
-                item {
-                    QuizResultHeader(
-                        quizName = uiState.quiz!!.quizName,
-                        attemptSize = quiz?.numberOfAttempts,
-                        totalPoints = uiState.quiz!!.overallPoints,
-                        scoreList = scoreList,
-                        windowInfo = windowInfo,
-                        onClickAttempt = { num ->
-                            selectedAttempt = num
-                        },
-                        selectedAttempt = selectedAttempt,
-                        earnedPoints = selectedResult.earnedPoints,
-                        keptScore = keptScore
-                    )
+            if (uiState.loading) {
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
-
-                item {
-                    QuizResultQuestions(
-                        windowInfo = windowInfo,
-                        showAnswers = uiState.quiz!!.hasAnswersShown,
-                        resultShown = selectedResult,
-                        numOfQuestion = uiState.quiz!!.numberOfQuestions,
-                        content = uiState.content
-                    )
-                }
-
-                item {
-                    TakeQuizAgainButton(
-                        windowInfo = windowInfo,
-                        onClickTakeQuizAgain = {
-                            navController.navigate(Screen.StudentActivityDetail.route)
+            }else{
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.loadMetadata()
+                        viewModel.loadAssessmentResults()
+                    },
+                ) {
+                    LazyColumn(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        item {
+                            QuizResultHeader(
+                                quizName = uiState.quiz!!.quizName,
+                                attemptSize = quiz?.numberOfAttempts,
+                                totalPoints = uiState.quiz!!.overallPoints,
+                                scoreList = scoreList,
+                                windowInfo = windowInfo,
+                                onClickAttempt = { num ->
+                                    selectedAttempt = num
+                                },
+                                selectedAttempt = selectedAttempt,
+                                earnedPoints = selectedResult.earnedPoints,
+                                keptScore = keptScore
+                            )
                         }
-                    )
+
+                        item {
+                            QuizResultQuestions(
+                                windowInfo = windowInfo,
+                                showAnswers = uiState.quiz!!.hasAnswersShown,
+                                resultShown = selectedResult,
+                                numOfQuestion = uiState.quiz!!.numberOfQuestions,
+                                content = uiState.content
+                            )
+                        }
+
+                        item {
+                            TakeQuizAgainButton(
+                                windowInfo = windowInfo,
+                                onClickTakeQuizAgain = {
+                                    navController.navigate(Screen.StudentActivityDetail.route)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -341,7 +354,7 @@ fun QuizResultQuestions(
     numOfQuestion: Int,
     content: List<QuizContentResponse>
 ){
-    val score = (resultShown.scorePercentage) * numOfQuestion
+    val score = (resultShown.scorePercentage/100) * numOfQuestion
 
     Column(
         modifier = Modifier

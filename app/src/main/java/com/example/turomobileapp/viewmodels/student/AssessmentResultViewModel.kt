@@ -40,36 +40,29 @@ class AssessmentResultViewModel @Inject constructor(
         }
     }
 
-    private fun loadMetadata() {
+    fun loadMetadata() {
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true,errorMessage = null) }
+            _uiState.update { it.copy(loadingMetadata = true, errorMessage = null) }
+
             val quizResult = quizRepository.getQuiz(_quizId).first()
-            handleResult(
-                result = quizResult,
-                onSuccess = { quiz ->
-                    _uiState.update { it.copy(loading = false, quiz = quiz) }
-                },
-                onFailure = { err ->
-                    _uiState.update { it.copy(errorMessage = err,loading = false) }
-                },
+            handleResult(quizResult,
+                onSuccess = { quiz -> _uiState.update { it.copy(quiz = quiz) } },
+                onFailure = { err -> _uiState.update { it.copy(errorMessage = err) } }
             )
 
             val quizContent = quizRepository.getQuizContent(_quizId).first()
-            handleResult(
-                result = quizContent,
-                onSuccess = { content ->
-                    _uiState.update { it.copy(loading = false,content = content) }
-                },
-                onFailure = { err ->
-                    _uiState.update { it.copy(loading = false, errorMessage = err) }
-                },
+            handleResult(quizContent,
+                onSuccess = { content -> _uiState.update { it.copy(content = content) } },
+                onFailure = { err -> _uiState.update { it.copy(errorMessage = err) } }
             )
+
+            _uiState.update { it.copy(loadingMetadata = false) }
         }
     }
 
-    private fun loadAssessmentResults(){
+    fun loadAssessmentResults(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingResults = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
@@ -77,10 +70,10 @@ class AssessmentResultViewModel @Inject constructor(
                 handleResult(
                     result = result,
                     onSuccess = {  results ->
-                        _uiState.update { it.copy(loading = false, results = results) }
+                        _uiState.update { it.copy(loadingResults = false, results = results) }
                     },
                     onFailure = {  err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        _uiState.update { it.copy(loadingResults = false, errorMessage = err) }
                     }
                 )
             }
@@ -89,9 +82,12 @@ class AssessmentResultViewModel @Inject constructor(
 }
 
 data class AssessmentResultUIState(
-    val loading: Boolean = false,
+    val loadingMetadata: Boolean = false,
+    val loadingResults: Boolean = false,
     val errorMessage: String? = null,
     val results: List<AssessmentResultResponse> = emptyList(),
     val quiz: QuizResponse? = null,
     val content: List<QuizContentResponse> = emptyList(),
-)
+){
+    val loading: Boolean get() = loadingMetadata || loadingResults
+}

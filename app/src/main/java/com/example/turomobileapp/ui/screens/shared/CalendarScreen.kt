@@ -1,3 +1,5 @@
+@file:Suppress("KotlinConstantConditions")
+
 package com.example.turomobileapp.ui.screens.shared
 
 import AppScaffold
@@ -18,8 +20,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,6 +71,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarScreen(
@@ -74,6 +81,7 @@ fun CalendarScreen(
 ){
     val windowInfo = rememberWindowInfo()
     val height = windowInfo.screenHeight
+    val pullRefreshState = rememberPullToRefreshState()
 
     val uiState by viewModel.uiState.collectAsState()
     val eventsByDate = remember(uiState.rawEvents) {
@@ -89,16 +97,30 @@ fun CalendarScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
-                CalendarContent(
-                    height = height,
-                    windowInfo = windowInfo,
-                    eventsByDate = eventsByDate
-                )
+            if (uiState.loading){
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    CircularProgressIndicator()
+                }
+            }else{
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getCalendarEventsForUser()
+                    },
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize()
+                    ) {
+                        CalendarContent(
+                            height = height,
+                            windowInfo = windowInfo,
+                            eventsByDate = eventsByDate
+                        )
+                    }
+                }
             }
         }
     )

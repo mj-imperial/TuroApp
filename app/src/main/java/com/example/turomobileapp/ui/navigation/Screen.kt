@@ -62,6 +62,9 @@ sealed class Screen(val route: String) {
     object StudentQuizResult: Screen("quiz_result_screen/{quizId}/{fromSubmit}"){
         fun createRoute(quizId: String, fromSubmit: Boolean) = "quiz_result_screen/$quizId/$fromSubmit"
     }
+    object ScreeningExamDetail: Screen("screening_exam_detail_screen/{activityId}"){
+        fun createRoute(activityId: String) = "screening_exam_detail_screen/$activityId"
+    }
 
     //teacher
     object TeacherCourseDetail: Screen("course_detail/{courseId}/{coursePic}") {
@@ -81,7 +84,12 @@ sealed class Screen(val route: String) {
     }
     object TeacherCreateModule: Screen("teacher_createModule")
     object TeacherViewAllStudents: Screen("teacher_viewAllStudents")
-    object TeacherPerformance: Screen("teacher_performance")
+    object TeacherPerformance: Screen("teacher_performance/{courseId}"){
+        fun createRoute(courseId: String) = "teacher_performance/$courseId"
+    }
+    object TeacherPerformanceIndividual: Screen("teacher_performance_individual/{studentId}/{rank}"){
+        fun createRoute(studentId: String, rank: Int) = "teacher_performance_individual/$studentId/$rank"
+    }
     object TeacherCreateQuiz: Screen("teacher_create_quiz/{moduleId}"){
         fun createRoute(moduleId: String) = "teacher_create_quiz/$moduleId"
     }

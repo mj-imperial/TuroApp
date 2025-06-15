@@ -16,7 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
+import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.SoftGray
+import com.example.turomobileapp.ui.theme.TextBlack
 
 @Composable
 fun CapsuleTextField(
@@ -46,6 +48,9 @@ fun CapsuleTextField(
         visualTransformation= visualTransformation,
         shape = RoundedCornerShape(roundedCornerShape),
         colors = colors(
+            focusedTextColor = TextBlack,
+            unfocusedTextColor = TextBlack,
+            errorTextColor = MainRed,
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = SoftGray,
             disabledContainerColor = Color.Transparent,

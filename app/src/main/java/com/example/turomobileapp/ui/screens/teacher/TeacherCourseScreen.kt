@@ -179,7 +179,7 @@ fun CourseActivities(
         Activities(
             name = R.string.TeacherPerformance,
             icon = R.drawable.shortquiz_icon,
-            route = Screen.TeacherPerformance.route,
+            route = Screen.TeacherPerformance.createRoute(courseId),
             colors = listOf(hiddenAnswers1,hiddenAnswers2)
         ),
     )

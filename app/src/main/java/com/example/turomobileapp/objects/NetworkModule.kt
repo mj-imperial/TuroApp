@@ -40,11 +40,13 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule{
 
+    val ip = "192.168.1.13"
+    //10.0.2.2
     @Provides
     @Singleton
     fun provideBaseUrl(): String =
         // change to production URL when live
-        "http://10.0.2.2/turo_app/api/v1/"
+        "http:/$ip//turo_app/api/v1/"
 
     @Provides
     @Singleton

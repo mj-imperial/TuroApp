@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,8 +22,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,6 +64,7 @@ import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -75,6 +81,7 @@ fun QuizDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val quiz = uiState.quiz
     val scoresList = uiState.scores.sortedBy { it.attemptNumber }
+    val pullRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(activityId) {
         activityFlowViewModel.setCurrentActivityId(activityId)
@@ -94,100 +101,115 @@ fun QuizDetailScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = { contentPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(contentPadding)
-                    .padding(windowInfo.screenWidth * 0.09f)
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceAround,
-                horizontalAlignment = Alignment.Start
-            ) {
-                QuizTitle(
-                    height = windowInfo.screenHeight * 0.2f,
-                    windowInfo = windowInfo,
-                    quizTypeName = quiz?.quizTypeName.toString(),
-                    quizName = quiz?.quizName.toString()
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(vertical = 15.dp),
-                    thickness =  1.dp,
-                    color = LoginText
-                )
-
-                QuizHeader(
-                    windowInfo = windowInfo,
-                    dueDate = quiz?.deadlineDate,
-                    unlockDate = quiz?.unlockDate,
-                    timeLimit = quiz?.timeLimit,
-                    allowedAttempts = quiz?.numberOfAttempts,
-                    questionSize = quiz?.numberOfQuestions,
-                    points = quiz?.overallPoints,
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(vertical = 15.dp),
-                    thickness =  1.dp,
-                    color = LoginText
-                )
-
-                QuizBody(
-                    windowInfo = windowInfo,
-                    description = quiz?.quizDescription,
-                    onTakeQuizClick = { quiz?.let { onClickTakeQuiz(it) } },
-                    onViewStatistics = {
-                        navController.navigate(Screen.StudentQuizResult.createRoute(quiz?.quizId ?: "", false))
+            if (uiState.loading){
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    CircularProgressIndicator()
+                }
+            }else{
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.loadQuizMetadata()
+                        viewModel.loadAttemptHistory()
                     },
-                    scoresList = scoresList,
-                    attemptNumber = quiz?.numberOfAttempts ?: 0,
-                    deadline = quiz?.deadlineDate
-                )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(contentPadding)
+                            .padding(windowInfo.screenWidth * 0.09f)
+                            .verticalScroll(rememberScrollState())
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.SpaceAround,
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        QuizTitle(
+                            height = windowInfo.screenHeight * 0.2f,
+                            windowInfo = windowInfo,
+                            quizTypeName = quiz?.quizTypeName.toString(),
+                            quizName = quiz?.quizName.toString()
+                        )
 
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(vertical = 30.dp),
-                    thickness =  1.dp,
-                    color = LoginText
-                )
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .padding(vertical = 15.dp),
+                            thickness =  1.dp,
+                            color = LoginText
+                        )
 
-                PreviousNextButton(
-                    windowInfo = windowInfo,
-                    onClickPrevious = {
-                        previous?.let {
-                            activityFlowViewModel.setCurrentActivityId(it.activityId)
-                            val route = Screen.StudentActivityDetail.createRoute(
-                                moduleId = it.moduleId,
-                                activityId = it.activityId,
-                                activityType = it.activityType,
-                                courseId = courseId
-                            )
-                            navController.navigate(route)
-                        }
-                    },
-                    onClickNext = {
-                        next?.let {
-                            activityFlowViewModel.setCurrentActivityId(it.activityId)
-                            val route = Screen.StudentActivityDetail.createRoute(
-                                moduleId = it.moduleId,
-                                activityId = it.activityId,
-                                activityType = it.activityType,
-                                courseId = courseId
-                            )
-                            navController.navigate(route)
-                        }
-                    },
-                    isPreviousEnabled = hasPrevious,
-                    isNextEnabled = hasNext,
-                )
+                        QuizHeader(
+                            windowInfo = windowInfo,
+                            dueDate = quiz?.deadlineDate,
+                            unlockDate = quiz?.unlockDate,
+                            timeLimit = quiz?.timeLimit,
+                            allowedAttempts = quiz?.numberOfAttempts,
+                            questionSize = quiz?.numberOfQuestions,
+                            points = quiz?.overallPoints,
+                        )
+
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .padding(vertical = 15.dp),
+                            thickness =  1.dp,
+                            color = LoginText
+                        )
+
+                        QuizBody(
+                            windowInfo = windowInfo,
+                            description = quiz?.quizDescription,
+                            onTakeQuizClick = { quiz?.let { onClickTakeQuiz(it) } },
+                            onViewStatistics = {
+                                navController.navigate(Screen.StudentQuizResult.createRoute(quiz?.quizId ?: "", false))
+                            },
+                            scoresList = scoresList,
+                            attemptNumber = quiz?.numberOfAttempts ?: 0,
+                            deadline = quiz?.deadlineDate
+                        )
+
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .padding(vertical = 30.dp),
+                            thickness =  1.dp,
+                            color = LoginText
+                        )
+
+                        PreviousNextButton(
+                            windowInfo = windowInfo,
+                            onClickPrevious = {
+                                previous?.let {
+                                    activityFlowViewModel.setCurrentActivityId(it.activityId)
+                                    val route = Screen.StudentActivityDetail.createRoute(
+                                        moduleId = it.moduleId,
+                                        activityId = it.activityId,
+                                        activityType = it.activityType,
+                                        courseId = courseId
+                                    )
+                                    navController.navigate(route)
+                                }
+                            },
+                            onClickNext = {
+                                next?.let {
+                                    activityFlowViewModel.setCurrentActivityId(it.activityId)
+                                    val route = Screen.StudentActivityDetail.createRoute(
+                                        moduleId = it.moduleId,
+                                        activityId = it.activityId,
+                                        activityType = it.activityType,
+                                        courseId = courseId
+                                    )
+                                    navController.navigate(route)
+                                }
+                            },
+                            isPreviousEnabled = hasPrevious,
+                            isNextEnabled = hasNext,
+                        )
+                    }
+                }
             }
         }
     )

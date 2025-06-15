@@ -24,8 +24,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,6 +60,7 @@ import com.example.turomobileapp.viewmodels.student.TutorialDetailViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -69,6 +73,7 @@ fun TutorialDetailScreen(
     activityFlowViewModel: ActivityFlowViewModel
 ){
     val windowInfo = rememberWindowInfo()
+    val pullRefreshState = rememberPullToRefreshState()
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -98,92 +103,100 @@ fun TutorialDetailScreen(
                     CircularProgressIndicator()
                 }
             }else{
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.SpaceAround,
-                    horizontalAlignment = Alignment.Start
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getTutorial()
+                    },
                 ) {
-                    item {
-                        TutorialTitle(
-                            height = windowInfo.screenHeight * 0.17f,
-                            windowInfo = windowInfo,
-                            tutorialName = uiState.tutorialName
-                        )
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.SpaceAround,
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        item {
+                            TutorialTitle(
+                                height = windowInfo.screenHeight * 0.17f,
+                                windowInfo = windowInfo,
+                                tutorialName = uiState.tutorialName
+                            )
 
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 15.dp),
-                            thickness =  1.dp,
-                            color = LoginText
-                        )
-                    }
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 15.dp),
+                                thickness =  1.dp,
+                                color = LoginText
+                            )
+                        }
 
-                    item {
-                        TutorialHeader(
-                            windowInfo = windowInfo,
-                            unlockDate = uiState.unlockDate,
-                            deadlineDate = uiState.deadlineDate
-                        )
+                        item {
+                            TutorialHeader(
+                                windowInfo = windowInfo,
+                                unlockDate = uiState.unlockDate,
+                                deadlineDate = uiState.deadlineDate
+                            )
 
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 15.dp),
-                            thickness =  1.dp,
-                            color = LoginText
-                        )
-                    }
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 15.dp),
+                                thickness =  1.dp,
+                                color = LoginText
+                            )
+                        }
 
-                    item {
-                        TutorialBody(
-                            windowInfo = windowInfo,
-                            tutorialDescription = uiState.tutorialDescription,
-                            videoUrl = uiState.videoUrl
-                        )
+                        item {
+                            TutorialBody(
+                                windowInfo = windowInfo,
+                                tutorialDescription = uiState.tutorialDescription,
+                                videoUrl = uiState.videoUrl
+                            )
 
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 15.dp),
-                            thickness =  1.dp,
-                            color = LoginText
-                        )
-                    }
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 15.dp),
+                                thickness =  1.dp,
+                                color = LoginText
+                            )
+                        }
 
-                    item {
-                        PreviousNextButtonTutorial(
-                            windowInfo = windowInfo,
-                            onClickPrevious = {
-                                previous?.let {
-                                    activityFlowViewModel.setCurrentActivityId(it.activityId)
-                                    val route = Screen.StudentActivityDetail.createRoute(
-                                        moduleId = it.moduleId,
-                                        activityId = it.activityId,
-                                        activityType = it.activityType,
-                                        courseId = courseId
-                                    )
-                                    navController.navigate(route)
-                                }
-                            },
-                            onClickNext = {
-                                next?.let {
-                                    activityFlowViewModel.setCurrentActivityId(it.activityId)
-                                    val route = Screen.StudentActivityDetail.createRoute(
-                                        moduleId = it.moduleId,
-                                        activityId = it.activityId,
-                                        activityType = it.activityType,
-                                        courseId = courseId
-                                    )
-                                    navController.navigate(route)
-                                }
-                            },
-                            isPreviousEnabled = hasPrevious,
-                            isNextEnabled = hasNext
-                        )
+                        item {
+                            PreviousNextButtonTutorial(
+                                windowInfo = windowInfo,
+                                onClickPrevious = {
+                                    previous?.let {
+                                        activityFlowViewModel.setCurrentActivityId(it.activityId)
+                                        val route = Screen.StudentActivityDetail.createRoute(
+                                            moduleId = it.moduleId,
+                                            activityId = it.activityId,
+                                            activityType = it.activityType,
+                                            courseId = courseId
+                                        )
+                                        navController.navigate(route)
+                                    }
+                                },
+                                onClickNext = {
+                                    next?.let {
+                                        activityFlowViewModel.setCurrentActivityId(it.activityId)
+                                        val route = Screen.StudentActivityDetail.createRoute(
+                                            moduleId = it.moduleId,
+                                            activityId = it.activityId,
+                                            activityType = it.activityType,
+                                            courseId = courseId
+                                        )
+                                        navController.navigate(route)
+                                    }
+                                },
+                                isPreviousEnabled = hasPrevious,
+                                isNextEnabled = hasNext
+                            )
+                        }
                     }
                 }
             }

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.StudentBadgeResponse
-import com.example.turomobileapp.models.StudentProgressResponse
+import com.example.turomobileapp.models.StudentLeaderboardResponse
 import com.example.turomobileapp.repositories.BadgesRepository
 import com.example.turomobileapp.repositories.StudentProgressRepository
 import com.example.turomobileapp.viewmodels.SessionManager
@@ -37,7 +37,7 @@ class GamificationViewModel @Inject constructor(
 
     fun getLeaderboard(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingLeaderboard = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
@@ -45,10 +45,10 @@ class GamificationViewModel @Inject constructor(
                 handleResult(
                     result = result,
                     onSuccess = { progresses ->
-                        _uiState.update { it.copy(loading = false, progresses = progresses) }
+                        _uiState.update { it.copy(loadingLeaderboard = false, progresses = progresses) }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        _uiState.update { it.copy(loadingLeaderboard = false, errorMessage = err) }
                     },
                 )
             }
@@ -57,7 +57,7 @@ class GamificationViewModel @Inject constructor(
 
     fun getBadgesForStudent(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingBadges = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
@@ -65,10 +65,10 @@ class GamificationViewModel @Inject constructor(
                 handleResult(
                     result = result,
                     onSuccess = { badges ->
-                        _uiState.update { it.copy(loading = false, studentBadges = badges) }
+                        _uiState.update { it.copy(loadingBadges = false, studentBadges = badges) }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        _uiState.update { it.copy(loadingBadges = false, errorMessage = err) }
                     }
                 )
             }
@@ -77,8 +77,11 @@ class GamificationViewModel @Inject constructor(
 }
 
 data class LeaderboardUIState(
-    val loading: Boolean = false,
+    val loadingLeaderboard: Boolean = false,
+    val loadingBadges: Boolean = false,
     val errorMessage: String? = null,
-    val progresses: List<StudentProgressResponse> = emptyList(),
+    val progresses: List<StudentLeaderboardResponse> = emptyList(),
     val studentBadges: List<StudentBadgeResponse> = emptyList()
-)
+){
+    val loading: Boolean get() = loadingLeaderboard || loadingBadges
+}

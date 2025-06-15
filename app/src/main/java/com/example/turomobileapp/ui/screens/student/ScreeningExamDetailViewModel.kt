@@ -1,4 +1,4 @@
-package com.example.turomobileapp.viewmodels.student
+package com.example.turomobileapp.ui.screens.student
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -20,56 +20,56 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class QuizDetailViewModel @Inject constructor(
+class ScreeningExamDetailViewModel @Inject constructor(
     private val quizRepository: QuizRepository,
     private val savedStateHandle: SavedStateHandle,
     private val assessmentResultRepository: AssessmentResultRepository,
-    private val sessionManager: SessionManager,
+    private val sessionManager: SessionManager
 ): ViewModel(){
 
-    private val _quizId: String = checkNotNull(savedStateHandle["activityId"])
+    private val _activityId: String = checkNotNull(savedStateHandle["activityId"])
 
-    private val _uiState = MutableStateFlow(QuizDetailUIState())
-    val uiState: StateFlow<QuizDetailUIState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(ScreeningExamDetailUIState())
+    val uiState: StateFlow<ScreeningExamDetailUIState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            launch { loadQuizMetadata() }
+            launch { loadQuiz() }
             launch { loadAttemptHistory() }
         }
     }
 
-    fun loadQuizMetadata(){
+    private fun loadQuiz(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loadingMetadata = true,errorMessage = null) }
+            _uiState.update { it.copy(loading = true,errorMessage = null) }
 
-            val quiz = quizRepository.getQuiz(_quizId).first()
+            val quiz = quizRepository.getQuiz(_activityId).first()
             handleResult(
                 result = quiz,
                 onSuccess = { quiz ->
-                    _uiState.update { it.copy(loadingMetadata = false, quiz = quiz) }
+                    _uiState.update { it.copy(loading = false, quiz = quiz) }
                 },
                 onFailure = { err ->
-                    _uiState.update { it.copy(errorMessage = err,loadingMetadata = false) }
+                    _uiState.update { it.copy(errorMessage = err,loading = false) }
                 },
             )
         }
     }
 
-    fun loadAttemptHistory(){
+    private fun loadAttemptHistory(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loadingResults = true, errorMessage = null) }
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
-            assessmentResultRepository.getScoresForStudentAndQuiz(studentId, _quizId).collect { result ->
+            assessmentResultRepository.getScoresForStudentAndQuiz(studentId, _activityId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { scores ->
-                        _uiState.update { it.copy(loadingResults = false, scores = scores) }
+                        _uiState.update { it.copy(loading = false, scores = scores) }
                     },
                     onFailure = {  err ->
-                        _uiState.update { it.copy(loadingResults = false, errorMessage = err) }
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
                     },
                 )
             }
@@ -77,13 +77,10 @@ class QuizDetailViewModel @Inject constructor(
     }
 }
 
-data class QuizDetailUIState(
-    val loadingMetadata: Boolean = false,
-    val loadingResults: Boolean = false,
+data class ScreeningExamDetailUIState(
+    val loading: Boolean = false,
     val errorMessage: String? = null,
     val quizName: String = "",
     val quiz: QuizResponse? = null,
-    val scores: List<AssessmentScoreResponse> = emptyList(),
-){
-    val loading: Boolean get() = loadingMetadata || loadingResults
-}
+    val scores: List<AssessmentScoreResponse> = emptyList()
+)

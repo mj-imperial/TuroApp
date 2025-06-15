@@ -9,15 +9,17 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -25,7 +27,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,7 +45,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -52,7 +56,6 @@ import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.models.CourseResponse
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.ResponsiveFont
-import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.MainRed
@@ -61,6 +64,7 @@ import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.shared.DashboardViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -74,6 +78,7 @@ fun DashboardScreen(
     val context = LocalContext.current
     var hasRequestedNotification by remember { mutableStateOf(false) }
     var openAlertDialog by remember { mutableStateOf(false) }
+    val pullRefreshState = rememberPullToRefreshState()
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -151,12 +156,6 @@ fun DashboardScreen(
         }
     }
 
-    val cardHeight = when (windowInfo.screenHeightInfo) {
-        WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.25f
-        WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.20f
-        WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.15f
-    }
-
     AppScaffold(
         navController = navController,
         modifier = Modifier,
@@ -175,16 +174,41 @@ fun DashboardScreen(
                         Text("Error: ${uiState.errorMessage}")
                     }
                 }
+                uiState.courses.isEmpty() -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.empty_list_icon),
+                            contentDescription = null
+                        )
+                        Text(
+                            text = "No courses available yet.",
+                            fontFamily = FontFamily(Font(R.font.alata)),
+                        )
+                    }
+                }
                 else -> {
-                    DashboardContent(
-                        innerPadding = innerPadding,
-                        cardHeight = cardHeight,
-                        coursesList = uiState.courses,
-                        body = ResponsiveFont.body(windowInfo),
-                        subtitle = ResponsiveFont.subtitle(windowInfo),
-                        navController = navController,
-                        role = role
-                    )
+                    PullToRefreshBox(
+                        isRefreshing = uiState.loading,
+                        state = pullRefreshState,
+                        onRefresh = {
+                            viewModel.loadCourses(userId.toString(), role)
+                        },
+                    ) {
+                        DashboardContent(
+                            innerPadding = innerPadding,
+                            coursesList = uiState.courses,
+                            body = ResponsiveFont.body(windowInfo),
+                            subtitle = ResponsiveFont.subtitle(windowInfo),
+                            navController = navController,
+                            role = role
+                        )
+                    }
                 }
             }
         }
@@ -194,7 +218,6 @@ fun DashboardScreen(
 @Composable
 fun DashboardContent(
     innerPadding: PaddingValues,
-    cardHeight: Dp,
     coursesList: List<CourseResponse>,
     body: TextUnit,
     subtitle: TextUnit,
@@ -215,7 +238,6 @@ fun DashboardContent(
                 courseName = course.courseName,
                 courseCode = course.courseCode,
                 coursePic = course.coursePicture,
-                cardHeight = cardHeight,
                 onCardClick = {
                     if (role == UserRole.STUDENT){
                         navController.navigate(Screen.StudentCourseDetail.createRoute(course.courseId, course.coursePicture))
@@ -235,48 +257,50 @@ fun DashboardItem(
     courseName: String,
     courseCode: String,
     coursePic: String,
-    cardHeight: Dp,
     onCardClick: () -> Unit,
     body: TextUnit,
     subtitle: TextUnit
-){
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(cardHeight)
+            .wrapContentHeight()
             .clickable(onClick = onCardClick),
         shape = RoundedCornerShape(10.dp),
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
-        AsyncImage(
-            model = coursePic,
-            contentDescription = "Course Picture",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .weight(6f)
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(4f)
-                .padding(10.dp)
-        ) {
-            Text(
-                text = courseName,
-                color = TextBlack,
-                fontSize = body,
-                fontFamily = FontFamily(Font(R.font.alata)),
+        Column {
+            AsyncImage(
+                model = coursePic,
+                contentDescription = "Course Picture",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
             )
 
-            Text(
-                text = courseCode,
-                color = TextBlack,
-                fontSize = subtitle,
-                fontFamily = FontFamily(Font(R.font.alata)),
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = courseName,
+                    color = TextBlack,
+                    fontSize = body,
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                )
+
+                Text(
+                    text = courseCode,
+                    color = TextBlack,
+                    fontSize = subtitle,
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                )
+            }
         }
     }
 }
+
 
 

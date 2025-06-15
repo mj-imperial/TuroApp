@@ -26,14 +26,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun AppScaffold(
     navController: NavController,
-    content: @Composable (PaddingValues) -> Unit,
     modifier: Modifier = Modifier,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit = {},
     windowInfo: WindowInfo,
     sessionManager: SessionManager,
     hasFloatingActionButton: Boolean = false,
-    items: List<ButtonItems> = emptyList()
+    items: List<ButtonItems> = emptyList(),
+    content: @Composable (PaddingValues) -> Unit
 ) {
     val heading2 = ResponsiveFont.heading2(windowInfo)
     val body = ResponsiveFont.body(windowInfo)

@@ -45,13 +45,13 @@ data class UpdateModuleProgressRequest(
 )
 
 @JsonClass(generateAdapter = true)
-data class StudentProgressResponses(
+data class StudentLeaderboardResponses(
     @Json(name = "success") val success: Boolean,
-    @Json(name = "progresses") val progresses: List<StudentProgressResponse>
+    @Json(name = "progresses") val progresses: List<StudentLeaderboardResponse>
 )
 
 @JsonClass(generateAdapter = true)
-data class StudentProgressResponse(
+data class StudentLeaderboardResponse(
     @Json(name = "first_name") val firstName: String,
     @Json(name = "last_name") val lastName: String,
     @Json(name = "course_name") val courseName: String,
@@ -65,4 +65,38 @@ data class StudentProfileProgress(
     @Json(name = "course_name") val courseName: String,
     @Json(name = "total_points") val totalPoints: Int,
     @Json(name = "average_score") val averageScore: Double
+)
+
+@JsonClass(generateAdapter = true)
+data class StudentPerformanceListResponses(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "overall_number_of_assessments") val overallNumberOfAssessments: Int,
+    @Json(name = "progresses") val progresses: List<StudentPerformanceListResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class StudentPerformanceListResponse(
+    @Json(name = "student_id") val studentId: String,
+    @Json(name = "student_name") val studentName: String,
+    @Json(name = "course_name") val courseName: String,
+    @Json(name = "profile_pic") val profilePic: String?,
+    @Json(name = "completed_assessments") val completedAssessments: Int,
+    @Json(name = "total_points") val totalPoints: Int,
+    @Json(name = "average_score") val averageScore: Double
+)
+
+@JsonClass(generateAdapter = true)
+data class StudentPerformanceModuleList(
+    @Json(name = "module_id") val moduleId: String,
+    @Json(name = "module_name") val moduleName: String,
+    @Json(name = "quiz_scores") val quizScores: List<QuizScore>
+)
+
+@JsonClass(generateAdapter = true)
+data class QuizScore(
+    @Json(name = "activity_id") val activityId: String,
+    @Json(name = "activity_name") val activityName: String,
+    @Json(name = "highest_score_percentage") val highestScorePercentage: Double,
+    @Json(name = "lowest_score_percentage") val lowestScorePercentage: Double,
+    @Json(name = "latest_score_percentage") val latestScorePercentage: Double
 )

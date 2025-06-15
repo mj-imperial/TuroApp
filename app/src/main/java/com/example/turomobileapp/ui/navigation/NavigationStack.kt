@@ -38,6 +38,8 @@ import com.example.turomobileapp.ui.screens.student.LectureDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizAttemptScreen
 import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
+import com.example.turomobileapp.ui.screens.student.ScreeningExamDetailScreen
+import com.example.turomobileapp.ui.screens.student.ScreeningExamDetailViewModel
 import com.example.turomobileapp.ui.screens.student.TutorialDetailScreen
 import com.example.turomobileapp.ui.screens.student.ViewAllModulesScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateEditActivitiesInModuleScreen
@@ -50,6 +52,7 @@ import com.example.turomobileapp.ui.screens.teacher.EditModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.EditQuizScreen
 import com.example.turomobileapp.ui.screens.teacher.EditTutorialScreen
 import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
+import com.example.turomobileapp.ui.screens.teacher.StudentPerformanceOverViewScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.shared.CreateMessageViewModel
@@ -72,6 +75,7 @@ import com.example.turomobileapp.viewmodels.teacher.EditModuleViewModel
 import com.example.turomobileapp.viewmodels.teacher.EditQuizViewModel
 import com.example.turomobileapp.viewmodels.teacher.EditTutorialViewModel
 import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
+import com.example.turomobileapp.viewmodels.teacher.StudentPerformanceOverviewViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -343,6 +347,15 @@ fun NavGraphBuilder.studentNavGraph(
     composable(Screen.Leaderboard.route) {
         LeaderboardScreen(navController, sessionManager)
     }
+    composable(
+        route = Screen.ScreeningExamDetail.route,
+        arguments = listOf(
+            navArgument("activityId") { type = NavType.StringType },
+        )
+    ) {
+        val viewModel: ScreeningExamDetailViewModel = hiltViewModel()
+        ScreeningExamDetailScreen(navController, sessionManager, viewModel)
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -481,5 +494,23 @@ fun NavGraphBuilder.teacherNavGraph(
         val viewModel: EditQuizViewModel = hiltViewModel()
 
         EditQuizScreen(navController, sessionManager, viewModel, moduleId.toString())
+    }
+    composable(
+        route = Screen.TeacherPerformance.route,
+        arguments = listOf(
+            navArgument("courseId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel: StudentPerformanceOverviewViewModel = hiltViewModel()
+        StudentPerformanceOverViewScreen(navController, sessionManager, viewModel)
+    }
+    composable(
+        route = Screen.TeacherPerformanceIndividual.route,
+        arguments = listOf(
+            navArgument("studentId") { type = NavType.StringType },
+            navArgument("rank") { type = NavType.IntType }
+        )
+    ) {
+
     }
 }

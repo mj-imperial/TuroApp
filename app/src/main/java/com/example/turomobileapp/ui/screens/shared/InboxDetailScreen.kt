@@ -18,11 +18,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,6 +53,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun InboxDetailScreen(
@@ -61,6 +65,7 @@ fun InboxDetailScreen(
     val windowInfo = rememberWindowInfo()
 
     val uiState by viewModel.uiState.collectAsState()
+    val pullRefreshState = rememberPullToRefreshState()
 
     AppScaffold(
         navController = navController,
@@ -74,61 +79,69 @@ fun InboxDetailScreen(
                     CircularProgressIndicator()
                 }
             }else{
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getInbox()
+                    },
                 ) {
-                    items(uiState.messages) { message ->
-                        SubjectHeader(
-                            windowInfo = windowInfo,
-                            subject = message.subject
-                        )
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(uiState.messages) { message ->
+                            SubjectHeader(
+                                windowInfo = windowInfo,
+                                subject = message.subject
+                            )
 
-                        val currentUserId = sessionManager.userId.collectAsState().value
+                            val currentUserId = sessionManager.userId.collectAsState().value
 
-                        val displayName = if (message.senderId == currentUserId) {
-                            "Me to ${message.recipientName}"
-                        } else {
-                            "${message.senderName} to Me"
-                        }
-
-                        MessageHeader(
-                            windowInfo = windowInfo,
-                            profilePic = message.senderPic.toString(),
-                            timestamp = message.timestamp,
-                            onClickReply = {
-                                val (recipientId, recipientName, recipientPic) = if (message.senderId == currentUserId) {
-                                    Triple(message.recipientId, message.recipientName, message.recipientPic ?: "")
-                                } else {
-                                    Triple(message.senderId, message.senderName, message.senderPic ?: "")
-                                }
-
-                                viewModel.setReplyInfo(recipientId, recipientName, recipientPic)
-                                navController.navigate(Screen.ReplyScreen.createRoute(inboxId))
-                            },
-                            displayName = displayName
-                        )
-
-                        MessageBody(
-                            windowInfo = windowInfo,
-                            body = message.body,
-                            onClickReply = {
-                                val (recipientId, recipientName, recipientPic) = if (message.senderId == currentUserId) {
-                                    Triple(message.recipientId, message.recipientName, message.recipientPic ?: "")
-                                } else {
-                                    Triple(message.senderId, message.senderName, message.senderPic ?: "")
-                                }
-
-                                viewModel.setReplyInfo(recipientId, recipientName, recipientPic)
-                                navController.navigate(Screen.ReplyScreen.createRoute(inboxId))
+                            val displayName = if (message.senderId == currentUserId) {
+                                "Me to ${message.recipientName}"
+                            } else {
+                                "${message.senderName} to Me"
                             }
-                        )
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                            MessageHeader(
+                                windowInfo = windowInfo,
+                                profilePic = message.senderPic.toString(),
+                                timestamp = message.timestamp,
+                                onClickReply = {
+                                    val (recipientId, recipientName, recipientPic) = if (message.senderId == currentUserId) {
+                                        Triple(message.recipientId, message.recipientName, message.recipientPic ?: "")
+                                    } else {
+                                        Triple(message.senderId, message.senderName, message.senderPic ?: "")
+                                    }
+
+                                    viewModel.setReplyInfo(recipientId, recipientName, recipientPic)
+                                    navController.navigate(Screen.ReplyScreen.createRoute(inboxId))
+                                },
+                                displayName = displayName
+                            )
+
+                            MessageBody(
+                                windowInfo = windowInfo,
+                                body = message.body,
+                                onClickReply = {
+                                    val (recipientId, recipientName, recipientPic) = if (message.senderId == currentUserId) {
+                                        Triple(message.recipientId, message.recipientName, message.recipientPic ?: "")
+                                    } else {
+                                        Triple(message.senderId, message.senderName, message.senderPic ?: "")
+                                    }
+
+                                    viewModel.setReplyInfo(recipientId, recipientName, recipientPic)
+                                    navController.navigate(Screen.ReplyScreen.createRoute(inboxId))
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
                     }
                 }
             }

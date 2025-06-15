@@ -52,7 +52,7 @@ class QuizAttemptViewModel @Inject constructor(
 
     private fun loadMetadata() {
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true,errorMessage = null) }
+            _uiState.update { it.copy(loadingMetadata = true,errorMessage = null) }
             quizRepository.getQuiz(_quizId).collect { result ->
                 handleResult(
                     result = result,
@@ -62,13 +62,15 @@ class QuizAttemptViewModel @Inject constructor(
                                 quizName = quiz.quizName,
                                 quizType = quiz.quizTypeName,
                                 timeLimit = quiz.timeLimit,
-                                loading = false
+                                loadingMetadata = false
                             )
                         }
-                        startTimer(quiz.timeLimit)
+                        if (_uiState.value.timeRemaining == 0) {
+                            startTimer(quiz.timeLimit)
+                        }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(errorMessage = err,loading = false) }
+                        _uiState.update { it.copy(errorMessage = err,loadingMetadata = false) }
                     },
                 )
             }
@@ -77,20 +79,20 @@ class QuizAttemptViewModel @Inject constructor(
 
     private fun loadQuizContent(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingContent = true, errorMessage = null) }
 
             quizRepository.getQuizContent(_quizId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { content ->
                         _uiState.update { it.copy(
-                            loading = false,
+                            loadingContent = false,
                             content = content,
                             currentIndex = 0,
                         ) }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        _uiState.update { it.copy(loadingContent = false, errorMessage = err) }
                     },
                 )
             }
@@ -145,7 +147,12 @@ class QuizAttemptViewModel @Inject constructor(
 
     fun onSubmitClicked(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingSubmit = true, errorMessage = null) }
+
+            if (_uiState.value.answers.isEmpty()) {
+                _events.send(QuizAttemptEvent.SubmitError("You haven't answered any questions."))
+                return@launch
+            }
 
             _events.send(QuizAttemptEvent.SubmitQuiz)
 
@@ -166,7 +173,7 @@ class QuizAttemptViewModel @Inject constructor(
                             }
 
                         AnswerUploadRequest(
-                            questionId = uiState.value.content[index].toString(),
+                            questionId = answer.response.questionId,
                             optionId   = match?.optionId ?: "",
                             isCorrect  = match?.isCorrect ?: false
                         )
@@ -227,7 +234,9 @@ class QuizAttemptViewModel @Inject constructor(
 }
 
 data class QuizAttemptUIState(
-    val loading: Boolean = false,
+    val loadingMetadata: Boolean = false,
+    val loadingContent: Boolean = false,
+    val loadingSubmit: Boolean = false,
     val errorMessage: String? = null,
     val quizName: String = "",
     val quizType: String = "",
@@ -236,7 +245,9 @@ data class QuizAttemptUIState(
     val currentIndex: Int = 0,
     val timeRemaining: Int = 0,
     val answers: Map<Int, Answer> = emptyMap()
-)
+){
+    val loading: Boolean get() = loadingMetadata || loadingContent
+}
 
 sealed class Answer {
     data class OptionAnswer(val questionId: String,val optionId: String, val isCorrect: Boolean) : Answer()

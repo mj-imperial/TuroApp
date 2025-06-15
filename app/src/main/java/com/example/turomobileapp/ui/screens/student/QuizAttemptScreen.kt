@@ -137,7 +137,9 @@ fun QuizAttemptScreen(
         viewModel.events.collect { ev ->
             when (ev) {
                 is QuizAttemptEvent.SubmitSuccess -> {
-                    navController.navigate(Screen.StudentQuizResult.createRoute(quizId, true))
+                    navController.navigate(Screen.StudentQuizResult.createRoute(quizId, true)) {
+                        popUpTo(Screen.StudentQuizAttempt.route) { inclusive = true }
+                    }
                 }
                 is QuizAttemptEvent.SubmitError -> {
                     Toast.makeText(ctx,ev.errorMessage,Toast.LENGTH_LONG).show()

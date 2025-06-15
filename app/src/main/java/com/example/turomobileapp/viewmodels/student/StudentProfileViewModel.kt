@@ -42,7 +42,7 @@ class StudentProfileViewModel @Inject constructor(
 
     fun getStudentProgress(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingProgress = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
@@ -50,10 +50,10 @@ class StudentProfileViewModel @Inject constructor(
                 handleResult(
                     result = result,
                     onSuccess = { resp ->
-                        _uiState.update { it.copy(loading = false, studentProgress = resp) }
+                        _uiState.update { it.copy(loadingProgress = false, studentProgress = resp) }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        _uiState.update { it.copy(loadingProgress = false, errorMessage = err) }
                     }
                 )
             }
@@ -62,7 +62,7 @@ class StudentProfileViewModel @Inject constructor(
 
     fun getBadgesForStudent(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingBadges = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
@@ -70,10 +70,10 @@ class StudentProfileViewModel @Inject constructor(
                 handleResult(
                     result = result,
                     onSuccess = { badges ->
-                        _uiState.update { it.copy(loading = false, badges = badges) }
+                        _uiState.update { it.copy(loadingBadges = false, badges = badges) }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        _uiState.update { it.copy(loadingBadges = false, errorMessage = err) }
                     }
                 )
             }
@@ -82,7 +82,8 @@ class StudentProfileViewModel @Inject constructor(
 }
 
 data class StudentProfileUIState(
-    val loading: Boolean = false,
+    val loadingProgress: Boolean = false,
+    val loadingBadges: Boolean = false,
     val errorMessage: String? = null,
     val studentName: String = "",
     val email: String = "",
@@ -90,4 +91,6 @@ data class StudentProfileUIState(
     val profilePic: String = "",
     val badges: List<StudentBadgeResponse> = emptyList(),
     val studentProgress: StudentProfileProgress? = null
-)
+){
+    val loading: Boolean get() = loadingProgress || loadingBadges
+}

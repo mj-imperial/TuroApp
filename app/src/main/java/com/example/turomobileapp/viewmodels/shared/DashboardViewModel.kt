@@ -24,6 +24,7 @@ class DashboardViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(DashboardUIState())
     val uiState: StateFlow<DashboardUIState> = _uiState.asStateFlow()
 
+
     fun loadCourses(userId: String, role: UserRole){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }

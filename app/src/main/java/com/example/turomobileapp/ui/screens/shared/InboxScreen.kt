@@ -26,10 +26,13 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,6 +68,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun InboxScreen(
@@ -74,6 +78,7 @@ fun InboxScreen(
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
+    val pullRefreshState = rememberPullToRefreshState()
 
     var inboxToDelete by remember { mutableStateOf<String?>(null) }
     var openDeleteDialog by remember { mutableStateOf(false) }
@@ -135,7 +140,12 @@ fun InboxScreen(
                     CircularProgressIndicator()
                 }
             }else{
-                Box(
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getInboxes()
+                    },
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(it)
@@ -230,12 +240,13 @@ fun InboxItem(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = latestParticipant.name,
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.title(windowInfo),
-                        modifier = Modifier.weight(1f)
-                    )
+                    Row(modifier = Modifier.fillMaxWidth()){
+                        Text(
+                            text = latestParticipant.name,
+                            fontFamily = FontFamily(Font(R.font.alata)),
+                            fontSize = ResponsiveFont.heading1(windowInfo),
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(4.dp))
 

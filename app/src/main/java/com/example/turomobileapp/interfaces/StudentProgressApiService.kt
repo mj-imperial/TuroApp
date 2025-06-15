@@ -1,7 +1,8 @@
 package com.example.turomobileapp.interfaces
 
+import com.example.turomobileapp.models.StudentLeaderboardResponses
+import com.example.turomobileapp.models.StudentPerformanceListResponses
 import com.example.turomobileapp.models.StudentProgress
-import com.example.turomobileapp.models.StudentProgressResponses
 import com.example.turomobileapp.models.UpdateStudentCourseProgressRequest
 import com.example.turomobileapp.models.UpdateStudentModuleProgressRequest
 import okhttp3.ResponseBody
@@ -16,18 +17,18 @@ interface StudentProgressApiService {
     @GET("get_leaderboard.php")
     suspend fun getLeaderboardCourse(
         @Query("student_id") studentId: String
-    ): Response<StudentProgressResponses>
+    ): Response<StudentLeaderboardResponses>
+
+    @GET("get_student_progress_list_for_course.php")
+    suspend fun getCourseProgressForAllStudents(
+        @Query("course_id") courseId: String
+    ): Response<StudentPerformanceListResponses>
 
     @GET("/students/{studentId}/progress/courses/{courseId}")
     suspend fun getStudentCourseProgress(
         @Path("studentId") studentId: String,
         @Path("courseId") courseId: String
     ): Response<StudentProgress>
-
-    @GET("/courses/{courseId}/progress")
-    suspend fun getCourseProgressForAllStudents(
-        @Path("courseId") courseId: String
-    ): Response<List<StudentProgress>>
 
     @PUT("/students/{studentId}/modules/{moduleId}/progress")
     suspend fun updateStudentModuleProgress(

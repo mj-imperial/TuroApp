@@ -22,7 +22,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,7 +49,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.StudentBadgeResponse
-import com.example.turomobileapp.models.StudentProgressResponse
+import com.example.turomobileapp.models.StudentLeaderboardResponse
 import com.example.turomobileapp.objects.CelebrationPrefs
 import com.example.turomobileapp.ui.components.CustomDropDownMenu
 import com.example.turomobileapp.ui.components.DropdownMenuItem
@@ -67,6 +70,7 @@ import nl.dionsegijn.konfetti.core.Position
 import nl.dionsegijn.konfetti.core.emitter.Emitter
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LeaderboardScreen(
     navController: NavController,
@@ -75,6 +79,7 @@ fun LeaderboardScreen(
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
+    val pullRefreshState = rememberPullToRefreshState()
 
     var currentMenu by remember { mutableStateOf<String>("Leaderboard") }
 
@@ -95,7 +100,7 @@ fun LeaderboardScreen(
         ),
         DropdownMenuItem(
             itemName = "Achievements",
-            leadingIcon = R.drawable.trophy,
+            leadingIcon = R.drawable.trophy_outlined,
             onClick = {
                 currentMenu = "Achievements"
             }
@@ -113,28 +118,43 @@ fun LeaderboardScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CustomDropDownMenu(
-                    menuText = currentMenu,dropdownMenuItems = menuList
-                )
+            if (uiState.loading){
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    CircularProgressIndicator()
+                }
+            }else{
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getLeaderboard()
+                        viewModel.getBadgesForStudent()
+                    },
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CustomDropDownMenu(
+                            menuText = currentMenu,dropdownMenuItems = menuList
+                        )
 
-                when(currentMenu){
-                    "Leaderboard" -> LeaderboardCard(
-                        students = sortedStudents,
-                        windowInfo = windowInfo,
-                        loading = uiState.loading
-                    )
-                    "Badges" -> BadgesCard(
-                        studentBadges = uiState.studentBadges,
-                        windowInfo = windowInfo
-                    )
-                    "Achievements" -> AchievementCard()
+                        when(currentMenu){
+                            "Leaderboard" -> LeaderboardCard(
+                                students = sortedStudents,
+                                windowInfo = windowInfo,
+                                loading = uiState.loading
+                            )
+                            "Badges" -> BadgesCard(
+                                studentBadges = uiState.studentBadges,
+                                windowInfo = windowInfo
+                            )
+                            "Achievements" -> AchievementCard()
+                        }
+                    }
                 }
             }
         }
@@ -143,7 +163,7 @@ fun LeaderboardScreen(
 
 @Composable
 fun LeaderboardCard(
-    students: List<StudentProgressResponse>,
+    students: List<StudentLeaderboardResponse>,
     windowInfo: WindowInfo,
     loading: Boolean
 ) {
@@ -164,9 +184,9 @@ fun LeaderboardCard(
         ) {
             itemsIndexed(students) { index, student ->
                 when (index) {
-                    0 -> FirstPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.13f)
-                    1 -> SecondPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.10f)
-                    2 -> ThirdPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.10f)
+                    0 -> FirstPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.16f)
+                    1 -> SecondPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.14f)
+                    2 -> ThirdPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.12f)
                     else -> RegularPlaceRow(student, index + 1, windowInfo, windowInfo.screenHeight * 0.10f)
                 }
             }

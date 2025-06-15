@@ -26,8 +26,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,6 +63,7 @@ import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.authentication.LoginViewModel
 import com.example.turomobileapp.viewmodels.student.StudentProfileViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavController,
@@ -73,6 +77,7 @@ fun ProfileScreen(
     val headerHeight = screenHeight * 0.18f
     val imageSize = windowInfo.screenWidth * 0.3f
     val imageOverlap = imageSize / 2f
+    val pullRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(true) {
         viewModel.getStudentProgress()
@@ -101,193 +106,202 @@ fun ProfileScreen(
                     CircularProgressIndicator()
                 }
             }else{
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(innerPadding),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getStudentProgress()
+                        viewModel.getBadgesForStudent()
+                    },
                 ) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(headerHeight)
-                                .background(MainOrange)
-                        )
-                    }
-
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalAlignment = Alignment.Start
-                        ) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(innerPadding),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        item {
                             Box(
                                 modifier = Modifier
-                                    .size(imageSize)
-                                    .offset(y = (-imageOverlap * 1.9f).coerceAtLeast((-40).dp))
-                                    .align(Alignment.CenterHorizontally)
-                                    .border(4.dp, MainOrange, CircleShape)
-                                    .clip(CircleShape)
-                            ) {
-                                AsyncImage(
-                                    model = uiState.profilePic,
-                                    placeholder = painterResource(R.drawable.default_account),
-                                    error = painterResource(R.drawable.default_account),
-                                    contentDescription = "Profile picture",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(-imageOverlap))
-
-                            userInfo.forEach { item ->
-                                ProfileField(
-                                    nameRes = item.name,
-                                    iconRes = item.icon,
-                                    value = item.value
-                                )
-                            }
-                        }
-                    }
-
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 31.dp, bottom = 15.dp),
-                            verticalArrangement = Arrangement.Top,
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.course_profile),
-                                    contentDescription = null
-                                )
-
-                                Spacer(modifier = Modifier.width(25.dp))
-
-                                Text(
-                                    text = "COURSE: ${uiState.studentProgress!!.courseName}",
-                                    fontSize = ResponsiveFont.heading3(windowInfo),
-                                    fontFamily = FontFamily(Font(R.font.alata))
-                                )
-                            }
-
-                            Text(
-                                text = "TOTAL POINTS: ${uiState.studentProgress!!.totalPoints}",
-                                fontSize = ResponsiveFont.body(windowInfo),
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                modifier = Modifier.padding(start = 70.dp)
-                            )
-
-                            Text(
-                                text = "AVG. SCORE: ${uiState.studentProgress!!.averageScore}",
-                                fontSize = ResponsiveFont.body(windowInfo),
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                modifier = Modifier.padding(start = 70.dp)
+                                    .fillMaxWidth()
+                                    .height(headerHeight)
+                                    .background(MainOrange)
                             )
                         }
-                    }
 
-                    items(badges) { badge ->
-                        Text(
-                            text = "BADGES",
-                            fontSize = ResponsiveFont.heading3(windowInfo),
-                            fontFamily = FontFamily(Font(R.font.alata)),
-                            modifier = Modifier.padding(start = 10.dp)
-                        )
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp, vertical = 10.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            elevation = CardDefaults.cardElevation(8.dp),
-                            colors = CardDefaults.cardColors(containerColor = MainWhite),
-                            border = BorderStroke(1.dp, LoginText)
-                        ) {
-                            Row(
+                        item {
+                            Column(
                                 modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                horizontalAlignment = Alignment.Start
                             ) {
-                                AsyncImage(
-                                    model = badge.badgeImage,
-                                    contentDescription = "Badge ${badge.badgeName}",
+                                Box(
                                     modifier = Modifier
-                                        .size(50.dp)
+                                        .size(imageSize)
+                                        .offset(y = (-imageOverlap * 1.9f).coerceAtLeast((-40).dp))
+                                        .align(Alignment.CenterHorizontally)
+                                        .border(4.dp, MainOrange, CircleShape)
                                         .clip(CircleShape)
-                                        .border(
-                                            width = 2.dp,
-                                            color = MainOrange,
-                                            shape = CircleShape
-                                        ),
-                                    contentScale = ContentScale.Crop,
-                                )
-
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                Column(
-                                    modifier = Modifier.weight(1f)
                                 ) {
-                                    Text(
-                                        text = badge.badgeName,
-                                        fontSize = ResponsiveFont.heading3(windowInfo),
-                                        fontFamily = FontFamily(Font(R.font.alata)),
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextBlack
+                                    AsyncImage(
+                                        model = uiState.profilePic,
+                                        placeholder = painterResource(R.drawable.default_account),
+                                        error = painterResource(R.drawable.default_account),
+                                        contentDescription = "Profile picture",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
                                     )
+                                }
 
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(-imageOverlap))
 
-                                    Text(
-                                        text = "POINTS NEEDED: ${badge.pointsRequired}",
-                                        fontSize = ResponsiveFont.body(windowInfo),
-                                        fontFamily = FontFamily(Font(R.font.alata)),
-                                        color = TextBlack
+                                userInfo.forEach { item ->
+                                    ProfileField(
+                                        nameRes = item.name,
+                                        iconRes = item.icon,
+                                        value = item.value
                                     )
                                 }
                             }
                         }
-                    }
 
-                    item {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        CapsuleButton(
-                            text = {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 31.dp, bottom = 15.dp),
+                                verticalArrangement = Arrangement.Top,
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.course_profile),
+                                        contentDescription = null
+                                    )
+
+                                    Spacer(modifier = Modifier.width(25.dp))
+
+                                    Text(
+                                        text = "COURSE: ${uiState.studentProgress!!.courseName}",
+                                        fontSize = ResponsiveFont.heading3(windowInfo),
+                                        fontFamily = FontFamily(Font(R.font.alata))
+                                    )
+                                }
+
                                 Text(
-                                    text = stringResource(R.string.Logout),
-                                    color = MainRed,
-                                    fontSize = ResponsiveFont.heading3(windowInfo),
-                                    fontFamily = FontFamily(Font(R.font.alata))
+                                    text = "TOTAL POINTS: ${uiState.studentProgress!!.totalPoints}",
+                                    fontSize = ResponsiveFont.body(windowInfo),
+                                    fontFamily = FontFamily(Font(R.font.alata)),
+                                    modifier = Modifier.padding(start = 70.dp)
                                 )
-                            },
-                            onClick = {
-                                loginViewModel.logout()
-                                navController.navigate(Screen.Login.route)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 32.dp)
-                                .border(2.dp, MainRed, RoundedCornerShape(28.dp)),
-                            roundedCornerShape = 28.dp,
-                            buttonElevation = ButtonDefaults.buttonElevation(8.dp),
-                            buttonColors = ButtonDefaults.buttonColors(
-                                containerColor = MainWhite,
-                                contentColor = MainRed,
-                                disabledContainerColor = Color.DarkGray,
-                                disabledContentColor = Color.DarkGray,
-                            ),
-                            enabled = true
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
+
+                                Text(
+                                    text = "AVG. SCORE: ${uiState.studentProgress!!.averageScore}",
+                                    fontSize = ResponsiveFont.body(windowInfo),
+                                    fontFamily = FontFamily(Font(R.font.alata)),
+                                    modifier = Modifier.padding(start = 70.dp)
+                                )
+                            }
+                        }
+
+                        items(badges) { badge ->
+                            Text(
+                                text = "BADGES",
+                                fontSize = ResponsiveFont.heading3(windowInfo),
+                                fontFamily = FontFamily(Font(R.font.alata)),
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 10.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                elevation = CardDefaults.cardElevation(8.dp),
+                                colors = CardDefaults.cardColors(containerColor = MainWhite),
+                                border = BorderStroke(1.dp, LoginText)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    AsyncImage(
+                                        model = badge.badgeImage,
+                                        contentDescription = "Badge ${badge.badgeName}",
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .clip(CircleShape)
+                                            .border(
+                                                width = 2.dp,
+                                                color = MainOrange,
+                                                shape = CircleShape
+                                            ),
+                                        contentScale = ContentScale.Crop,
+                                    )
+
+                                    Spacer(modifier = Modifier.width(16.dp))
+
+                                    Column(
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            text = badge.badgeName,
+                                            fontSize = ResponsiveFont.heading3(windowInfo),
+                                            fontFamily = FontFamily(Font(R.font.alata)),
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextBlack
+                                        )
+
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        Text(
+                                            text = "POINTS NEEDED: ${badge.pointsRequired}",
+                                            fontSize = ResponsiveFont.body(windowInfo),
+                                            fontFamily = FontFamily(Font(R.font.alata)),
+                                            color = TextBlack
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            CapsuleButton(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.Logout),
+                                        color = MainRed,
+                                        fontSize = ResponsiveFont.heading3(windowInfo),
+                                        fontFamily = FontFamily(Font(R.font.alata))
+                                    )
+                                },
+                                onClick = {
+                                    loginViewModel.logout()
+                                    navController.navigate(Screen.Login.route)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 32.dp)
+                                    .border(2.dp, MainRed, RoundedCornerShape(28.dp)),
+                                roundedCornerShape = 28.dp,
+                                buttonElevation = ButtonDefaults.buttonElevation(8.dp),
+                                buttonColors = ButtonDefaults.buttonColors(
+                                    containerColor = MainWhite,
+                                    contentColor = MainRed,
+                                    disabledContainerColor = Color.DarkGray,
+                                    disabledContentColor = Color.DarkGray,
+                                ),
+                                enabled = true
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
                     }
                 }
             }

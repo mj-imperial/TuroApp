@@ -24,8 +24,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,6 +60,7 @@ import com.example.turomobileapp.viewmodels.student.LectureDetailViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -69,6 +73,7 @@ fun LectureDetailScreen(
     activityFlowViewModel: ActivityFlowViewModel
 ){
     val windowInfo = rememberWindowInfo()
+    val pullRefreshState = rememberPullToRefreshState()
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -96,120 +101,128 @@ fun LectureDetailScreen(
                     CircularProgressIndicator()
                 }
             }else{
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.SpaceAround,
-                    horizontalAlignment = Alignment.Start
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getLecture()
+                    },
                 ) {
-                    item {
-                        LectureTitle(
-                            height = windowInfo.screenHeight * 0.17f,
-                            windowInfo = windowInfo,
-                            lectureName = uiState.lectureTitle
-                        )
-
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 15.dp),
-                            thickness =  1.dp,
-                            color = LoginText
-                        )
-                    }
-
-                    item {
-                        LectureHeader(
-                            windowInfo = windowInfo,
-                            unlockDate = uiState.unlockDateTime,
-                            deadlineDate = uiState.deadlineDateTime
-                        )
-
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 15.dp),
-                            thickness =  1.dp,
-                            color = LoginText
-                        )
-                    }
-
-                    item {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(10.dp),
-                            verticalArrangement = Arrangement.Top,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = uiState.lectureDescription,
-                                fontSize = ResponsiveFont.heading3(windowInfo),
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                minLines = 1,
-                                softWrap = true,
-                                modifier = Modifier.padding(bottom = 20.dp)
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.SpaceAround,
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        item {
+                            LectureTitle(
+                                height = windowInfo.screenHeight * 0.17f,
+                                windowInfo = windowInfo,
+                                lectureName = uiState.lectureTitle
                             )
 
-                            Spacer(modifier = Modifier.height(20.dp))
-
-                            when(uiState.contentTypeName){
-                                "PDF/DOCS" -> LectureBodyPDF(
-                                    fileUrl = uiState.fileUrl,
-                                    fileMimeType = uiState.fileMimeType,
-                                    fileName = uiState.fileName,
-                                    windowInfo = windowInfo
-                                )
-                                "TEXT" -> LectureBodyText(
-                                    windowInfo = windowInfo,
-                                    textBody = uiState.text.toString()
-                                )
-                                "VIDEO" -> LectureBodyVideo(
-                                    windowInfo = windowInfo,
-                                    videoUrl = uiState.youtubeUrl.toString()
-                                )
-                            }
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 15.dp),
+                                thickness =  1.dp,
+                                color = LoginText
+                            )
                         }
 
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 15.dp),
-                            thickness =  1.dp,
-                            color = LoginText
-                        )
-                    }
+                        item {
+                            LectureHeader(
+                                windowInfo = windowInfo,
+                                unlockDate = uiState.unlockDateTime,
+                                deadlineDate = uiState.deadlineDateTime
+                            )
 
-                    item {
-                        PreviousNextButtonLecture(
-                            windowInfo = windowInfo,
-                            onClickPrevious = {
-                                previous?.let {
-                                    activityFlowViewModel.setCurrentActivityId(it.activityId)
-                                    val route = Screen.StudentActivityDetail.createRoute(
-                                        moduleId = it.moduleId,
-                                        activityId = it.activityId,
-                                        activityType = it.activityType,
-                                        courseId = courseId
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 15.dp),
+                                thickness =  1.dp,
+                                color = LoginText
+                            )
+                        }
+
+                        item {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                                verticalArrangement = Arrangement.Top,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = uiState.lectureDescription,
+                                    fontSize = ResponsiveFont.heading3(windowInfo),
+                                    fontFamily = FontFamily(Font(R.font.alata)),
+                                    minLines = 1,
+                                    softWrap = true,
+                                    modifier = Modifier.padding(bottom = 20.dp)
+                                )
+
+                                Spacer(modifier = Modifier.height(20.dp))
+
+                                when(uiState.contentTypeName){
+                                    "PDF/DOCS" -> LectureBodyPDF(
+                                        fileUrl = uiState.fileUrl,
+                                        fileMimeType = uiState.fileMimeType,
+                                        fileName = uiState.fileName,
+                                        windowInfo = windowInfo
                                     )
-                                    navController.navigate(route)
-                                }
-                            },
-                            onClickNext = {
-                                next?.let {
-                                    activityFlowViewModel.setCurrentActivityId(it.activityId)
-                                    val route = Screen.StudentActivityDetail.createRoute(
-                                        moduleId = it.moduleId,
-                                        activityId = it.activityId,
-                                        activityType = it.activityType,
-                                        courseId = courseId
+                                    "TEXT" -> LectureBodyText(
+                                        windowInfo = windowInfo,
+                                        textBody = uiState.text.toString()
                                     )
-                                    navController.navigate(route)
+                                    "VIDEO" -> LectureBodyVideo(
+                                        windowInfo = windowInfo,
+                                        videoUrl = uiState.youtubeUrl.toString()
+                                    )
                                 }
-                            },
-                            isPreviousEnabled = hasPrevious,
-                            isNextEnabled = hasNext
-                        )
+                            }
+
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 15.dp),
+                                thickness =  1.dp,
+                                color = LoginText
+                            )
+                        }
+
+                        item {
+                            PreviousNextButtonLecture(
+                                windowInfo = windowInfo,
+                                onClickPrevious = {
+                                    previous?.let {
+                                        activityFlowViewModel.setCurrentActivityId(it.activityId)
+                                        val route = Screen.StudentActivityDetail.createRoute(
+                                            moduleId = it.moduleId,
+                                            activityId = it.activityId,
+                                            activityType = it.activityType,
+                                            courseId = courseId
+                                        )
+                                        navController.navigate(route)
+                                    }
+                                },
+                                onClickNext = {
+                                    next?.let {
+                                        activityFlowViewModel.setCurrentActivityId(it.activityId)
+                                        val route = Screen.StudentActivityDetail.createRoute(
+                                            moduleId = it.moduleId,
+                                            activityId = it.activityId,
+                                            activityType = it.activityType,
+                                            courseId = courseId
+                                        )
+                                        navController.navigate(route)
+                                    }
+                                },
+                                isPreviousEnabled = hasPrevious,
+                                isNextEnabled = hasNext
+                            )
+                        }
                     }
                 }
             }
