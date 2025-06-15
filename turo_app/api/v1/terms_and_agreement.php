@@ -1,7 +1,8 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 $configFile = __DIR__ . '/config.php';
-if (! file_exists($configFile)) {
+
+if (!file_exists($configFile)) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
@@ -9,29 +10,35 @@ if (! file_exists($configFile)) {
     ]);
     exit;
 }
+
 require_once $configFile;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    jsonResponse(['success'=>false,'error'=>'Method Not Allowed'], 405);
+    jsonResponse(['success' => false, 'error' => 'Method Not Allowed'], 405);
 }
 
-if (! empty($_POST)) {
+$input = [];
+if (!empty($_POST)) {
     $input = $_POST;
 } else {
-    $raw   = file_get_contents('php://input');
+    $raw = file_get_contents('php://input');
     $input = json_decode($raw, true) ?: [];
 }
 
-if (empty($input['user_id']) || empty($input['agreed_to_terms'])) {
+if (!isset($input['user_id']) || !isset($input['agreed_to_terms'])) {
     http_response_code(400);
     jsonResponse(['success' => false, 'message' => 'user_id and agreed_to_terms are required'], 400);
 }
 
-changeAgreementStatus($conn, $input['user_id'], $input['agreed_to_terms']);
+$userId = $input['user_id'];
+$agreedToTerms = filter_var($input['agreed_to_terms'], FILTER_VALIDATE_BOOLEAN); // 💡 ensures true/false
 
-function changeAgreementStatus(mysqli $conn, string $userId, bool $agreedToTerms){
+changeAgreementStatus($conn, $userId, $agreedToTerms);
+
+function changeAgreementStatus(mysqli $conn, string $userId, bool $agreedToTerms) {
     $agreedInt = $agreedToTerms ? 1 : 0;
+
     $stmt = $conn->prepare("
         UPDATE `User`
         SET `agreed_to_terms` = ?
@@ -39,11 +46,16 @@ function changeAgreementStatus(mysqli $conn, string $userId, bool $agreedToTerms
     ");
     $stmt->bind_param('is', $agreedInt, $userId);
 
-    if($stmt->execute()){
-        jsonResponse([ 'success' => true, 'message' => 'Terms Agreement changed successfully' ]);
-    }else{
+    if ($stmt->execute()) {
+        jsonResponse([
+            'success' => true,
+            'message' => 'Terms Agreement changed successfully',
+            'rows_affected' => $stmt->affected_rows
+        ]);
+    } else {
         http_response_code(500);
         jsonResponse(['success' => false, 'message' => 'Failed to change Terms Agreement']);
     }
+
     $stmt->close();
 }
