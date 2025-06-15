@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -50,7 +51,7 @@ import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
-import com.example.turomobileapp.ui.theme.TextBlack
+import com.example.turomobileapp.ui.theme.headingText
 import com.example.turomobileapp.ui.theme.screeningExam1
 import com.example.turomobileapp.ui.theme.screeningExam11
 import com.example.turomobileapp.ui.theme.shortquiz1
@@ -104,12 +105,11 @@ fun ViewAllModulesScreen(
                             .padding(20.dp)
                     ) {
                         items(modules) { module ->
-                            val activities = uiState.activities
-                                .filter { it.moduleId == module.moduleId }
-                                .filterNot { it.quizTypeName == "SCREENING_EXAM" }
                             val isExpanded = expandedModules.value.contains(module.moduleId)
 
-                            val screeningExam = activities.filter { it.quizTypeName == "SCREENING_EXAM" }
+                            val allActivities = uiState.activities.filter { it.moduleId == module.moduleId }
+                            val screeningExam = allActivities.filter { it.quizTypeName == "SCREENING_EXAM" }
+                            val activities = allActivities.filterNot { it.quizTypeName == "SCREENING_EXAM" }
 
                             screeningExam.forEach {
                                 ScreeningExamCard(
@@ -160,12 +160,12 @@ fun ScreeningExamCard(
             .fillMaxWidth()
             .clickable(onClick = onNavigateActivity),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        shape = RoundedCornerShape(5.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .background(
                     brush = Brush.linearGradient(colors = listOf(screeningExam1, screeningExam11)),
                     shape = RoundedCornerShape(14.dp)
@@ -207,8 +207,8 @@ fun ModuleContentCollapsable(
             .padding(vertical = 8.dp)
             .animateContentSize(),
         shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White) // or themed bg
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(
             modifier = Modifier
@@ -230,17 +230,20 @@ fun ModuleContentCollapsable(
                     modifier = Modifier.size(50.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
-                Column {
+                Column(
+                    modifier = Modifier.clip(RoundedCornerShape(10.dp))
+                ) {
                     Text(
                         text = moduleName,
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.heading1(windowInfo),
-                        color = TextBlack
+                        color = headingText
                     )
                     Text(
                         text = moduleDescription,
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo)
+                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        color = headingText
                     )
                 }
             }

@@ -63,19 +63,24 @@ import com.example.turomobileapp.ui.theme.quiz1
 import com.example.turomobileapp.ui.theme.quiz2
 import com.example.turomobileapp.ui.theme.studentProgressBox
 import com.example.turomobileapp.viewmodels.SessionManager
-import com.example.turomobileapp.viewmodels.teacher.StudentPerformanceOverviewViewModel
+import com.example.turomobileapp.viewmodels.teacher.StudentPerformanceViewModel
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentPerformanceOverViewScreen(
     navController: NavController,
     sessionManager: SessionManager,
-    viewModel: StudentPerformanceOverviewViewModel
+    viewModel: StudentPerformanceViewModel,
+    courseId: String
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
     val sortedStudents = uiState.studentProgressList.sortedByDescending { it.totalPoints }
     val pullRefreshState = rememberPullToRefreshState()
+    val decimalFormat = DecimalFormat("#.##", DecimalFormatSymbols(Locale.US))
 
     AppScaffold(
         navController = navController,
@@ -111,7 +116,7 @@ fun StudentPerformanceOverViewScreen(
                             OverallPerformanceBoxes(
                                 windowInfo = windowInfo,
                                 title = "OVERALL STUDENT PERFORMANCE",
-                                mainPercentage = highestScorePercentage,
+                                mainPercentage = decimalFormat.format(highestScorePercentage),
                                 subtitle = gradeAverageDisplay,
                                 image = painterResource(R.drawable.trophy)
                             )
@@ -129,7 +134,7 @@ fun StudentPerformanceOverViewScreen(
                             OverallPerformanceBoxes(
                                 windowInfo = windowInfo,
                                 title = "COURSE PROGRESS",
-                                mainPercentage = courseProgress,
+                                mainPercentage = decimalFormat.format(courseProgress),
                                 subtitle = numberOfAssessments,
                                 image = painterResource(R.drawable.additionalscreening)
                             )
@@ -207,8 +212,17 @@ fun StudentPerformanceOverViewScreen(
                                 averageGrade = student.averageScore,
                                 points = student.totalPoints,
                                 onClickStudent = {
-                                    navController.navigate(Screen.TeacherPerformanceIndividual.createRoute(student.studentId, index + 1))
-                                },
+                                    viewModel.updateIndividualStudentInfo(
+                                        studentId = student.studentId,
+                                        studentName = student.studentName,
+                                        profilePic = student.profilePic.toString(),
+                                        completedAssessments = student.completedAssessments,
+                                        averageGrade = student.averageScore,
+                                        points = student.totalPoints,
+                                        rank = index + 1
+                                    )
+                                    navController.navigate(Screen.TeacherPerformanceIndividual.createRoute(courseId, student.studentId))
+                                }
                             )
                         }
                     }
@@ -222,7 +236,7 @@ fun StudentPerformanceOverViewScreen(
 fun OverallPerformanceBoxes(
     windowInfo: WindowInfo,
     title: String,
-    mainPercentage: Double,
+    mainPercentage: String,
     subtitle: String,
     image: Painter
 ){
@@ -266,12 +280,23 @@ fun OverallPerformanceBoxes(
                     modifier = Modifier.weight(2f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "$mainPercentage %",
-                        fontSize = 60.sp,
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        color = green
-                    )
+                    Row {
+                        Text(
+                            text = mainPercentage,
+                            fontSize = 50.sp,
+                            fontFamily = FontFamily(Font(R.font.alata)),
+                            color = green,
+                            modifier = Modifier.padding(end = 5.dp)
+                        )
+
+                        Text(
+                            text = "%",
+                            fontSize = 20.sp,
+                            fontFamily = FontFamily(Font(R.font.alata)),
+                            color = green,
+                            textAlign = TextAlign.Center
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(4.dp))
 

@@ -63,4 +63,8 @@ class SessionManager @Inject constructor() {
     fun setRole(role: String){
         _role.value = role
     }
+
+    fun setAgreedToTerms(newTerms: Boolean){
+        _agreedToTerms.value = newTerms
+    }
 }

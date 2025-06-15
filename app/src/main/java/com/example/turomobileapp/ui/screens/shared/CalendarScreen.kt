@@ -51,6 +51,8 @@ import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.MainOrange
+import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.calendarEvent
@@ -210,6 +212,7 @@ fun Day(
     isUrgent: Boolean,
     onClick: (CalendarDay) -> Unit
 ){
+    val isToday = day.date == LocalDate.now()
     Box(
         modifier = Modifier
             .aspectRatio(1f)
@@ -219,6 +222,8 @@ fun Day(
                 when {
                     isUrgent -> TextBlack
                     hasEvent -> calendarEvent
+                    isToday -> MainRed
+                    isSelected -> MainOrange
                     else -> calendarGray
                 }
             )
@@ -229,7 +234,7 @@ fun Day(
             text = day.date.dayOfMonth.toString(),
             textAlign = TextAlign.Center,
             fontFamily = FontFamily(Font(R.font.alata)),
-            color = if (isUrgent) MainWhite else TextBlack
+            color = if (isUrgent || isToday || isSelected) MainWhite else TextBlack
         )
     }
 }
@@ -316,4 +321,3 @@ fun DateEvents(
         }
     }
 }
-

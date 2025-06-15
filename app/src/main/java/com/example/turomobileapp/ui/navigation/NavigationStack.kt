@@ -2,6 +2,7 @@ package com.example.turomobileapp.ui.navigation
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,9 +53,11 @@ import com.example.turomobileapp.ui.screens.teacher.EditModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.EditQuizScreen
 import com.example.turomobileapp.ui.screens.teacher.EditTutorialScreen
 import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
+import com.example.turomobileapp.ui.screens.teacher.StudentIndividualPerformanceScreen
 import com.example.turomobileapp.ui.screens.teacher.StudentPerformanceOverViewScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.authentication.AgreementTermsViewModel
 import com.example.turomobileapp.viewmodels.shared.CreateMessageViewModel
 import com.example.turomobileapp.viewmodels.shared.InboxDetailViewModel
 import com.example.turomobileapp.viewmodels.shared.InboxViewModel
@@ -75,7 +78,7 @@ import com.example.turomobileapp.viewmodels.teacher.EditModuleViewModel
 import com.example.turomobileapp.viewmodels.teacher.EditQuizViewModel
 import com.example.turomobileapp.viewmodels.teacher.EditTutorialViewModel
 import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
-import com.example.turomobileapp.viewmodels.teacher.StudentPerformanceOverviewViewModel
+import com.example.turomobileapp.viewmodels.teacher.StudentPerformanceViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -85,40 +88,40 @@ fun NavigationStack(
     sessionManager: SessionManager
 ) {
     val roleStr by sessionManager.role.collectAsState(initial = null)
+    val agreedToTerms by sessionManager.agreedToTerms.collectAsState(initial = false)
+    val userId by sessionManager.userId.collectAsState()
     val role = roleStr?.let { UserRole.valueOf(it) }
+    Log.d("NavDebug", "role=$role, agreedToTerms=$agreedToTerms")
 
-    when (role) {
-        null -> AuthNavHost()
-        UserRole.STUDENT -> StudentNavHost(sessionManager)
-        UserRole.TEACHER -> TeacherNavHost(sessionManager)
-    }
-}
-
-@Composable
-fun AuthNavHost() {
-    val navController = rememberNavController()
-    NavHost(navController, startDestination = Screen.Splash.route) {
-        authNavGraph(navController)
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@Composable
-fun StudentNavHost(sessionManager: SessionManager) {
-    val navController = rememberNavController()
-    NavHost(navController, startDestination = Screen.Dashboard.route) {
-        commonNavGraph(navController, sessionManager)
-        studentNavGraph(navController, sessionManager)
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@Composable
-fun TeacherNavHost(sessionManager: SessionManager) {
-    val navController = rememberNavController()
-    NavHost(navController, startDestination = Screen.Dashboard.route) {
-        commonNavGraph(navController, sessionManager)
-        teacherNavGraph(navController, sessionManager)
+    when {
+        role == null -> {
+            val navController = rememberNavController()
+            NavHost(navController, startDestination = Screen.Splash.route) {
+                authNavGraph(navController)
+            }
+        }
+        !agreedToTerms!! -> {
+            Log.d("NavDebug", "Showing TermsAgreement NavHost")
+            val navController = rememberNavController()
+            NavHost(navController, startDestination = Screen.TermsAgreement.createRoute(userId.toString())) {
+                authNavGraph(navController)
+            }
+        }
+        role == UserRole.STUDENT && agreedToTerms == true -> {
+            Log.d("NavDebug", "Showing Student Dashboard NavHost")
+            val navController = rememberNavController()
+            NavHost(navController, startDestination = Screen.Dashboard.route) {
+                commonNavGraph(navController, sessionManager)
+                studentNavGraph(navController, sessionManager)
+            }
+        }
+        role == UserRole.TEACHER && agreedToTerms == true -> {
+            val navController = rememberNavController()
+            NavHost(navController, startDestination = Screen.Dashboard.route) {
+                commonNavGraph(navController, sessionManager)
+                teacherNavGraph(navController, sessionManager)
+            }
+        }
     }
 }
 
@@ -144,8 +147,14 @@ fun NavGraphBuilder.authNavGraph(
     composable(Screen.ForgotPassword.route) {
         ChangePasswordScreen(navController)
     }
-    composable(Screen.TermsAgreement.route) {
-        TermsAgreementScreen(navController)
+    composable(
+        route = Screen.TermsAgreement.route,
+        arguments = listOf(
+            navArgument("userId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel: AgreementTermsViewModel = hiltViewModel()
+        TermsAgreementScreen(navController, viewModel)
     }
 }
 
@@ -500,17 +509,24 @@ fun NavGraphBuilder.teacherNavGraph(
         arguments = listOf(
             navArgument("courseId") { type = NavType.StringType }
         )
-    ) {
-        val viewModel: StudentPerformanceOverviewViewModel = hiltViewModel()
-        StudentPerformanceOverViewScreen(navController, sessionManager, viewModel)
+    ) {navBackStackEntry ->
+        val courseId = navBackStackEntry.arguments?.getString("courseId")!!
+        val viewModel: StudentPerformanceViewModel = hiltViewModel(navBackStackEntry)
+        StudentPerformanceOverViewScreen(navController, sessionManager, viewModel, courseId)
     }
     composable(
         route = Screen.TeacherPerformanceIndividual.route,
         arguments = listOf(
-            navArgument("studentId") { type = NavType.StringType },
-            navArgument("rank") { type = NavType.IntType }
+            navArgument("courseId") { type = NavType.StringType },
+            navArgument("studentId") { type = NavType.StringType }
         )
-    ) {
-
+    ) { backStackEntry ->
+        val courseId = backStackEntry.arguments?.getString("courseId")!!
+        val studentId = backStackEntry.arguments?.getString("studentId")!!
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry("teacher_performance/$courseId")
+        }
+        val viewModel: StudentPerformanceViewModel = hiltViewModel(parentEntry)
+        StudentIndividualPerformanceScreen(navController, sessionManager, viewModel, studentId)
     }
 }

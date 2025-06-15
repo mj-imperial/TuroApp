@@ -9,7 +9,6 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -172,24 +171,6 @@ fun DashboardScreen(
                 uiState.errorMessage != null -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Error: ${uiState.errorMessage}")
-                    }
-                }
-                uiState.courses.isEmpty() -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.empty_list_icon),
-                            contentDescription = null
-                        )
-                        Text(
-                            text = "No courses available yet.",
-                            fontFamily = FontFamily(Font(R.font.alata)),
-                        )
                     }
                 }
                 else -> {

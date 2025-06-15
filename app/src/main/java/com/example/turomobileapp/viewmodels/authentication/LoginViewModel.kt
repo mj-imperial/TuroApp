@@ -72,21 +72,23 @@ class LoginViewModel @Inject constructor(
                             )
                         }
                         _eventFlow.tryEmit(LoginEvent.ShowToast("Login successful"))
+                        sessionManager.startSession(
+                            user.userId,
+                            user.agreedToTerms,
+                            user.requiresPasswordChange,
+                            user.email,
+                            user.firstName,
+                            user.lastName,
+                            user.profilePic.toString(),
+                            user.role.toString()
+                        )
                         if (user.requiresPasswordChange){
                             _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,user.email,true))
                         } else if(!user.agreedToTerms){
-                            _eventFlow.tryEmit(LoginEvent.NavigateToTermsAgreement(user.userId, user.agreedToTerms))
-                        } else{
-                            sessionManager.startSession(
-                                user.userId,
-                                user.agreedToTerms,
-                                user.requiresPasswordChange,
-                                user.email,
-                                user.firstName,
-                                user.lastName,
-                                user.profilePic.toString(),
+                            _eventFlow.tryEmit(LoginEvent.NavigateToTermsAgreement(user.userId, user.agreedToTerms,
                                 user.role.toString()
-                            )
+                            ))
+                        } else{
                             _eventFlow.tryEmit(LoginEvent.NavigateToDashboard(user.userId))
                         }
                     },
@@ -139,7 +141,7 @@ data class LoginUiState(
 sealed class LoginEvent {
     data class ShowToast(val message: String) : LoginEvent()
     data class NavigateToChangeDefaultPassword(val userId: String, val email: String,val requiresChange: Boolean) : LoginEvent()
-    data class NavigateToTermsAgreement(val userId: String, val agreedToTerms: Boolean) : LoginEvent()
+    data class NavigateToTermsAgreement(val userId: String, val agreedToTerms: Boolean, val role: String) : LoginEvent()
     data class NavigateToDashboard(val userId: String) : LoginEvent()
 }
 

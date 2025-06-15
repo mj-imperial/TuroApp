@@ -169,15 +169,13 @@ fun LoginScreen(
                     }
                     viewModel.clearLoginSuccess()
                 }
-                is LoginEvent.NavigateToDashboard -> {
-                    viewModel.clearLoginSuccess()
-                }
                 is LoginEvent.NavigateToTermsAgreement -> {
-                   navController.navigate(Screen.TermsAgreement.route){
+                   navController.navigate(Screen.TermsAgreement.createRoute(event.userId)){
                        popUpTo(Screen.Login.route) { inclusive = true }
                    }
                     viewModel.clearLoginSuccess()
                 }
+                else -> {}
             }
         }
     }

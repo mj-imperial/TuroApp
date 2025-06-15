@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.StudentPerformanceListResponse
+import com.example.turomobileapp.models.StudentPerformanceModuleList
 import com.example.turomobileapp.repositories.StudentProgressRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class StudentPerformanceOverviewViewModel @Inject constructor(
+class StudentPerformanceViewModel @Inject constructor(
     private val studentProgressRepository: StudentProgressRepository,
     savedStateHandle: SavedStateHandle
 ): ViewModel(){
@@ -50,11 +51,61 @@ class StudentPerformanceOverviewViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateIndividualStudentInfo(
+        studentId: String,
+        studentName: String,
+        profilePic: String,
+        completedAssessments: Int,
+        averageGrade: Double,
+        points: Int,
+        rank: Int
+    ){
+        _uiState.update { it.copy(currentStudentInfo = CurrentStudentInfo(
+            studentId = studentId,
+            studentName = studentName,
+            profilePic = profilePic,
+            completedAssessments = completedAssessments,
+            averageGrade = averageGrade,
+            points = points,
+            rank = rank
+        )) }
+    }
+
+    fun getIndividualStudentProgress(studentId: String){
+        viewModelScope.launch {
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
+
+            studentProgressRepository.getIndividualStudentCourseProgress(studentId, _courseId).collect { result ->
+                handleResult(
+                    result = result,
+                    onSuccess = { resp ->
+                        _uiState.update { it.copy(loading = false, currentStudentScores = resp) }
+                    },
+                    onFailure = { err ->
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                    }
+                )
+            }
+        }
+    }
 }
 
 data class StudentPerformanceOverviewUIState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
     val numberOfAssessment: Int = 0,
-    val studentProgressList: List<StudentPerformanceListResponse> = emptyList()
+    val studentProgressList: List<StudentPerformanceListResponse> = emptyList(),
+    val currentStudentInfo: CurrentStudentInfo? = null,
+    val currentStudentScores: List<StudentPerformanceModuleList> = emptyList()
+)
+
+data class CurrentStudentInfo(
+    val studentId: String,
+    val studentName: String,
+    val profilePic: String,
+    val completedAssessments: Int,
+    val averageGrade: Double,
+    val points: Int,
+    val rank: Int
 )

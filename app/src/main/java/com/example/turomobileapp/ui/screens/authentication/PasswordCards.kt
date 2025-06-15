@@ -263,7 +263,10 @@ fun PasswordCard(
             onDismissRequest = {
                 openAlertDialog = false
             },
-            onConfirmation = onChangePassword,
+            onConfirmation = {
+                onChangePassword()
+                openAlertDialog = false
+            },
             icon = painterResource(R.drawable.fullname_icon),
             title = {
                 Text(
@@ -475,7 +478,7 @@ fun CodeStep(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {
         chars.forEachIndexed { i, charState ->
@@ -503,7 +506,7 @@ fun CodeStep(
                 ),
                 roundedCornerShape = 29.dp,
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(50.dp)
                     .focusRequester(focusRequesters[i])
                     .onKeyEvent { keyEvent ->
                         if (keyEvent.type == KeyEventType.KeyUp && keyEvent.type == KeyEventType.KeyDown) {

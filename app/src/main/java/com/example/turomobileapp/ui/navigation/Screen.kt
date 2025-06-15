@@ -12,7 +12,9 @@ sealed class Screen(val route: String) {
             = "change_password/$userId/$email/$requiresChange"
     }
     object ForgotPassword : Screen("forgot_password/{userId}")
-    object TermsAgreement: Screen("terms_agreement_screen")
+    object TermsAgreement : Screen("terms_agreement_screen/{userId}") {
+        fun createRoute(userId: String) = "terms_agreement_screen/$userId"
+    }
 
     //shared
     object Dashboard: Screen("dashboard_screen")
@@ -87,8 +89,8 @@ sealed class Screen(val route: String) {
     object TeacherPerformance: Screen("teacher_performance/{courseId}"){
         fun createRoute(courseId: String) = "teacher_performance/$courseId"
     }
-    object TeacherPerformanceIndividual: Screen("teacher_performance_individual/{studentId}/{rank}"){
-        fun createRoute(studentId: String, rank: Int) = "teacher_performance_individual/$studentId/$rank"
+    object TeacherPerformanceIndividual: Screen("teacher_performance_individual/{courseId}/{studentId}"){
+        fun createRoute(courseId: String, studentId: String) = "teacher_performance_individual/$courseId/$studentId"
     }
     object TeacherCreateQuiz: Screen("teacher_create_quiz/{moduleId}"){
         fun createRoute(moduleId: String) = "teacher_create_quiz/$moduleId"

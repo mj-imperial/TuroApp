@@ -46,10 +46,10 @@ import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.TextBlack
-import com.example.turomobileapp.ui.theme.hiddenAnswers1
-import com.example.turomobileapp.ui.theme.hiddenAnswers2
 import com.example.turomobileapp.ui.theme.longquiz1
 import com.example.turomobileapp.ui.theme.longquiz2
+import com.example.turomobileapp.ui.theme.performance1
+import com.example.turomobileapp.ui.theme.performance2
 import com.example.turomobileapp.ui.theme.screeningExam1
 import com.example.turomobileapp.ui.theme.screeningExam2
 import com.example.turomobileapp.ui.theme.shortquiz1
@@ -180,7 +180,7 @@ fun CourseActivities(
             name = R.string.TeacherPerformance,
             icon = R.drawable.shortquiz_icon,
             route = Screen.TeacherPerformance.createRoute(courseId),
-            colors = listOf(hiddenAnswers1,hiddenAnswers2)
+            colors = listOf(performance1, performance2)
         ),
     )
 

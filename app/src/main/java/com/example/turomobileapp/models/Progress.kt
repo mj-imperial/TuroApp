@@ -86,6 +86,12 @@ data class StudentPerformanceListResponse(
 )
 
 @JsonClass(generateAdapter = true)
+data class IndividualStudentList(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "modules") val modules: List<StudentPerformanceModuleList>
+)
+
+@JsonClass(generateAdapter = true)
 data class StudentPerformanceModuleList(
     @Json(name = "module_id") val moduleId: String,
     @Json(name = "module_name") val moduleName: String,

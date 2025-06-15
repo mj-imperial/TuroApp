@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,6 +29,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -38,25 +41,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
-import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
-import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
+import com.example.turomobileapp.viewmodels.authentication.AgreementEvent
 import com.example.turomobileapp.viewmodels.authentication.AgreementTermsViewModel
+import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun TermsAgreementScreen(
     navController: NavController,
-    viewModel: AgreementTermsViewModel = hiltViewModel()
+    viewModel: AgreementTermsViewModel,
 ){
     val windowInfo = rememberWindowInfo()
     val cardHeight = windowInfo.screenHeight * 0.95f
@@ -108,13 +110,15 @@ fun TermsAgreementScreen(
     }
 
     val ctx = LocalContext.current
-    LaunchedEffect(uiState.isAgreementSaved) {
-        if (uiState.isAgreementSaved is Result.Success){
-            navController.navigate(Screen.Dashboard.route){
-                popUpTo(0) { inclusive = true }
+    val alreadyNavigated = remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collect { event ->
+            if (event is AgreementEvent.NavigateToDashboard && !alreadyNavigated.value) {
+                alreadyNavigated.value = true
+                Toast.makeText(ctx, "Agreement saved. Redirecting...", Toast.LENGTH_SHORT).show()
+                delay(1000)
             }
-        }else{
-            Toast.makeText(ctx, "Failed to save agreement, please try again", Toast.LENGTH_LONG).show()
         }
     }
 }
@@ -223,6 +227,8 @@ fun TermsCard(
                     ),
                     enabled = !loading
                 )
+
+                Spacer(modifier = Modifier.height(15.dp))
             }
         }
     }
