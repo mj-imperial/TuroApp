@@ -37,40 +37,20 @@ sort($allParticipants);
 try {
     $conn->begin_transaction();
 
-    $inboxId = null;
-
-    $placeholders = implode(',', array_fill(0, count($allParticipants), '?'));
-    $checkSql = "
-        SELECT ip.inbox_id
-        FROM InboxParticipant ip
-        GROUP BY ip.inbox_id
-        HAVING COUNT(*) = ? AND SUM(ip.participant_id IN ($placeholders)) = ?
-        LIMIT 1
-    ";
-
-    $stmt = $conn->prepare($checkSql);
-    $types = str_repeat('s', count($allParticipants) + 2);
-    $params = array_merge([count($allParticipants)], $allParticipants, [count($allParticipants)]);
-    $stmt->bind_param(str_repeat('s', count($params)), ...array_map('strval', $params));
+    // Always create a new inbox (removed checking for existing one)
+    $inboxId = uuid_v4();
+    $stmt = $conn->prepare("INSERT INTO Inbox (inbox_id, unread_count, timestamp) VALUES (?, 0, ?)");
+    $stmt->bind_param("si", $inboxId, $timestamp);
     $stmt->execute();
-    $result = $stmt->get_result();
 
-    if ($row = $result->fetch_assoc()) {
-        $inboxId = $row['inbox_id'];
-    } else {
-        $inboxId = uuid_v4();
-        $stmt = $conn->prepare("INSERT INTO Inbox (inbox_id, unread_count, timestamp) VALUES (?, 0, ?)");
-        $stmt->bind_param("si", $inboxId, $timestamp);
+    $stmt = $conn->prepare("INSERT INTO InboxParticipant (inbox_id, participant_id) VALUES (?, ?)");
+    foreach ($allParticipants as $participantId) {
+        $stmt->bind_param("ss", $inboxId, $participantId);
         $stmt->execute();
-
-        $stmt = $conn->prepare("INSERT INTO InboxParticipant (inbox_id, participant_id) VALUES (?, ?)");
-        foreach ($allParticipants as $participantId) {
-            $stmt->bind_param("ss", $inboxId, $participantId);
-            $stmt->execute();
-        }
-        $stmt->close();
     }
+    $stmt->close();
 
+    // Insert message
     $messageId = uuid_v4();
     $stmt = $conn->prepare("
         INSERT INTO Message (message_id, inbox_id, sender_id, subject, body, timestamp)
@@ -80,11 +60,13 @@ try {
     $stmt->execute();
     $stmt->close();
 
+    // Update inbox timestamp
     $stmt = $conn->prepare("UPDATE Inbox SET timestamp = ? WHERE inbox_id = ?");
     $stmt->bind_param("is", $timestamp, $inboxId);
     $stmt->execute();
     $stmt->close();
 
+    // Set message state for each participant
     $stmt = $conn->prepare("
         INSERT INTO MessageUserState (message_id, user_id, is_read, is_deleted)
         VALUES (?, ?, ?, 0)
@@ -110,4 +92,3 @@ try {
         'message' => 'Server error: ' . $e->getMessage()
     ]);
 }
-
