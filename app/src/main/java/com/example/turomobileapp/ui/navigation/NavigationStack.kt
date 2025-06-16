@@ -31,7 +31,6 @@ import com.example.turomobileapp.ui.screens.shared.DashboardScreen
 import com.example.turomobileapp.ui.screens.shared.InboxDetailScreen
 import com.example.turomobileapp.ui.screens.shared.InboxScreen
 import com.example.turomobileapp.ui.screens.shared.NotificationScreen
-import com.example.turomobileapp.ui.screens.shared.ProfileScreen
 import com.example.turomobileapp.ui.screens.shared.ReplyScreen
 import com.example.turomobileapp.ui.screens.student.CourseDetailScreen
 import com.example.turomobileapp.ui.screens.student.LeaderboardScreen
@@ -41,6 +40,7 @@ import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.ui.screens.student.ScreeningExamDetailScreen
 import com.example.turomobileapp.ui.screens.student.ScreeningExamDetailViewModel
+import com.example.turomobileapp.ui.screens.student.StudentProfileScreen
 import com.example.turomobileapp.ui.screens.student.TutorialDetailScreen
 import com.example.turomobileapp.ui.screens.student.ViewAllModulesScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateEditActivitiesInModuleScreen
@@ -56,6 +56,7 @@ import com.example.turomobileapp.ui.screens.teacher.ModuleFoldersScreen
 import com.example.turomobileapp.ui.screens.teacher.StudentIndividualPerformanceScreen
 import com.example.turomobileapp.ui.screens.teacher.StudentPerformanceOverViewScreen
 import com.example.turomobileapp.ui.screens.teacher.TeacherCourseScreen
+import com.example.turomobileapp.ui.screens.teacher.TeacherProfileScreen
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.authentication.AgreementTermsViewModel
 import com.example.turomobileapp.viewmodels.shared.CreateMessageViewModel
@@ -111,15 +112,15 @@ fun NavigationStack(
             Log.d("NavDebug", "Showing Student Dashboard NavHost")
             val navController = rememberNavController()
             NavHost(navController, startDestination = Screen.Dashboard.route) {
-                commonNavGraph(navController, sessionManager)
-                studentNavGraph(navController, sessionManager)
+                commonNavGraph(role, navController, sessionManager)
+                studentNavGraph(role, navController, sessionManager)
             }
         }
         role == UserRole.TEACHER && agreedToTerms == true -> {
             val navController = rememberNavController()
             NavHost(navController, startDestination = Screen.Dashboard.route) {
-                commonNavGraph(navController, sessionManager)
-                teacherNavGraph(navController, sessionManager)
+                commonNavGraph(role, navController, sessionManager)
+                teacherNavGraph(role, navController, sessionManager)
             }
         }
     }
@@ -160,11 +161,16 @@ fun NavGraphBuilder.authNavGraph(
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun NavGraphBuilder.commonNavGraph(
+    role: UserRole,
     navController: NavHostController,
     sessionManager: SessionManager
 ) {
     composable(Screen.Profile.route) {
-        ProfileScreen(navController, sessionManager)
+        if (role == UserRole.STUDENT){
+            StudentProfileScreen(navController, sessionManager)
+        }else{
+            TeacherProfileScreen(navController, sessionManager)
+        }
     }
     composable(
         route = Screen.Calendar.route,
@@ -236,10 +242,11 @@ fun NavGraphBuilder.commonNavGraph(
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun NavGraphBuilder.studentNavGraph(
+    role: UserRole,
     navController: NavHostController,
     sessionManager: SessionManager
 ) {
-    commonNavGraph(navController, sessionManager)
+    commonNavGraph(role, navController, sessionManager)
 
     composable(
         route = Screen.StudentCourseDetail.route,
@@ -369,10 +376,11 @@ fun NavGraphBuilder.studentNavGraph(
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun NavGraphBuilder.teacherNavGraph(
+    role: UserRole,
     navController: NavHostController,
     sessionManager: SessionManager
 ) {
-    commonNavGraph(navController, sessionManager)
+    commonNavGraph(role, navController, sessionManager)
 
     composable(
         route = Screen.TeacherCourseDetail.route,

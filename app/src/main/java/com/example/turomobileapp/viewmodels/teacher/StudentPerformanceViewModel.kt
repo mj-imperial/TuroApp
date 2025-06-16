@@ -41,6 +41,14 @@ class StudentPerformanceViewModel @Inject constructor(
                         _uiState.update { it.copy(
                             loading = false,
                             numberOfAssessment = resp.overallNumberOfAssessments,
+                            lowestAssessmentAverageQuizName = resp.lowestAssessmentAverageQuizName,
+                            lowestAssessmentAverage = resp.lowestAssessmentAverage,
+                            highestAssessmentAverageQuizName = resp.highestAssessmentAverageQuizName,
+                            highestAssessmentAverage = resp.highestAssessmentAverage,
+                            lowestScoringModuleName = resp.lowestScoringModuleName,
+                            lowestScoringModuleAverage = resp.lowestScoringModuleAverage,
+                            highestScoringModuleName = resp.highestScoringModuleName,
+                            highestScoringModuleAverage = resp.highestScoringModuleAverage,
                             studentProgressList = resp.progresses
                         ) }
                     },
@@ -96,6 +104,14 @@ data class StudentPerformanceOverviewUIState(
     val errorMessage: String? = null,
     val numberOfAssessment: Int = 0,
     val studentProgressList: List<StudentPerformanceListResponse> = emptyList(),
+    val lowestAssessmentAverageQuizName: String = "",
+    val lowestAssessmentAverage: Double = 0.0,
+    val highestAssessmentAverageQuizName: String = "",
+    val highestAssessmentAverage: Double = 0.0,
+    val lowestScoringModuleName: String = "",
+    val lowestScoringModuleAverage: Double = 0.0,
+    val highestScoringModuleName: String = "",
+    val highestScoringModuleAverage: Double = 0.0,
     val currentStudentInfo: CurrentStudentInfo? = null,
     val currentStudentScores: List<StudentPerformanceModuleList> = emptyList()
 )

@@ -40,7 +40,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule{
 
-    val ip = "192.168.1.13"
+    val ip = "10.0.2.2"
+//        "192.168.242.83"
+//        192.168.1.13
     //10.0.2.2
     @Provides
     @Singleton

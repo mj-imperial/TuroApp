@@ -154,7 +154,7 @@ fun InboxScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(10.dp),
-                        verticalArrangement = Arrangement.SpaceBetween,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         items(uiState.inboxList) { inbox ->

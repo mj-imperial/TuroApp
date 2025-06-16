@@ -71,6 +71,14 @@ data class StudentProfileProgress(
 data class StudentPerformanceListResponses(
     @Json(name = "success") val success: Boolean,
     @Json(name = "overall_number_of_assessments") val overallNumberOfAssessments: Int,
+    @Json(name = "lowest_assessment_average_quiz_name") val lowestAssessmentAverageQuizName: String,
+    @Json(name = "lowest_assessment_average") val lowestAssessmentAverage: Double,
+    @Json(name = "highest_assessment_average_quiz_name") val highestAssessmentAverageQuizName: String,
+    @Json(name = "highest_assessment_average") val highestAssessmentAverage: Double,
+    @Json(name = "lowest_scoring_module_name") val lowestScoringModuleName: String,
+    @Json(name = "lowest_scoring_module_average") val lowestScoringModuleAverage: Double,
+    @Json(name = "highest_scoring_module_name") val highestScoringModuleName: String,
+    @Json(name = "highest_scoring_module_average") val highestScoringModuleAverage: Double,
     @Json(name = "progresses") val progresses: List<StudentPerformanceListResponse>
 )
 
