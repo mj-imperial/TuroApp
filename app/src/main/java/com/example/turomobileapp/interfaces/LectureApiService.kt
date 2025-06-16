@@ -43,7 +43,7 @@ interface LectureApiService {
         @Body lecture: LectureUpdateRequest
     ): Response<ActivityActionResponse>
 
-    @GET("/modules/{moduleId}/lectures")
+    @GET("/modulesScores/{moduleId}/lectures")
     suspend fun getAllLecturesForModule(
         @Path("moduleId") moduleId: String
     ): Response<List<Lecture>>

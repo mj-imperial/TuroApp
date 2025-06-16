@@ -11,32 +11,32 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ModuleProgressApiService {
-    @GET("/students/{studentId}/modules/{moduleId}/progress")
+    @GET("/students/{studentId}/modulesScores/{moduleId}/progress")
     suspend fun getModuleProgress(
         @Path("studentId") studentId: String,
         @Path("moduleId") moduleId: String
     ): Response<ModuleProgress>
 
-    @GET("/students/{studentId}/modules")
+    @GET("/students/{studentId}/modulesScores")
     suspend fun getAllModuleProgressForStudent(
         @Path("studentId") studentId: String
     ): Response<List<ModuleProgress>>
 
-    @PUT("/students/{studentId}/modules/{moduleId}/progress")
+    @PUT("/students/{studentId}/modulesScores/{moduleId}/progress")
     suspend fun updateModuleProgress(
         @Path("studentId") studentId: String,
         @Path("moduleId") moduleId: String,
         @Body request: UpdateModuleProgressRequest // Use the new request class
     ): Response<ResponseBody>
 
-    @PUT("/students/{studentId}/modules/{moduleId}/progress/completed")
+    @PUT("/students/{studentId}/modulesScores/{moduleId}/progress/completed")
     suspend fun updateIsCompleted(
         @Path("studentId") studentId: String,
         @Path("moduleId") moduleId: String,
         @Query("isCompleted") isCompleted: Boolean
     ): Response<ResponseBody>
 
-    @PUT("/students/{studentId}/modules/{moduleId}/progress/tier-passed")
+    @PUT("/students/{studentId}/modulesScores/{moduleId}/progress/tier-passed")
     suspend fun updateTierPassed(
         @Path("studentId") studentId: String,
         @Path("moduleId") moduleId: String,

@@ -40,6 +40,8 @@ import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
 import com.example.turomobileapp.ui.screens.student.ScreeningExamDetailScreen
 import com.example.turomobileapp.ui.screens.student.ScreeningExamDetailViewModel
+import com.example.turomobileapp.ui.screens.student.StudentCourseAnalyticsScreen
+import com.example.turomobileapp.ui.screens.student.StudentCourseIndividualModuleScreen
 import com.example.turomobileapp.ui.screens.student.StudentProfileScreen
 import com.example.turomobileapp.ui.screens.student.TutorialDetailScreen
 import com.example.turomobileapp.ui.screens.student.ViewAllModulesScreen
@@ -67,6 +69,7 @@ import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 import com.example.turomobileapp.viewmodels.student.LectureDetailViewModel
 import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
+import com.example.turomobileapp.viewmodels.student.StudentCourseAnalyticsViewModel
 import com.example.turomobileapp.viewmodels.student.TutorialDetailViewModel
 import com.example.turomobileapp.viewmodels.student.ViewAllModulesViewModel
 import com.example.turomobileapp.viewmodels.teacher.ActivityActionsViewModel
@@ -371,6 +374,32 @@ fun NavGraphBuilder.studentNavGraph(
     ) {
         val viewModel: ScreeningExamDetailViewModel = hiltViewModel()
         ScreeningExamDetailScreen(navController, sessionManager, viewModel)
+    }
+    composable(
+        route = Screen.StudentCourseAnalytics.route,
+        arguments = listOf(
+            navArgument("courseId") { type = NavType.StringType }
+        )
+    ) { navBackStackEntry ->
+        val courseId = navBackStackEntry.arguments?.getString("courseId")!!
+        val viewModel: StudentCourseAnalyticsViewModel = hiltViewModel(navBackStackEntry)
+
+        StudentCourseAnalyticsScreen(navController, sessionManager, viewModel, courseId)
+    }
+    composable(
+        route = Screen.StudentCourseIndividualAnalytics.route,
+        arguments = listOf(
+            navArgument("courseId") { type = NavType.StringType },
+            navArgument("moduleId") { type = NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val courseId = backStackEntry.arguments?.getString("courseId")!!
+        val moduleId = backStackEntry.arguments?.getString("moduleId")!!
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry("student_course_analytics/$courseId")
+        }
+        val viewModel: StudentCourseAnalyticsViewModel = hiltViewModel(parentEntry)
+        StudentCourseIndividualModuleScreen(navController, sessionManager, viewModel, moduleId)
     }
 }
 

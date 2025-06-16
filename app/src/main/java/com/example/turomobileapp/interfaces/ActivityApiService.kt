@@ -13,7 +13,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ActivityApiService {
-    @POST("/modules/{moduleId}/activities")
+    @POST("/modulesScores/{moduleId}/activities")
     suspend fun createActivity(
         @Path("moduleId") moduleId: String,
         @Body activity: Activity
@@ -24,7 +24,7 @@ interface ActivityApiService {
         @Path("activityId") activityId: String
     ): Response<Activity>
 
-    @GET("/modules/{moduleId}/activities")
+    @GET("/modulesScores/{moduleId}/activities")
     suspend fun getAllActivities(
         @Path("moduleId") moduleId: String
     ): Response<List<Activity>>

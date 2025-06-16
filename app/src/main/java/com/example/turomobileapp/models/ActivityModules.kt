@@ -92,7 +92,7 @@ data class ModuleResultResponse(
 @JsonClass(generateAdapter = true)
 data class ModulesResponse(
     @Json(name = "success") val success: Boolean,
-    @Json(name = "modules") val modules: List<ModuleResponse>
+    @Json(name = "modulesScores") val modules: List<ModuleResponse>
 )
 
 @JsonClass(generateAdapter = true)

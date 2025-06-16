@@ -40,7 +40,7 @@ interface AssessmentResultApiService {
         @Path("assessmentResultId") assessmentResultId: String
     ): Response<AssessmentResult>
 
-    @GET("/students/{studentId}/modules/{moduleId}/assessmentResults")
+    @GET("/students/{studentId}/modulesScores/{moduleId}/assessmentResults")
     suspend fun getAssessmentResultsForStudentAndModule(
         @Path("studentId") studentId: String,
         @Path("moduleId") moduleId: String
@@ -56,7 +56,7 @@ interface AssessmentResultApiService {
         @Query("quizId") quizId: String
     ): Response<List<AssessmentResult>>
 
-    @GET("/modules/{moduleId}/assessmentResults")
+    @GET("/modulesScores/{moduleId}/assessmentResults")
     suspend fun getAssessmentResultsForModule(
         @Path("moduleId") moduleId: String
     ): Response<List<AssessmentResult>>

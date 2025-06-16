@@ -6,6 +6,7 @@ import com.example.turomobileapp.interfaces.StudentProgressApiService
 import com.example.turomobileapp.models.StudentLeaderboardResponse
 import com.example.turomobileapp.models.StudentPerformanceListResponses
 import com.example.turomobileapp.models.StudentPerformanceModuleList
+import com.example.turomobileapp.models.StudentPerformanceResponse
 import com.example.turomobileapp.models.UpdateStudentModuleProgressRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -31,16 +32,9 @@ class  StudentProgressRepository @Inject constructor(private val studentProgress
             mapper = { dto -> dto.modules }
         )
 
-    fun updateStudentProgress(studentId: String, moduleId: String, request: UpdateStudentModuleProgressRequest): Flow<Result<Unit>> = flow {
+    fun getIndividualStudentPerformanceList(studentId: String, courseId: String): Flow<Result<StudentPerformanceResponse>> =
         handleApiResponse(
-            call = {
-                studentProgressApiService.updateStudentModuleProgress(
-                    studentId,
-                    moduleId,
-                    request
-                )
-            },
-            errorMessage = "Failed to update student $studentId progress"
+            call = { studentProgressApiService.getIndividualStudentPerformanceList(studentId, courseId) },
+            errorMessage = "Failed to get individual student performance list for $studentId"
         )
-    }
 }

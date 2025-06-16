@@ -14,7 +14,7 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ModuleApiService {
-    @GET("/modules")
+    @GET("/modulesScores")
     suspend fun getAllModules(): Response<List<Module>>
 
     @GET("get_course_modules.php")

@@ -94,6 +94,22 @@ data class StudentPerformanceListResponse(
 )
 
 @JsonClass(generateAdapter = true)
+data class StudentPerformanceResponse(
+    @Json(name = "overall_number_of_assessments") val overallNumberOfAssessments: Int,
+    @Json(name = "completed_assessments") val completedAssessments: Int,
+    @Json(name = "total_points") val totalPoints: Int,
+    @Json(name = "average_score") val averageScore: Double,
+    @Json(name = "lowest_assessment_quiz_name") val lowestAssessmentQuizName: String,
+    @Json(name = "lowest_assessment_scorePercentage") val lowestAssessmentScorePercentage: Double,
+    @Json(name = "highest_assessment_quiz_name") val highestAssessmentQuizName: String,
+    @Json(name = "highest_assessment_scorePercentage") val highestAssessmentScorePercentage: Double,
+    @Json(name = "lowest_scoring_module_name") val lowestScoringModuleName: String,
+    @Json(name = "lowest_scoring_module_average") val lowestScoringModuleAverage: Double,
+    @Json(name = "highest_scoring_module_name") val highestScoringModuleName: String,
+    @Json(name = "highest_scoring_module_average") val highestScoringModuleAverage: Double,
+)
+
+@JsonClass(generateAdapter = true)
 data class IndividualStudentList(
     @Json(name = "success") val success: Boolean,
     @Json(name = "modules") val modules: List<StudentPerformanceModuleList>

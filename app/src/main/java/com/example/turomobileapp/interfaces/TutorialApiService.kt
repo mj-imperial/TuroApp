@@ -30,7 +30,7 @@ interface TutorialApiService {
         @Body tutorial: TutorialResponse
     ): Response<ActivityActionResponse>
 
-    @GET("/modules/{moduleId}/tutorials")
+    @GET("/modulesScores/{moduleId}/tutorials")
     suspend fun getAllTutorialsForModule(
         @Path("moduleId") moduleId: String
     ): Response<List<Tutorial>>

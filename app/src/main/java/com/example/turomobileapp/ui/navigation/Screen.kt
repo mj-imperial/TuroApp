@@ -36,7 +36,6 @@ sealed class Screen(val route: String) {
     object Help: Screen("help_screen")
 
     //student
-    object MiniGames: Screen("mini_games_screen")
     object Leaderboard: Screen("leaderboard_screen")
     object Shop: Screen("shop_screen")
     object StudentCourseDetail: Screen("course_detail/{courseId}/{coursePic}") {
@@ -47,9 +46,6 @@ sealed class Screen(val route: String) {
     }
     object StudentCourseActivity: Screen("course_tutorial_screen/{courseId}/{type}"){
         fun createRoute(courseId: String,type: QuizType) = "course_tutorial_screen/$courseId/${type.name}"
-    }
-    object StudentCourseQuizzes: Screen("course_quizzes_screen/{courseId}/{type}"){
-        fun createRoute(courseId: String, type: QuizType) = "course_quizzes_screen/$courseId/${type.name}"
     }
     object StudentModules: Screen("student_modules_screen/{courseId}"){
         fun createRoute(courseId: String) = "student_modules_screen/$courseId"
@@ -66,6 +62,12 @@ sealed class Screen(val route: String) {
     }
     object ScreeningExamDetail: Screen("screening_exam_detail_screen/{activityId}"){
         fun createRoute(activityId: String) = "screening_exam_detail_screen/$activityId"
+    }
+    object StudentCourseAnalytics: Screen("student_course_analytics/{courseId}"){
+        fun createRoute(courseId: String) = "student_course_analytics/$courseId"
+    }
+    object StudentCourseIndividualAnalytics: Screen("student_course_individual_analytics/{courseId}/{moduleId}"){
+        fun createRoute(courseId: String, moduleId: String) = "student_course_individual_analytics/$courseId/$moduleId"
     }
 
     //teacher

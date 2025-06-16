@@ -97,6 +97,10 @@ class StudentPerformanceViewModel @Inject constructor(
             }
         }
     }
+
+    fun clearCurrentStudentInfo() {
+        _uiState.update { it.copy(currentStudentInfo = null) }
+    }
 }
 
 data class StudentPerformanceOverviewUIState(

@@ -220,9 +220,9 @@ fun CourseActivities(
             colors = listOf(tutorial1,tutorial2)
         ),
         Activities(
-            name = R.string.Grades,
+            name = R.string.Analytics,
             icon = R.drawable.practicequiz_icon,
-            route = Screen.StudentCourseQuizzes.createRoute(courseId = courseId, type = QuizType.PRACTICE),
+            route = Screen.StudentCourseAnalytics.createRoute(courseId),
             colors = listOf(practice1,practice2)
         ),
         //TODO change screening exam since screening exam will have a special ui

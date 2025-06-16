@@ -54,7 +54,7 @@ class ModuleRepository @Inject constructor(private val moduleApiService: ModuleA
     fun getAllModules(): Flow<Result<List<Module>>> = flow {
         handleApiResponse(
             call = { moduleApiService.getAllModules() },
-            errorMessage = "Failed to get all modules"
+            errorMessage = "Failed to get all modulesScores"
         )
     }
 

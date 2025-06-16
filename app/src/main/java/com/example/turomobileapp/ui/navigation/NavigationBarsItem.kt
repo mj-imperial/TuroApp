@@ -22,11 +22,6 @@ val navigationItems = listOf(
         route = Screen.Calendar.route
     ),
     NavigationBarsItem(
-        title = R.string.Performance,
-        icon = R.drawable.minigames_icon,
-        route = Screen.MiniGames.route
-    ),
-    NavigationBarsItem(
         title = R.string.Leaderboard,
         icon = R.drawable.leaderboard_icon,
         route = Screen.Leaderboard.route

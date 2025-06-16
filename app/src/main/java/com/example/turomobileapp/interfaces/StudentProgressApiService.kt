@@ -3,6 +3,7 @@ package com.example.turomobileapp.interfaces
 import com.example.turomobileapp.models.IndividualStudentList
 import com.example.turomobileapp.models.StudentLeaderboardResponses
 import com.example.turomobileapp.models.StudentPerformanceListResponses
+import com.example.turomobileapp.models.StudentPerformanceResponse
 import com.example.turomobileapp.models.UpdateStudentCourseProgressRequest
 import com.example.turomobileapp.models.UpdateStudentModuleProgressRequest
 import okhttp3.ResponseBody
@@ -30,17 +31,9 @@ interface StudentProgressApiService {
         @Query("course_id") courseId: String
     ): Response<IndividualStudentList>
 
-    @PUT("/students/{studentId}/modules/{moduleId}/progress")
-    suspend fun updateStudentModuleProgress(
-        @Path("studentId") studentId: String,
-        @Path("moduleId") moduleId: String,
-        @Body request: UpdateStudentModuleProgressRequest
-    ): Response<ResponseBody>
-
-    @PUT("/students/{studentId}/courses/{courseId}/progress")
-    suspend fun updateStudentCourseProgress(
-        @Path("studentId") studentId: String,
-        @Path("courseId") courseId: String,
-        @Body request: UpdateStudentCourseProgressRequest
-    ): Response<ResponseBody>
+    @GET("get_overview_student_performance.php")
+    suspend fun getIndividualStudentPerformanceList(
+        @Query("student_id") studentId: String,
+        @Query("course_id") courseId: String
+    ): Response<StudentPerformanceResponse>
 }

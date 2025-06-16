@@ -74,6 +74,7 @@ fun StudentIndividualPerformanceScreen(
         navController = navController,
         canNavigateBack = true,
         navigateUp = {
+            viewModel.clearCurrentStudentInfo()
             navController.navigateUp()
         },
         windowInfo = windowInfo,
