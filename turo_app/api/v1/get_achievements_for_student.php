@@ -20,24 +20,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $input = json_decode($raw, true) ?: [];
 }
 
-if (empty($input['course_id'])) {
+if (empty($input['student_id'])) {
     http_response_code(400);
-    jsonResponse([ 'success' => false, 'message' => 'Invalid request: course_id' ], 400);
+    jsonResponse([ 'success' => false, 'message' => 'Invalid request: student_id' ], 400);
 }
 
-$courseId = $input['course_id'];
+$studentId = $input['student_id'];
 
 try{
     $sql = "
-        SELECT 
-            M.module_id,
-            M.module_name,
-            M.module_description
-        FROM `Module` AS M
-        WHERE M.course_id = ?
+        SELECT
+            sa.achievement_id,
+            sa.is_unlocked,
+            a.achievement_name,
+            a.achievement_description,
+            a.achievement_image,
+            act.condition_name,
+            a.condition_value
+        FROM `student_achievements` AS sa
+        INNER JOIN `achievements` AS a
+            ON sa.achievement_id = a.achievement_id
+        INNER JOIN `achievementconditiontype` AS act
+            ON a.condition_type_id = act.condition_type_id
+        WHERE sa.student_id = ?
     ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $courseId);
+    $stmt->bind_param('s', $studentId);
     if (! $stmt) {
         http_response_code(500);
         jsonResponse(['success'=>false,'message'=>'Database prepare failed'],500);
@@ -48,13 +56,13 @@ try{
         jsonResponse(['success'=>false,'message'=>'Database execute failed'],500);
         return;
     }
-    $modules = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $achievements = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 
     header('Content-Type: application/json');
     echo json_encode([
       'success' => true,
-      'modules' => $modules
+      'achievements' => $achievements
     ]);
     exit;
 }catch (mysqli_sql_exception $e) {
