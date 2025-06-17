@@ -20,50 +20,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $input = json_decode($raw, true) ?: [];
 }
 
-if (empty($input['module_id'])) {
+if (empty($input['user_id'])) {
     http_response_code(400);
-    jsonResponse([ 'success' => false, 'message' => 'Invalid request: course_id' ], 400);
+    jsonResponse([ 'success' => false, 'message' => 'Invalid request: user_id is required' ], 400);
 }
-
-$moduleId = $input['module_id'];
 
 try{
     $sql = "
         SELECT
-            A.module_id,
-            A.activity_id,
-            A.activity_type,
-            A.activity_name,
-            QT.quiz_type_name,
-            A.activity_description,
-            A.unlock_date,
-            A.deadline_date
-        FROM `Activity` AS A
-        LEFT JOIN `Quiz` AS Q 
-            ON A.activity_id = Q.activity_id
-        LEFT JOIN `Quiztype` AS QT
-            ON Q.quiz_type_id = QT.quiz_type_id
-        WHERE module_id = ?
+            C.course_code,
+            CE.event_id,
+            CE.title,
+            CE.description,
+            CE.date,
+            ET.event_type_name,
+            CE.is_urgent,
+            CE.location
+        FROM `Calendarevent` AS CE
+        INNER JOIN `Eventtype` AS ET 
+            ON CE.event_type_id = ET.event_type_id
+        INNER JOIN `Activity` AS A  
+            ON CE.event_id = A.activity_id 
+        INNER JOIN `Module` AS M  
+            ON A.module_id = M.module_id
+        INNER JOIN `Course` AS C 
+            ON M.course_id = C.course_id
+        INNER JOIN `Enrollment` AS E  
+            ON C.course_id = E.course_id
+        WHERE E.student_id = ?
+        ORDER BY CE.date;
     ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $moduleId);
     if (! $stmt) {
         http_response_code(500);
         jsonResponse(['success'=>false,'message'=>'Database prepare failed'],500);
         return;
     }
+    $stmt->bind_param('s', $input['user_id']);
     if (! $stmt->execute()) {
         http_response_code(500);
         jsonResponse(['success'=>false,'message'=>'Database execute failed'],500);
         return;
     }
-    $activities = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt -> close();
+
+    $events = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
 
     header('Content-Type: application/json');
     echo json_encode([
       'success' => true,
-      'activities' => $activities
+      'events' => $events
     ]);
     exit;
 }catch (mysqli_sql_exception $e) {

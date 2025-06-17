@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/config.php';
-
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -20,7 +19,7 @@ try {
     $stmt = $conn->prepare("SELECT course_name FROM Course WHERE course_id = ? LIMIT 1");
     $stmt->bind_param('s', $courseId);
     $stmt->execute();
-    $courseResult = $stmt->get_result()->fetch_assoc();
+    $courseResult = $stmt->get_result()->fetch_assoc() ?: [];
     $courseName = $courseResult['course_name'] ?? '';
     $stmt->close();
 
@@ -80,7 +79,7 @@ try {
         ");
         $stmt->bind_param('ss', $studentId, $courseId);
         $stmt->execute();
-        $progress = $stmt->get_result()->fetch_assoc();
+        $progress = $stmt->get_result()->fetch_assoc() ?: [];
         $stmt->close();
 
         $progressList[] = [
@@ -94,9 +93,99 @@ try {
         ];
     }
 
+    // Default fallbacks
+    $lowestAssessment = ['quiz_name' => '', 'avg_score' => 0.0];
+    $highestAssessment = ['quiz_name' => '', 'avg_score' => 0.0];
+    $lowestModule = ['module_name' => '', 'avg_score' => 0.0];
+    $highestModule = ['module_name' => '', 'avg_score' => 0.0];
+
+    // Lowest scoring assessment
+    $stmt = $conn->prepare("
+        SELECT a.activity_name AS quiz_name, AVG(ar.score_percentage) AS avg_score
+        FROM AssessmentResult ar
+        JOIN Quiz q ON q.activity_id = ar.activity_id
+        JOIN Activity a ON a.activity_id = ar.activity_id
+        JOIN QuizType qt ON qt.quiz_type_id = q.quiz_type_id
+        WHERE ar.module_id IN (
+            SELECT module_id FROM Module WHERE course_id = ?
+        )
+        AND qt.quiz_type_name != 'SCREENING_EXAM'
+        GROUP BY ar.activity_id
+        ORDER BY avg_score ASC
+        LIMIT 1
+    ");
+    $stmt->bind_param('s', $courseId);
+    $stmt->execute();
+    if ($row = $stmt->get_result()->fetch_assoc()) $lowestAssessment = $row;
+    $stmt->close();
+
+    // Highest scoring assessment
+    $stmt = $conn->prepare("
+        SELECT a.activity_name AS quiz_name, AVG(ar.score_percentage) AS avg_score
+        FROM AssessmentResult ar
+        JOIN Quiz q ON q.activity_id = ar.activity_id
+        JOIN Activity a ON a.activity_id = ar.activity_id
+        JOIN QuizType qt ON qt.quiz_type_id = q.quiz_type_id
+        WHERE ar.module_id IN (
+            SELECT module_id FROM Module WHERE course_id = ?
+        )
+        AND qt.quiz_type_name != 'SCREENING_EXAM'
+        GROUP BY ar.activity_id
+        ORDER BY avg_score DESC
+        LIMIT 1
+    ");
+    $stmt->bind_param('s', $courseId);
+    $stmt->execute();
+    if ($row = $stmt->get_result()->fetch_assoc()) $highestAssessment = $row;
+    $stmt->close();
+
+    // Lowest scoring module
+    $stmt = $conn->prepare("
+        SELECT m.module_name, AVG(ar.score_percentage) AS avg_score
+        FROM AssessmentResult ar
+        JOIN Module m ON m.module_id = ar.module_id
+        JOIN Quiz q ON q.activity_id = ar.activity_id
+        JOIN QuizType qt ON qt.quiz_type_id = q.quiz_type_id
+        WHERE m.course_id = ?
+        AND qt.quiz_type_name != 'SCREENING_EXAM'
+        GROUP BY m.module_id
+        ORDER BY avg_score ASC
+        LIMIT 1
+    ");
+    $stmt->bind_param('s', $courseId);
+    $stmt->execute();
+    if ($row = $stmt->get_result()->fetch_assoc()) $lowestModule = $row;
+    $stmt->close();
+
+    // Highest scoring module
+    $stmt = $conn->prepare("
+        SELECT m.module_name, AVG(ar.score_percentage) AS avg_score
+        FROM AssessmentResult ar
+        JOIN Module m ON m.module_id = ar.module_id
+        JOIN Quiz q ON q.activity_id = ar.activity_id
+        JOIN QuizType qt ON qt.quiz_type_id = q.quiz_type_id
+        WHERE m.course_id = ?
+        AND qt.quiz_type_name != 'SCREENING_EXAM'
+        GROUP BY m.module_id
+        ORDER BY avg_score DESC
+        LIMIT 1
+    ");
+    $stmt->bind_param('s', $courseId);
+    $stmt->execute();
+    if ($row = $stmt->get_result()->fetch_assoc()) $highestModule = $row;
+    $stmt->close();
+
     echo json_encode([
         'success' => true,
         'overall_number_of_assessments' => (int)$totalAssessments,
+        'lowest_assessment_average_quiz_name' => $lowestAssessment['quiz_name'] ?? '',
+        'lowest_assessment_average' => (float)($lowestAssessment['avg_score'] ?? 0.0),
+        'highest_assessment_average_quiz_name' => $highestAssessment['quiz_name'] ?? '',
+        'highest_assessment_average' => (float)($highestAssessment['avg_score'] ?? 0.0),
+        'lowest_scoring_module_name' => $lowestModule['module_name'] ?? '',
+        'lowest_scoring_module_average' => (float)($lowestModule['avg_score'] ?? 0.0),
+        'highest_scoring_module_name' => $highestModule['module_name'] ?? '',
+        'highest_scoring_module_average' => (float)($highestModule['avg_score'] ?? 0.0),
         'progresses' => $progressList
     ]);
 } catch (Exception $e) {
