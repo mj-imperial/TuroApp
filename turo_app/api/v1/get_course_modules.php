@@ -20,12 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $input = json_decode($raw, true) ?: [];
 }
 
-if (empty($input['course_id'])) {
+if (empty($input['course_id']) || empty($input['student_id'])) {
     http_response_code(400);
-    jsonResponse([ 'success' => false, 'message' => 'Invalid request: course_id' ], 400);
+    jsonResponse([ 'success' => false, 'message' => 'Invalid request: course_id, student_id' ], 400);
 }
 
 $courseId = $input['course_id'];
+$studentId = $input['student_id'];
 
 try{
     $sql = "
@@ -33,12 +34,15 @@ try{
             M.module_id,
             M.module_name,
             M.module_description,
-            M.module_picture
+            M.module_picture,
+            MP.progress
         FROM `Module` AS M
+        INNER JOIN `moduleprogress` AS MP
+            ON M.module_id = MP.module_id AND MP.student_id = ?
         WHERE M.course_id = ?
     ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $courseId);
+    $stmt->bind_param('ss', $studentId, $courseId);
     if (! $stmt) {
         http_response_code(500);
         jsonResponse(['success'=>false,'message'=>'Database prepare failed'],500);
