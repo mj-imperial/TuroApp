@@ -36,7 +36,7 @@ class CreateModuleViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(loading = false, errorMessage = null) }
 
-            moduleRepository.getModulesForCourse(_courseId).collect { result ->
+            moduleRepository.getModulesForCourseTeacher(_courseId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = {  modules ->

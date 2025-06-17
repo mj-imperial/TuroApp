@@ -5,6 +5,7 @@ import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.ModuleApiService
 import com.example.turomobileapp.models.ModuleActivityResponse
 import com.example.turomobileapp.models.ModuleResponse
+import com.example.turomobileapp.models.ModuleResponseStudent
 import com.example.turomobileapp.models.ModuleResultResponse
 import com.example.turomobileapp.models.ModuleUpdateRequest
 import com.example.turomobileapp.models.ModuleUploadRequest
@@ -19,9 +20,15 @@ class ModuleRepository @Inject constructor(private val moduleApiService: ModuleA
             errorMessage = "Failed to create module"
         )
 
-    fun getModulesForCourse(courseId: String): Flow<Result<List<ModuleResponse>>> =
+    fun getModulesForCourseTeacher(courseId: String): Flow<Result<List<ModuleResponse>>> =
         requestAndMap(
-            call = { moduleApiService.getModulesForCourse(courseId) },
+            call = { moduleApiService.getModulesForCourseTeacher(courseId) },
+            mapper = { dto -> dto.modules }
+        )
+
+    fun getModulesForCourseStudent(courseId: String, studentId: String): Flow<Result<List<ModuleResponseStudent>>> =
+        requestAndMap(
+            call = { moduleApiService.getModulesForCourseStudent(courseId, studentId) },
             mapper = { dto -> dto.modules }
         )
 

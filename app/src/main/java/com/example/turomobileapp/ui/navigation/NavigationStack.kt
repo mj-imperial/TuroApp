@@ -42,9 +42,10 @@ import com.example.turomobileapp.ui.screens.student.ScreeningExamDetailScreen
 import com.example.turomobileapp.ui.screens.student.ScreeningExamDetailViewModel
 import com.example.turomobileapp.ui.screens.student.StudentCourseAnalyticsScreen
 import com.example.turomobileapp.ui.screens.student.StudentCourseIndividualModuleScreen
+import com.example.turomobileapp.ui.screens.student.StudentModuleActivitiesScreen
+import com.example.turomobileapp.ui.screens.student.StudentModulesScreen
 import com.example.turomobileapp.ui.screens.student.StudentProfileScreen
 import com.example.turomobileapp.ui.screens.student.TutorialDetailScreen
-import com.example.turomobileapp.ui.screens.student.ViewAllModulesScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateEditActivitiesInModuleScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateLectureScreen
 import com.example.turomobileapp.ui.screens.teacher.CreateModuleScreen
@@ -267,12 +268,28 @@ fun NavGraphBuilder.studentNavGraph(
         arguments = listOf(
             navArgument(name = "courseId") { type = NavType.StringType }
         )
-    ) {backStackEntry ->
-        val activityFlowViewModel: ActivityFlowViewModel = hiltViewModel(backStackEntry)
+    ) { backStackEntry ->
         val courseId = backStackEntry.arguments?.getString("courseId")
-        val viewModel: ViewAllModulesViewModel = hiltViewModel()
+        val viewModel: ViewAllModulesViewModel = hiltViewModel(backStackEntry)
 
-        ViewAllModulesScreen(navController, sessionManager, viewModel, courseId.toString(), activityFlowViewModel)
+        StudentModulesScreen(navController, sessionManager, viewModel, courseId.toString())
+    }
+
+    composable(
+        route = Screen.StudentModuleActivities.route,
+        arguments = listOf(
+            navArgument(name = "courseId") { type = NavType.StringType },
+            navArgument(name = "moduleId") { type = NavType.StringType }
+        )
+    ) {backStackEntry ->
+        val courseId = backStackEntry.arguments?.getString("courseId")!!
+        val moduleId = backStackEntry.arguments?.getString("moduleId")!!
+        val activityFlowViewModel: ActivityFlowViewModel = hiltViewModel(backStackEntry)
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry("student_modules_screen/$courseId")
+        }
+        val viewModel: ViewAllModulesViewModel = hiltViewModel(parentEntry)
+        StudentModuleActivitiesScreen(navController, sessionManager, viewModel, courseId, moduleId, activityFlowViewModel)
     }
     composable(
         route = Screen.StudentActivityDetail.route,
@@ -284,11 +301,12 @@ fun NavGraphBuilder.studentNavGraph(
         )
     ) { backStackEntry ->
         val courseId = backStackEntry.arguments?.getString("courseId")!!
+        val moduleId = backStackEntry.arguments?.getString("moduleId")!!
         val activityId = backStackEntry.arguments?.getString("activityId")!!
         val activityType = backStackEntry.arguments?.getString("activityType")!!
 
         val parentEntry = remember(backStackEntry) {
-            navController.getBackStackEntry("student_modules_screen/$courseId")
+            navController.getBackStackEntry("student_module_activities/$courseId/$moduleId")
         }
         val activityFlowViewModel: ActivityFlowViewModel = hiltViewModel(parentEntry)
 

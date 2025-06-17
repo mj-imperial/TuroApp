@@ -1,5 +1,7 @@
 package com.example.turomobileapp.viewmodels.student
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.turomobileapp.models.ModuleActivityResponse
@@ -15,6 +17,7 @@ data class ActivityFlowUIState(
     val currentActivityId: String? = null
 )
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class ActivityFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
@@ -37,13 +40,17 @@ class ActivityFlowViewModel @Inject constructor(
     }
 
     fun goToPrevious(): ModuleActivityResponse? {
-        val list = _uiState.value.activityList.filter { it.isUnlocked }
+        val list = _uiState.value.activityList.filter {
+            it.isUnlocked && !it.isLockedDate
+        }
         val index = list.indexOfFirst { it.activityId == _uiState.value.currentActivityId }
         return if (index > 0) list[index - 1] else null
     }
 
     fun goToNext(): ModuleActivityResponse? {
-        val list = _uiState.value.activityList.filter { it.isUnlocked }
+        val list = _uiState.value.activityList.filter {
+            it.isUnlocked && !it.isLockedDate
+        }
         val index = list.indexOfFirst { it.activityId == _uiState.value.currentActivityId }
         return if (index >= 0 && index < list.lastIndex) list[index + 1] else null
     }

@@ -48,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
+import com.example.turomobileapp.models.StudentAchievementResponse
 import com.example.turomobileapp.models.StudentBadgeResponse
 import com.example.turomobileapp.models.StudentLeaderboardResponse
 import com.example.turomobileapp.objects.CelebrationPrefs
@@ -152,7 +153,10 @@ fun LeaderboardScreen(
                                 studentBadges = uiState.studentBadges,
                                 windowInfo = windowInfo
                             )
-                            "Achievements" -> AchievementCard()
+                            "Achievements" -> AchievementsCard(
+                                windowInfo = windowInfo,
+                                achievements = uiState.studentAchievements
+                            )
                         }
                     }
                 }
@@ -205,6 +209,7 @@ fun BadgesCard(
     val lockedBadges = studentBadges.filter { !it.isUnlocked }
 
     var showConfetti by remember { mutableStateOf(false) }
+    var celebratedIds by remember { mutableStateOf<Set<String>?>(null) }
 
     val confettiEmitter = remember { Party(
         speed = 1f,
@@ -217,17 +222,22 @@ fun BadgesCard(
         position = Position.Relative(0.5, 0.0)
     ) }
 
-    LaunchedEffect(unlockedBadges) {
-        val celebratedIds = CelebrationPrefs.getCelebratedBadges(context)
+    LaunchedEffect(Unit) {
+        celebratedIds = CelebrationPrefs.getCelebratedBadges(context)
+    }
+
+    LaunchedEffect(celebratedIds, unlockedBadges) {
+        if (celebratedIds == null) return@LaunchedEffect
 
         val newlyUnlocked = unlockedBadges
-            .filter { it.studentTotalPoints == it.pointsRequired && it.badgeId !in celebratedIds }
+            .filter { it.studentTotalPoints == it.pointsRequired && it.badgeId !in celebratedIds!! }
             .map { it.badgeId }
             .toSet()
 
         if (newlyUnlocked.isNotEmpty()) {
             showConfetti = true
             CelebrationPrefs.appendCelebratedBadges(context, newlyUnlocked)
+            celebratedIds = celebratedIds!! + newlyUnlocked
             delay(2000)
             showConfetti = false
         }
@@ -363,7 +373,169 @@ fun IndividualBadgeCard(
     }
 }
 
+//TODO place progress
 @Composable
-fun AchievementCard(){
+fun AchievementsCard(
+    windowInfo: WindowInfo,
+    achievements: List<StudentAchievementResponse>
+){
+    val context = LocalContext.current
+    val iconSize = windowInfo.screenHeight * 0.09f
 
+    val unlockedAchievements = achievements.filter { it.isUnlocked }
+    val lockedAchievements = achievements.filter { !it.isUnlocked }
+
+    var showConfetti by remember { mutableStateOf(false) }
+    var celebratedIds by remember { mutableStateOf<Set<String>?>(null) }
+
+    val confettiEmitter = remember { Party(
+        speed = 1f,
+        maxSpeed = 10f,
+        damping = 0.9f,
+        spread = 360,
+        angle = Angle.BOTTOM,
+        colors = listOf(0xfce18a, 0xff726d, 0xf4306d, 0xb48def),
+        emitter = Emitter(duration = 1, TimeUnit.SECONDS).perSecond(100),
+        position = Position.Relative(0.5, 0.0)
+    ) }
+
+    LaunchedEffect(Unit) {
+        celebratedIds = CelebrationPrefs.getCelebratedAchievements(context)
+    }
+
+    LaunchedEffect(celebratedIds, unlockedAchievements) {
+        if (celebratedIds == null) return@LaunchedEffect
+
+        val newlyUnlocked = unlockedAchievements
+            .filter { it.achievementId !in celebratedIds!! }
+            .map { it.achievementId }
+            .toSet()
+
+        if (newlyUnlocked.isNotEmpty()) {
+            showConfetti = true
+            CelebrationPrefs.appendCelebratedAchievements(context, newlyUnlocked)
+            celebratedIds = celebratedIds!! + newlyUnlocked
+            delay(2000)
+            showConfetti = false
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (showConfetti) {
+            KonfettiView(
+                modifier = Modifier.fillMaxSize(),
+                parties = listOf(confettiEmitter)
+            )
+        }
+
+        LazyColumn {
+            item {
+                Text(
+                    text = "UNLOCKED ACHIEVEMENTS",
+                    fontSize = ResponsiveFont.heading1(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+
+                if (unlockedAchievements.isEmpty()){
+                    Spacer(modifier = Modifier.height(40.dp))
+                }else{
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+            }
+
+            items(unlockedAchievements) {
+                IndividualAchievementCard(
+                    achievement = it,
+                    iconSize = iconSize,
+                    windowInfo = windowInfo
+                )
+                Spacer(modifier = Modifier.height(40.dp))
+            }
+
+            item {
+                Text(
+                    text = "LOCKED ACHIEVEMENTS",
+                    fontSize = ResponsiveFont.heading1(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+            }
+
+            items(lockedAchievements) {
+                IndividualAchievementCard(
+                    achievement = it,
+                    iconSize = iconSize,
+                    windowInfo = windowInfo
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun IndividualAchievementCard(
+    achievement: StudentAchievementResponse,
+    iconSize: Dp,
+    windowInfo: WindowInfo
+){
+    val alpha = if (achievement.isUnlocked) 1f else 0.7f
+    val unlocked = achievement.isUnlocked
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .alpha(alpha),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MainWhite),
+        border = BorderStroke(1.dp, LoginText)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = achievement.achievementImage,
+                contentDescription = "Badge ${achievement.achievementName}",
+                modifier = Modifier
+                    .size(iconSize)
+                    .clip(CircleShape)
+                    .border(width = 2.dp, color = MainOrange, shape = CircleShape),
+                contentScale = ContentScale.Crop,
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = achievement.achievementName,
+                    fontSize = ResponsiveFont.heading1(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    fontWeight = FontWeight.Bold,
+                    color = if (unlocked) TextBlack else LoginText
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = achievement.achievementDescription,
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    maxLines = 2,
+                    color = if (unlocked) TextBlack else LoginText
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+        }
+    }
 }

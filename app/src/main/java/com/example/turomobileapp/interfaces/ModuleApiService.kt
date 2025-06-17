@@ -5,6 +5,7 @@ import com.example.turomobileapp.models.ModuleResultResponse
 import com.example.turomobileapp.models.ModuleUpdateRequest
 import com.example.turomobileapp.models.ModuleUploadRequest
 import com.example.turomobileapp.models.ModulesResponse
+import com.example.turomobileapp.models.ModulesResponseStudent
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -13,10 +14,16 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ModuleApiService {
-    @GET("get_course_modules.php")
-    suspend fun getModulesForCourse(
+    @GET("get_course_modules_for_teacher.php")
+    suspend fun getModulesForCourseTeacher(
         @Query("course_id") courseId: String
     ): Response<ModulesResponse>
+
+    @GET("get_course_modules_for_student.php")
+    suspend fun getModulesForCourseStudent(
+        @Query("course_id") courseId: String,
+        @Query("student_id") studentId: String
+    ): Response<ModulesResponseStudent>
 
     @GET("get_activities_in_module.php")
     suspend fun getActivitiesInModule(

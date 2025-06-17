@@ -167,7 +167,8 @@ fun QuizDetailScreen(
                             },
                             scoresList = scoresList,
                             attemptNumber = quiz?.numberOfAttempts ?: 0,
-                            deadline = quiz?.deadlineDate
+                            deadline = quiz?.deadlineDate,
+                            unlockDate = quiz?.unlockDate
                         )
 
                         HorizontalDivider(
@@ -295,15 +296,17 @@ fun QuizBody(
     onViewStatistics: () -> Unit,
     scoresList: List<AssessmentScoreResponse>,
     attemptNumber: Int,
+    unlockDate: LocalDateTime?,
     deadline: LocalDateTime?
 ){
     var openAlertDialog by remember { mutableStateOf(false) }
 
     val today = LocalDateTime.now()
     val beforeDeadline = deadline?.let { today <= it } ?: true
+    val afterUnlock = unlockDate?.let { today >= it } ?: true
 
     val hasAttemptsLeft = scoresList.size < attemptNumber
-    val canTake = hasAttemptsLeft && beforeDeadline
+    val canTake = hasAttemptsLeft && beforeDeadline && afterUnlock
 
     Text(
         text = "General Instructions",
@@ -400,6 +403,12 @@ fun QuizBody(
     }else if (!hasAttemptsLeft){
         Text(
             text = "No more attempts available.",
+            fontSize = ResponsiveFont.body(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata))
+        )
+    }else if(!afterUnlock){
+        Text(
+            text = "Quiz hasn't been unlocked yet. Please check the date.",
             fontSize = ResponsiveFont.body(windowInfo),
             fontFamily = FontFamily(Font(R.font.alata))
         )

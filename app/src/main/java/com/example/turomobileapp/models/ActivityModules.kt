@@ -1,6 +1,8 @@
 package com.example.turomobileapp.models
 
+import android.os.Build
 import android.os.Parcelable
+import androidx.annotation.RequiresApi
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.Parcelize
@@ -22,7 +24,7 @@ data class ModuleResultResponse(
 @JsonClass(generateAdapter = true)
 data class ModulesResponse(
     @Json(name = "success") val success: Boolean,
-    @Json(name = "modulesScores") val modules: List<ModuleResponse>
+    @Json(name = "modules") val modules: List<ModuleResponse>
 )
 
 @JsonClass(generateAdapter = true)
@@ -35,7 +37,23 @@ data class ModuleUpdateRequest(
 data class ModuleResponse(
     @Json(name = "module_id") val moduleId: String,
     @Json(name = "module_name") val moduleName: String,
+    @Json(name = "module_picture") val modulePicture: String,
     @Json(name = "module_description") val moduleDescription: String,
+)
+
+@JsonClass(generateAdapter = true)
+data class ModulesResponseStudent(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "modules") val modules: List<ModuleResponseStudent>
+)
+
+@JsonClass(generateAdapter = true)
+data class ModuleResponseStudent(
+    @Json(name = "module_id") val moduleId: String,
+    @Json(name = "module_name") val moduleName: String,
+    @Json(name = "module_picture") val modulePicture: String,
+    @Json(name = "module_description") val moduleDescription: String,
+    @Json(name = "progress") val moduleProgress: Double
 )
 
 @JsonClass(generateAdapter = true)
@@ -53,13 +71,15 @@ data class ModuleActivityResponse(
     @Json(name = "activity_name") val activityName: String,
     @Json(name = "quiz_type_name") val quizTypeName: String? = null,
     @Json(name = "activity_description") val activityDescription: String,
-    @Json(name = "unlock_date") val unlockDate: String,
-    @Json(name = "deadline_date") val deadlineDate: String? = null,
+    @Json(name = "unlock_date") val unlockDate: LocalDateTime?,
+    @Json(name = "deadline_date") val deadlineDate: LocalDateTime? = null,
 
     val isUnlocked: Boolean = false,
     val hasAnswered: Boolean = false,
-    val displayOrder: Int = 0
-): Parcelable
+    val displayOrder: Int = 0,
+): Parcelable{
+    val isLockedDate: Boolean @RequiresApi(Build.VERSION_CODES.O) get() = unlockDate?.isAfter(LocalDateTime.now()) == true
+}
 
 @JsonClass(generateAdapter = true)
 data class ActivityActionResponse(

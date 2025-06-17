@@ -24,6 +24,12 @@ data class StudentBadgeResponse(
 
 @JsonClass(generateAdapter = true)
 data class StudentAchievementsResponse(
+    @Json(name = "success") val success: Boolean,
+    @Json(name = "achievements") val achievements: List<StudentAchievementResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class StudentAchievementResponse(
     @Json(name = "achievement_id") val achievementId: String,
     @Json(name = "achievement_name") val achievementName: String,
     @Json(name = "achievement_description") val achievementDescription: String,

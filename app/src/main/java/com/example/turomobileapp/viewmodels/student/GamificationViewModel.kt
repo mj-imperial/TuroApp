@@ -3,8 +3,10 @@ package com.example.turomobileapp.viewmodels.student
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
+import com.example.turomobileapp.models.StudentAchievementResponse
 import com.example.turomobileapp.models.StudentBadgeResponse
 import com.example.turomobileapp.models.StudentLeaderboardResponse
+import com.example.turomobileapp.repositories.AchievementsRepository
 import com.example.turomobileapp.repositories.BadgesRepository
 import com.example.turomobileapp.repositories.StudentProgressRepository
 import com.example.turomobileapp.viewmodels.SessionManager
@@ -22,6 +24,7 @@ import javax.inject.Inject
 class GamificationViewModel @Inject constructor(
     private val studentProgressRepository: StudentProgressRepository,
     private val badgesRepository: BadgesRepository,
+    private val achievementsRepository: AchievementsRepository,
     private val sessionManager: SessionManager
 ): ViewModel(){
 
@@ -32,6 +35,7 @@ class GamificationViewModel @Inject constructor(
         viewModelScope.launch {
             launch { getLeaderboard() }
             launch { getBadgesForStudent() }
+            launch { getAchievementsForStudent() }
         }
     }
 
@@ -77,7 +81,21 @@ class GamificationViewModel @Inject constructor(
 
     fun getAchievementsForStudent(){
         viewModelScope.launch {
+            _uiState.update { it.copy(loadingAchievements = true, errorMessage = null) }
 
+            val studentId: String = sessionManager.userId.filterNotNull().first()
+
+             achievementsRepository.getAchievementsForStudent(studentId).collect { result ->
+                 handleResult(
+                     result = result,
+                     onSuccess = { resp ->
+                         _uiState.update { it.copy(loadingAchievements = false, studentAchievements = resp) }
+                     },
+                     onFailure = { err ->
+                         _uiState.update { it.copy(loadingAchievements = false, errorMessage = err) }
+                     }
+                 )
+             }
         }
     }
 }
@@ -88,7 +106,8 @@ data class LeaderboardUIState(
     val loadingAchievements: Boolean = false,
     val errorMessage: String? = null,
     val progresses: List<StudentLeaderboardResponse> = emptyList(),
-    val studentBadges: List<StudentBadgeResponse> = emptyList()
+    val studentBadges: List<StudentBadgeResponse> = emptyList(),
+    val studentAchievements: List<StudentAchievementResponse> = emptyList()
 ){
-    val loading: Boolean get() = loadingLeaderboard || loadingBadges
+    val loading: Boolean get() = loadingLeaderboard || loadingBadges || loadingAchievements
 }

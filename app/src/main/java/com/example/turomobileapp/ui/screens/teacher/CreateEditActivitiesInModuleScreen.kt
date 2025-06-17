@@ -64,8 +64,6 @@ import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.ui.theme.practice2
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.teacher.ActivityActionsViewModel
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -79,11 +77,10 @@ fun CreateEditActivitiesInModuleScreen(
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
 
-    val activitiesSortedByDate: List<ModuleActivityResponse> =
-        uiState.activities.map {
-            val dt = LocalDateTime.parse(it.unlockDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            val parsedDate = dt.toLocalDate()
-            it to parsedDate
+    val activitiesSortedByDate: List<ModuleActivityResponse> = uiState.activities
+        .mapNotNull { activity ->
+            val parsedDate = activity.unlockDate
+            parsedDate?.let { activity to it }
         }
         .sortedBy { it.second }
         .map { it.first }
@@ -252,18 +249,6 @@ fun CreateEditActivitiesInModuleScreen(
                             )
                         }
                     )
-                }
-
-                LaunchedEffect(uiState.deleteStatusResult) {
-                    if (uiState.deleteStatusResult == Result.Success(Unit)) {
-                        Toast.makeText(
-                            context,
-                            "Activity successfully deleted.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        viewModel.getActivitiesInModule()
-                    }
-                    viewModel.resetDeleteStatusResult()
                 }
             }
         }

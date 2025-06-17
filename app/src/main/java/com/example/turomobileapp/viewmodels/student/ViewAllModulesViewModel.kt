@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.AssessmentResultResponse
 import com.example.turomobileapp.models.ModuleActivityResponse
-import com.example.turomobileapp.models.ModuleResponse
+import com.example.turomobileapp.models.ModuleResponseStudent
 import com.example.turomobileapp.repositories.AssessmentResultRepository
 import com.example.turomobileapp.repositories.ModuleRepository
 import com.example.turomobileapp.viewmodels.SessionManager
@@ -27,8 +27,8 @@ import javax.inject.Inject
 class ViewAllModulesViewModel @Inject constructor(
     private val moduleRepository: ModuleRepository,
     private val assessmentResultRepository: AssessmentResultRepository,
-    private val savedStateHandle: SavedStateHandle,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    savedStateHandle: SavedStateHandle
 ): ViewModel(){
 
     private val _courseId: String = checkNotNull(savedStateHandle["courseId"])
@@ -37,16 +37,16 @@ class ViewAllModulesViewModel @Inject constructor(
     val uiState: StateFlow<ViewAllModulesUIState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            launch { getModules() }
-        }
+        getModules()
     }
 
     fun getModules(){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
-            moduleRepository.getModulesForCourse(_courseId).collect { result ->
+            val studentId: String = sessionManager.userId.filterNotNull().first()
+
+            moduleRepository.getModulesForCourseStudent(_courseId, studentId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { modules ->
@@ -56,10 +56,6 @@ class ViewAllModulesViewModel @Inject constructor(
                         _uiState.update { it.copy(loading = false, errorMessage = err) }
                     }
                 )
-            }
-
-            _uiState.value.modules.forEach {
-                getActivitiesInModule(it.moduleId)
             }
         }
     }
@@ -121,6 +117,14 @@ class ViewAllModulesViewModel @Inject constructor(
         }
     }
 
+    fun updateModuleName(moduleName: String){
+        _uiState.update { it.copy(moduleName = moduleName) }
+    }
+
+    fun clearModuleName(){
+        _uiState.update { it.copy(moduleName = "") }
+    }
+
     suspend fun getAssessmentResults(studentId: String, activityId: String): List<AssessmentResultResponse> {
         var resultList: List<AssessmentResultResponse> = emptyList()
 
@@ -141,6 +145,7 @@ class ViewAllModulesViewModel @Inject constructor(
 data class ViewAllModulesUIState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
-    val modules: List<ModuleResponse> = emptyList(),
-    val activities: List<ModuleActivityResponse> = emptyList()
+    val modules: List<ModuleResponseStudent> = emptyList(),
+    val activities: List<ModuleActivityResponse> = emptyList(),
+    val moduleName: String = ""
 )

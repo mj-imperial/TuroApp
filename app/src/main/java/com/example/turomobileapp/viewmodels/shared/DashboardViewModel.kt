@@ -6,7 +6,6 @@ import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.CourseResponse
 import com.example.turomobileapp.repositories.CourseRepository
-import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +17,6 @@ import javax.inject.Inject
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val courseRepository: CourseRepository,
-    private val sessionManager: SessionManager
 ): ViewModel(){
 
     private val _uiState = MutableStateFlow(DashboardUIState())
