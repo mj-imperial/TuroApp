@@ -32,7 +32,8 @@ try{
         SELECT 
             M.module_id,
             M.module_name,
-            M.module_description
+            M.module_description,
+            M.module_picture
         FROM `Module` AS M
         WHERE M.course_id = ?
     ";
