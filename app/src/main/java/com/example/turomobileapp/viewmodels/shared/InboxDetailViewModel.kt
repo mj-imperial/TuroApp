@@ -96,7 +96,7 @@ class InboxDetailViewModel @Inject constructor(
                 return@launch
             }
 
-            messageRepository.sendMessage(userId, messageRequest).collect { result ->
+            messageRepository.sendReply(userId, messageRequest).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = {

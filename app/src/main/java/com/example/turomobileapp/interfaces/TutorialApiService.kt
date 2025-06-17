@@ -1,14 +1,12 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.ActivityActionResponse
-import com.example.turomobileapp.models.Tutorial
 import com.example.turomobileapp.models.TutorialResponse
 import com.example.turomobileapp.models.TutorialUploadRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface TutorialApiService {
@@ -29,9 +27,4 @@ interface TutorialApiService {
         @Query("module_id") moduleId: String,
         @Body tutorial: TutorialResponse
     ): Response<ActivityActionResponse>
-
-    @GET("/modulesScores/{moduleId}/tutorials")
-    suspend fun getAllTutorialsForModule(
-        @Path("moduleId") moduleId: String
-    ): Response<List<Tutorial>>
 }

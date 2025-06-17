@@ -101,17 +101,19 @@ fun StudentIndividualPerformanceScreen(
                         item {
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            IndividualPerformanceBox(
-                                windowInfo = windowInfo,
-                                studentPic = uiState.currentStudentInfo!!.profilePic,
-                                studentName = uiState.currentStudentInfo!!.studentName,
-                                completedAssessments = uiState.currentStudentInfo!!.completedAssessments,
-                                averageGrade = uiState.currentStudentInfo!!.averageGrade,
-                                points = uiState.currentStudentInfo!!.points,
-                                rank = uiState.currentStudentInfo!!.rank
-                            )
+                            uiState.currentStudentInfo?.let { student ->
+                                IndividualPerformanceBox(
+                                    windowInfo = windowInfo,
+                                    studentPic = student.profilePic,
+                                    studentName = student.studentName,
+                                    completedAssessments = student.completedAssessments,
+                                    averageGrade = student.averageGrade,
+                                    points = student.points,
+                                    rank = student.rank
+                                )
 
-                            Spacer(modifier = Modifier.height(20.dp))
+                                Spacer(modifier = Modifier.height(20.dp))
+                            }
                         }
 
                         items(uiState.currentStudentScores) {

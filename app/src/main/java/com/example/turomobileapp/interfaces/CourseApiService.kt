@@ -1,16 +1,11 @@
 package com.example.turomobileapp.interfaces
 
-import com.example.turomobileapp.models.Course
 import com.example.turomobileapp.models.CoursesResponse
 import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface CourseApiService {
-    @GET("/courses")
-    suspend fun getAllCourses(): Response<List<Course>>
-
     @GET("get_courses.php")
     suspend fun getCoursesForStudent(
         @Query("action") action: String,
@@ -22,9 +17,4 @@ interface CourseApiService {
         @Query("action") action: String,
         @Query("user_id") userId: String
     ): Response<CoursesResponse>
-
-    @GET("/courses/{courseId}")
-    suspend fun getCourse(
-        @Path("courseId") courseId: String
-    ): Response<Course>
 }

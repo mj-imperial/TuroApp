@@ -1,22 +1,8 @@
 package com.example.turomobileapp.models
 
-import com.example.turomobileapp.enums.EventType
-import com.google.gson.annotations.SerializedName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.time.LocalDateTime
-import java.util.Date
-
-@JsonClass(generateAdapter = true)
-data class CalendarEvent(
-    @SerializedName("event_id") val eventId: String,
-    @SerializedName("title") val title: String,
-    @SerializedName("description") val description: String? = null,
-    @SerializedName("date") val date: Date,
-    @SerializedName("event_type") val eventType: EventType,
-    @SerializedName("is_urgent") var isUrgent: Boolean = false,
-    @SerializedName("location") val location: String
-)
 
 @JsonClass(generateAdapter = true)
 data class CalendarEventsResponse(

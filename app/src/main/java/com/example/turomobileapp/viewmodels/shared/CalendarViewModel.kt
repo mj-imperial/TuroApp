@@ -52,43 +52,90 @@ class CalendarViewModel @Inject constructor(
                 return@launch
             }
 
+            val role = sessionManager.role.value
+            if (role.isNullOrBlank()) {
+                _uiState.update { it.copy(loading = false, errorMessage = "No role") }
+                return@launch
+            }
+
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
-            calendarRepository.getCalendarEventsForUser(userId).collect { result ->
-                handleResult(
-                    result = result,
-                    onSuccess = { events ->
-                        _uiState.update { it.copy(loading = false, rawEvents = events) }
+            if (role == "STUDENT"){
+                calendarRepository.getCalendarEventsForStudent(userId).collect { result ->
+                    handleResult(
+                        result = result,
+                        onSuccess = { events ->
+                            _uiState.update { it.copy(loading = false, rawEvents = events) }
 
-                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a")
+                            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a")
 
-                        events.forEach {
-                            if (notifiedIds.contains(it.eventId)) {
-                                return@forEach
+                            events.forEach {
+                                val now = java.time.LocalDate.now()
+                                val eventDate = it.date.toLocalDate()
+
+                                if (!notifiedIds.contains(it.eventId) && java.time.temporal.ChronoUnit.DAYS.between(now, eventDate) == 7L) {
+                                    val whenText = it.date.format(formatter)
+                                    val title = "Upcoming Event: ${it.title}"
+                                    val text = "This event is scheduled for $whenText — that's 1 week from today!"
+
+                                    notificationService.showNotification(
+                                        notificationTitle = title,
+                                        notificationText = text,
+                                        route = "calendar_screen"
+                                    )
+
+                                    notifiedIds.add(it.eventId)
+                                    prefs.edit()
+                                        .putStringSet("notified_event_ids", notifiedIds)
+                                        .apply()
+                                }
+
                             }
+                        },
+                        onFailure = { err ->
+                            _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        },
+                    )
+                }
+            } else {
+                calendarRepository.getCalendarEventsForTeacher(userId).collect { result ->
+                    handleResult(
+                        result = result,
+                        onSuccess = { events ->
+                            _uiState.update { it.copy(loading = false, rawEvents = events) }
 
-                            val date = it.date
+                            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a")
 
-                            val whenText = date.format(formatter)
-                            val title = "Reminder: ${it.title}"
-                            val text = "You have an event on $whenText"
-                            notificationService.showNotification(
-                                notificationTitle = title,
-                                notificationText = text,
-                                route = "calendar_screen"
-                            )
+                            events.forEach {
+                                val now = java.time.LocalDate.now()
+                                val eventDate = it.date.toLocalDate()
 
-                            notifiedIds.add(it.eventId)
-                            prefs.edit()
-                                .putStringSet("notified_event_ids", notifiedIds)
-                                .apply()
+                                if (!notifiedIds.contains(it.eventId) && java.time.temporal.ChronoUnit.DAYS.between(now, eventDate) == 7L) {
+                                    val whenText = it.date.format(formatter)
+                                    val title = "Upcoming Event: ${it.title}"
+                                    val text = "This event is scheduled for $whenText — that's 1 week from today!"
+
+                                    notificationService.showNotification(
+                                        notificationTitle = title,
+                                        notificationText = text,
+                                        route = "calendar_screen"
+                                    )
+
+                                    notifiedIds.add(it.eventId)
+                                    prefs.edit()
+                                        .putStringSet("notified_event_ids", notifiedIds)
+                                        .apply()
+                                }
+
+                            }
+                        },
+                        onFailure = { err ->
+                            _uiState.update { it.copy(loading = false, errorMessage = err) }
                         }
-                    },
-                    onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
-                    },
-                )
+                    )
+                }
             }
+
         }
     }
 }

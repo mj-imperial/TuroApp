@@ -108,7 +108,7 @@ fun LeaderboardScreen(
     )
 
     val sortedStudents = remember(uiState.progresses) {
-        uiState.progresses.sortedByDescending { it.totalPoints }
+        uiState.progresses.sortedByDescending { it.averageScore }
     }
 
     AppScaffold(
@@ -365,5 +365,5 @@ fun IndividualBadgeCard(
 
 @Composable
 fun AchievementCard(){
-    Text("this is achievements")
+
 }

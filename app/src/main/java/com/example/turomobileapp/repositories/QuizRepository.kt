@@ -4,14 +4,11 @@ import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.QuizApiService
 import com.example.turomobileapp.models.ActivityActionResponse
-import com.example.turomobileapp.models.Answers
-import com.example.turomobileapp.models.AssessmentResult
 import com.example.turomobileapp.models.CreateQuizRequest
 import com.example.turomobileapp.models.QuizContentResponse
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.models.QuizUploadResponse
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class QuizRepository @Inject constructor(private val quizApiService: QuizApiService) {
@@ -40,20 +37,6 @@ class QuizRepository @Inject constructor(private val quizApiService: QuizApiServ
             call = { quizApiService.updateQuiz(quizId, moduleId, quiz) },
             errorMessage = "Failed to update quiz $quizId"
         )
-
-    fun deleteQuiz(quizId: String): Flow<Result<Unit>> = flow {
-        handleApiResponse(
-            call = { quizApiService.deleteQuiz(quizId) },
-            errorMessage = "Failed to delete quiz $quizId"
-        )
-    }
-
-    fun submitQuiz(studentId: String, quizId: String, answers: List<Answers>): Flow<Result<AssessmentResult>> = flow {
-        handleApiResponse(
-            call = { quizApiService.submitQuiz(studentId, quizId, answers) },
-            errorMessage = "Failed to submit quiz $quizId"
-        )
-    }
 
     fun getQuizzesInCourse(courseId: String): Flow<Result<List<QuizResponse>>> =
         requestAndMap(

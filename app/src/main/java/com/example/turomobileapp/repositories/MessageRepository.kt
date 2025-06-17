@@ -31,6 +31,12 @@ class MessageRepository @Inject constructor(private val messageApiService: Messa
             errorMessage = "Failed to send message"
         )
 
+    fun sendReply(userId: String, message: CreateMessageRequest): Flow<Result<MessageActionResponse>> =
+        handleApiResponse(
+            call = { messageApiService.sendReply(userId, message) },
+            errorMessage = "Failed to reply message"
+        )
+
     fun deleteInboxMessage(inboxId: String, userId: String): Flow<Result<MessageActionResponse>> =
         handleApiResponse(
             call = { messageApiService.deleteInboxMessage(inboxId, userId) },

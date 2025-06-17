@@ -4,14 +4,8 @@ import com.example.turomobileapp.models.IndividualStudentList
 import com.example.turomobileapp.models.StudentLeaderboardResponses
 import com.example.turomobileapp.models.StudentPerformanceListResponses
 import com.example.turomobileapp.models.StudentPerformanceResponse
-import com.example.turomobileapp.models.UpdateStudentCourseProgressRequest
-import com.example.turomobileapp.models.UpdateStudentModuleProgressRequest
-import okhttp3.ResponseBody
 import retrofit2.Response
-import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.PUT
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface StudentProgressApiService {

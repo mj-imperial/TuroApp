@@ -3,14 +3,12 @@ package com.example.turomobileapp.repositories
 import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.ModuleApiService
-import com.example.turomobileapp.models.Module
 import com.example.turomobileapp.models.ModuleActivityResponse
 import com.example.turomobileapp.models.ModuleResponse
 import com.example.turomobileapp.models.ModuleResultResponse
 import com.example.turomobileapp.models.ModuleUpdateRequest
 import com.example.turomobileapp.models.ModuleUploadRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class ModuleRepository @Inject constructor(private val moduleApiService: ModuleApiService) {
@@ -50,12 +48,5 @@ class ModuleRepository @Inject constructor(private val moduleApiService: ModuleA
             call = { moduleApiService.updateModule(moduleId, module) },
             errorMessage = "Failed to update module $moduleId"
         )
-
-    fun getAllModules(): Flow<Result<List<Module>>> = flow {
-        handleApiResponse(
-            call = { moduleApiService.getAllModules() },
-            errorMessage = "Failed to get all modulesScores"
-        )
-    }
 
 }

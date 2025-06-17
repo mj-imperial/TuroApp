@@ -31,6 +31,12 @@ interface MessageApiService {
         @Body message: CreateMessageRequest
     ): Response<MessageActionResponse>
 
+    @POST("send_reply.php")
+    suspend fun sendReply(
+        @Query("user_id") userId: String,
+        @Body message: CreateMessageRequest
+    ): Response<MessageActionResponse>
+
     @GET("get_inbox_for_user.php")
     suspend fun getInboxMessages(
         @Query("user_id") userId: String

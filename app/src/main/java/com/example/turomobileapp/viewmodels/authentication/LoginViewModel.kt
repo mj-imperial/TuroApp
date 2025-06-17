@@ -3,7 +3,7 @@ package com.example.turomobileapp.viewmodels.authentication
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.User
+import com.example.turomobileapp.models.UserResponse
 import com.example.turomobileapp.repositories.UserRepository
 import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Suppress("KotlinConstantConditions")
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
@@ -80,13 +81,13 @@ class LoginViewModel @Inject constructor(
                             user.firstName,
                             user.lastName,
                             user.profilePic.toString(),
-                            user.role.toString()
+                            user.roleName.toString()
                         )
                         if (user.requiresPasswordChange){
                             _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,user.email,true))
                         } else if(!user.agreedToTerms){
                             _eventFlow.tryEmit(LoginEvent.NavigateToTermsAgreement(user.userId, user.agreedToTerms,
-                                user.role.toString()
+                                user.roleName.toString()
                             ))
                         } else{
                             _eventFlow.tryEmit(LoginEvent.NavigateToDashboard(user.userId))
@@ -132,7 +133,7 @@ data class LoginUiState(
     val errorMessage: String? = null,
     val email: String = "",
     val password: String = "",
-    val loggedInUser: User? = null,
+    val loggedInUser: UserResponse? = null,
     val isLoginEnabled: Boolean = false,
     val loginSuccess: Boolean? = null,
     val requiresChange: Boolean? = null

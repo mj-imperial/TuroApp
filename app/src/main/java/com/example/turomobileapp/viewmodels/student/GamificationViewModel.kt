@@ -74,11 +74,18 @@ class GamificationViewModel @Inject constructor(
             }
         }
     }
+
+    fun getAchievementsForStudent(){
+        viewModelScope.launch {
+
+        }
+    }
 }
 
 data class LeaderboardUIState(
     val loadingLeaderboard: Boolean = false,
     val loadingBadges: Boolean = false,
+    val loadingAchievements: Boolean = false,
     val errorMessage: String? = null,
     val progresses: List<StudentLeaderboardResponse> = emptyList(),
     val studentBadges: List<StudentBadgeResponse> = emptyList()

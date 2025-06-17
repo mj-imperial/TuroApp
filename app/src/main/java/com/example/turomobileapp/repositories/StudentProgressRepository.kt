@@ -7,9 +7,7 @@ import com.example.turomobileapp.models.StudentLeaderboardResponse
 import com.example.turomobileapp.models.StudentPerformanceListResponses
 import com.example.turomobileapp.models.StudentPerformanceModuleList
 import com.example.turomobileapp.models.StudentPerformanceResponse
-import com.example.turomobileapp.models.UpdateStudentModuleProgressRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class  StudentProgressRepository @Inject constructor(private val studentProgressApiService: StudentProgressApiService) {

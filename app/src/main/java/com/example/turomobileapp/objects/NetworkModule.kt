@@ -10,13 +10,10 @@ import com.example.turomobileapp.interfaces.BadgesApiService
 import com.example.turomobileapp.interfaces.CalendarApiService
 import com.example.turomobileapp.interfaces.CourseApiService
 import com.example.turomobileapp.interfaces.EnrollmentApiService
-import com.example.turomobileapp.interfaces.LeaderboardApiService
 import com.example.turomobileapp.interfaces.LectureApiService
 import com.example.turomobileapp.interfaces.MessageApiService
 import com.example.turomobileapp.interfaces.ModuleApiService
 import com.example.turomobileapp.interfaces.ModuleProgressApiService
-import com.example.turomobileapp.interfaces.OptionsApiService
-import com.example.turomobileapp.interfaces.QuestionApiService
 import com.example.turomobileapp.interfaces.QuizApiService
 import com.example.turomobileapp.interfaces.ShopItemApiService
 import com.example.turomobileapp.interfaces.StudentProgressApiService
@@ -41,6 +38,7 @@ import javax.inject.Singleton
 object NetworkModule{
 
     val ip = "10.0.2.2"
+//        192.168.50.83
 //        "192.168.242.83"
 //        192.168.1.13
     //10.0.2.2
@@ -132,11 +130,6 @@ object NetworkModule{
 
     @Provides
     @Singleton
-    fun provideLeaderboardApiService(retrofit: Retrofit): LeaderboardApiService =
-        retrofit.create(LeaderboardApiService::class.java)
-
-    @Provides
-    @Singleton
     fun provideLectureApiService(retrofit: Retrofit): LectureApiService =
         retrofit.create(LectureApiService::class.java)
 
@@ -154,16 +147,6 @@ object NetworkModule{
     @Singleton
     fun provideModuleProgressApiService(retrofit: Retrofit): ModuleProgressApiService =
         retrofit.create(ModuleProgressApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideOptionsApiService(retrofit: Retrofit): OptionsApiService =
-        retrofit.create(OptionsApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideQuestionApiService(retrofit: Retrofit): QuestionApiService =
-        retrofit.create(QuestionApiService::class.java)
 
     @Provides
     @Singleton

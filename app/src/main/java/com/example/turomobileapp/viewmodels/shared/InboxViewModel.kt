@@ -81,8 +81,18 @@ class InboxViewModel @Inject constructor(
                 handleResult(
                     result = result,
                     onSuccess = {
-                        _uiState.update { it.copy(loading = false, markMessageStatus = Result.Success(Unit)) }
-                        getInboxes()
+                        _uiState.update { state ->
+                            val updatedList = state.inboxList.map { inbox ->
+                                if (inbox.latestMessageId == messageId) {
+                                    inbox.copy(unreadCount = 0)
+                                } else inbox
+                            }
+                            state.copy(
+                                loading = false,
+                                inboxList = updatedList,
+                                markMessageStatus = Result.Success(Unit)
+                            )
+                        }
                     },
                     onFailure = { err ->
                         _uiState.update { it.copy(loading = false, errorMessage = err) }
@@ -98,5 +108,6 @@ data class InboxUIState(
     val errorMessage: String? = null,
     val inboxList: List<InboxItem> = emptyList(),
     val deleteInboxStatus: Result<Unit>? = null,
-    val markMessageStatus: Result<Unit>? = null
+    val markMessageStatus: Result<Unit>? = null,
+    val unreadCount: Int = 0
 )
