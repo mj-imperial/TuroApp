@@ -35,12 +35,9 @@ $stmt = $conn->prepare("
       AR.score_percentage,
       AR.date_taken,
       AR.attempt_number,
-      ST.tier_name,
       AR.earned_points,
       AR.is_kept
     FROM Assessmentresult AR
-    LEFT JOIN Screeningtier ST 
-      ON ST.tier_id = AR.tier_level_id
     WHERE AR.student_id = ? 
       AND AR.activity_id = ?
     ORDER BY AR.attempt_number
