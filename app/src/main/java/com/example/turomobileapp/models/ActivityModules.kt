@@ -37,9 +37,31 @@ data class ModuleUpdateRequest(
 data class ModuleResponse(
     @Json(name = "module_id") val moduleId: String,
     @Json(name = "module_name") val moduleName: String,
-    @Json(name = "module_picture") val modulePicture: String,
+    @Json(name = "module_picture") val modulePicture: ByteArray,
     @Json(name = "module_description") val moduleDescription: String,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as ModuleResponse
+
+        if (moduleId!=other.moduleId) return false
+        if (moduleName!=other.moduleName) return false
+        if (!modulePicture.contentEquals(other.modulePicture)) return false
+        if (moduleDescription!=other.moduleDescription) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = moduleId.hashCode()
+        result = 31 * result + moduleName.hashCode()
+        result = 31 * result + modulePicture.contentHashCode()
+        result = 31 * result + moduleDescription.hashCode()
+        return result
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class ModulesResponseStudent(
@@ -51,10 +73,34 @@ data class ModulesResponseStudent(
 data class ModuleResponseStudent(
     @Json(name = "module_id") val moduleId: String,
     @Json(name = "module_name") val moduleName: String,
-    @Json(name = "module_picture") val modulePicture: String,
+    @Json(name = "module_picture") val modulePicture: ByteArray,
     @Json(name = "module_description") val moduleDescription: String,
     @Json(name = "progress") val moduleProgress: Double
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as ModuleResponseStudent
+
+        if (moduleProgress!=other.moduleProgress) return false
+        if (moduleId!=other.moduleId) return false
+        if (moduleName!=other.moduleName) return false
+        if (!modulePicture.contentEquals(other.modulePicture)) return false
+        if (moduleDescription!=other.moduleDescription) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = moduleProgress.hashCode()
+        result = 31 * result + moduleId.hashCode()
+        result = 31 * result + moduleName.hashCode()
+        result = 31 * result + modulePicture.contentHashCode()
+        result = 31 * result + moduleDescription.hashCode()
+        return result
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class ModuleActivitiesResponse(
@@ -108,10 +154,30 @@ data class TutorialUploadRequest(
 
 @JsonClass(generateAdapter = true)
 data class FileUploadResponse(
-    @Json(name = "file_url") val fileUrl: String,
+    @Json(name = "file_url") val fileUrl: ByteArray,
     @Json(name = "file_name") val fileName: String? = null,
     @Json(name = "mime_type") val mimeType: String? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as FileUploadResponse
+
+        if (!fileUrl.contentEquals(other.fileUrl)) return false
+        if (fileName!=other.fileName) return false
+        if (mimeType!=other.mimeType) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = fileUrl.contentHashCode()
+        result = 31 * result + (fileName?.hashCode() ?: 0)
+        result = 31 * result + (mimeType?.hashCode() ?: 0)
+        return result
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class LectureUploadRequest(
@@ -122,11 +188,47 @@ data class LectureUploadRequest(
     @Json(name = "deadline_date") val deadlineDate: LocalDateTime?,
     @Json(name = "content_type_name") val contentTypeName: String,
     @Json(name = "video_url") val videoUrl: String? = null,
-    @Json(name = "file_url") val fileUrl: String? = null,
+    @Json(name = "file_url") val fileUrl: ByteArray? = null,
     @Json(name = "file_mime_type") val fileMimeType: String? = null,
     @Json(name = "file_name") val fileName: String? = null,
     @Json(name = "text_body") val textBody: String? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as LectureUploadRequest
+
+        if (activityType!=other.activityType) return false
+        if (lectureName!=other.lectureName) return false
+        if (lectureDescription!=other.lectureDescription) return false
+        if (unlockDate!=other.unlockDate) return false
+        if (deadlineDate!=other.deadlineDate) return false
+        if (contentTypeName!=other.contentTypeName) return false
+        if (videoUrl!=other.videoUrl) return false
+        if (!fileUrl.contentEquals(other.fileUrl)) return false
+        if (fileMimeType!=other.fileMimeType) return false
+        if (fileName!=other.fileName) return false
+        if (textBody!=other.textBody) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = activityType.hashCode()
+        result = 31 * result + lectureName.hashCode()
+        result = 31 * result + (lectureDescription?.hashCode() ?: 0)
+        result = 31 * result + (unlockDate?.hashCode() ?: 0)
+        result = 31 * result + (deadlineDate?.hashCode() ?: 0)
+        result = 31 * result + contentTypeName.hashCode()
+        result = 31 * result + (videoUrl?.hashCode() ?: 0)
+        result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
+        result = 31 * result + (fileMimeType?.hashCode() ?: 0)
+        result = 31 * result + (fileName?.hashCode() ?: 0)
+        result = 31 * result + (textBody?.hashCode() ?: 0)
+        return result
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class LectureResponse(
@@ -136,11 +238,45 @@ data class LectureResponse(
     @Json(name = "deadline_date") val deadlineDate: LocalDateTime?,
     @Json(name = "content_type_name") val contentTypeName: String,
     @Json(name = "video_url") val videoUrl: String? = null,
-    @Json(name = "file_url") val fileUrl: String? = null,
+    @Json(name = "file_url") val fileUrl: ByteArray? = null,
     @Json(name = "file_mime_type") val fileMimeType: String? = null,
     @Json(name = "file_name") val fileName: String? = null,
     @Json(name = "text_body") val textBody: String? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as LectureResponse
+
+        if (lectureName!=other.lectureName) return false
+        if (lectureDescription!=other.lectureDescription) return false
+        if (unlockDate!=other.unlockDate) return false
+        if (deadlineDate!=other.deadlineDate) return false
+        if (contentTypeName!=other.contentTypeName) return false
+        if (videoUrl!=other.videoUrl) return false
+        if (!fileUrl.contentEquals(other.fileUrl)) return false
+        if (fileMimeType!=other.fileMimeType) return false
+        if (fileName!=other.fileName) return false
+        if (textBody!=other.textBody) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = lectureName.hashCode()
+        result = 31 * result + (lectureDescription?.hashCode() ?: 0)
+        result = 31 * result + (unlockDate?.hashCode() ?: 0)
+        result = 31 * result + (deadlineDate?.hashCode() ?: 0)
+        result = 31 * result + contentTypeName.hashCode()
+        result = 31 * result + (videoUrl?.hashCode() ?: 0)
+        result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
+        result = 31 * result + (fileMimeType?.hashCode() ?: 0)
+        result = 31 * result + (fileName?.hashCode() ?: 0)
+        result = 31 * result + (textBody?.hashCode() ?: 0)
+        return result
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class LectureUpdateRequest(
@@ -150,11 +286,45 @@ data class LectureUpdateRequest(
     @Json(name = "deadline_date") val deadlineDate: LocalDateTime?,
     @Json(name = "content_type_name") val contentTypeName: String,
     @Json(name = "video_url") val videoUrl: String? = null,
-    @Json(name = "file_url") val fileUrl: String? = null,
+    @Json(name = "file_url") val fileUrl: ByteArray? = null,
     @Json(name = "file_mime_type") val fileMimeType: String? = null,
     @Json(name = "file_name") val fileName: String? = null,
     @Json(name = "text_body") val textBody: String? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as LectureUpdateRequest
+
+        if (lectureName!=other.lectureName) return false
+        if (lectureDescription!=other.lectureDescription) return false
+        if (unlockDate!=other.unlockDate) return false
+        if (deadlineDate!=other.deadlineDate) return false
+        if (contentTypeName!=other.contentTypeName) return false
+        if (videoUrl!=other.videoUrl) return false
+        if (!fileUrl.contentEquals(other.fileUrl)) return false
+        if (fileMimeType!=other.fileMimeType) return false
+        if (fileName!=other.fileName) return false
+        if (textBody!=other.textBody) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = lectureName.hashCode()
+        result = 31 * result + (lectureDescription?.hashCode() ?: 0)
+        result = 31 * result + (unlockDate?.hashCode() ?: 0)
+        result = 31 * result + (deadlineDate?.hashCode() ?: 0)
+        result = 31 * result + contentTypeName.hashCode()
+        result = 31 * result + (videoUrl?.hashCode() ?: 0)
+        result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
+        result = 31 * result + (fileMimeType?.hashCode() ?: 0)
+        result = 31 * result + (fileName?.hashCode() ?: 0)
+        result = 31 * result + (textBody?.hashCode() ?: 0)
+        return result
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class QuizzesResponse(

@@ -54,7 +54,7 @@ fun SideDrawer(
     windowInfo: WindowInfo,
     heading2: TextUnit,
     body: TextUnit,
-    profilePicUrl: String,
+    profilePic: ByteArray?,
     firstName: String,
     lastName: String,
     email: String,
@@ -104,16 +104,26 @@ fun SideDrawer(
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AsyncImage(
-                    model = if (profilePicUrl.isBlank()) R.drawable.default_account else profilePicUrl,
-                    placeholder = painterResource(R.drawable.default_account),
-                    error = painterResource(R.drawable.error_pic),
-                    contentDescription = "Profile Picture",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(headerHeight * 0.45f)
-                        .clip(CircleShape)
-                )
+                if (profilePic != null){
+                    BlobImage(
+                        byteArray = profilePic,
+                        modifier = Modifier
+                            .size(headerHeight * 0.45f)
+                            .clip(CircleShape)
+                    )
+                }else{
+                    AsyncImage(
+                        model = R.drawable.default_account,
+                        placeholder = painterResource(R.drawable.default_account),
+                        error = painterResource(R.drawable.error_pic),
+                        contentDescription = "Profile Picture",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(headerHeight * 0.45f)
+                            .clip(CircleShape)
+                    )
+                }
+
                 Spacer(Modifier.height(15.dp))
 
                 Column(modifier = Modifier.fillMaxWidth(0.8f)) {

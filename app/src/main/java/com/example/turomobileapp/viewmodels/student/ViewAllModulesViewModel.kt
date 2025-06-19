@@ -37,7 +37,34 @@ class ViewAllModulesViewModel @Inject constructor(
     val uiState: StateFlow<ViewAllModulesUIState> = _uiState.asStateFlow()
 
     init {
-        getModules()
+        getCurrentModule()
+    }
+
+    fun getCurrentModule(){
+        viewModelScope.launch {
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
+
+            val studentId: String = sessionManager.userId.filterNotNull().first()
+
+            moduleRepository.getCurrentModule(studentId, _courseId).collect { result ->
+                handleResult(
+                    result = result,
+                    onSuccess = { resp ->
+                        _uiState.update { it.copy(
+                            loading = false,
+                            moduleId = resp.moduleId,
+                            moduleName = resp.moduleName,
+                            modulePicture = resp.modulePicture,
+                            moduleDescription = resp.moduleDescription,
+                            moduleProgress = resp.moduleProgress
+                        ) }
+                    },
+                    onFailure = { err ->
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                    }
+                )
+            }
+        }
     }
 
     fun getModules(){
@@ -72,7 +99,6 @@ class ViewAllModulesViewModel @Inject constructor(
                             val quizOrder = listOf("PRACTICE", "SHORT", "LONG")
                             val lectures = resp.filter { it.activityType == "LECTURE" }
                             val tutorials = resp.filter { it.activityType == "TUTORIAL" }
-                            val screeningExam = resp.filter { it.quizTypeName == "SCREENING_EXAM" }
                             val quizzes = resp.filter { it.activityType == "QUIZ" && it.quizTypeName != "SCREENING_EXAM" }
 
                             val studentId: String = sessionManager.userId.filterNotNull().first()
@@ -99,7 +125,6 @@ class ViewAllModulesViewModel @Inject constructor(
                             val finalActivities = mutableListOf<ModuleActivityResponse>()
                             finalActivities += lectures.map { it.copy(isUnlocked = true) }
                             finalActivities += tutorials.map { it.copy(isUnlocked = true) }
-                            finalActivities += screeningExam.map { it.copy(isUnlocked = true) }
                             finalActivities += unlockedQuizzes
 
                             val sortedActivities = finalActivities.sortedBy { it.displayOrder }
@@ -147,5 +172,41 @@ data class ViewAllModulesUIState(
     val errorMessage: String? = null,
     val modules: List<ModuleResponseStudent> = emptyList(),
     val activities: List<ModuleActivityResponse> = emptyList(),
-    val moduleName: String = ""
-)
+    val moduleName: String = "",
+    val moduleId: String = "",
+    val modulePicture: ByteArray = byteArrayOf(),
+    val moduleDescription: String = "",
+    val moduleProgress: Double = 0.0
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as ViewAllModulesUIState
+
+        if (loading!=other.loading) return false
+        if (moduleProgress!=other.moduleProgress) return false
+        if (errorMessage!=other.errorMessage) return false
+        if (modules!=other.modules) return false
+        if (activities!=other.activities) return false
+        if (moduleName!=other.moduleName) return false
+        if (moduleId!=other.moduleId) return false
+        if (!modulePicture.contentEquals(other.modulePicture)) return false
+        if (moduleDescription!=other.moduleDescription) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = loading.hashCode()
+        result = 31 * result + moduleProgress.hashCode()
+        result = 31 * result + (errorMessage?.hashCode() ?: 0)
+        result = 31 * result + modules.hashCode()
+        result = 31 * result + activities.hashCode()
+        result = 31 * result + moduleName.hashCode()
+        result = 31 * result + moduleId.hashCode()
+        result = 31 * result + modulePicture.contentHashCode()
+        result = 31 * result + moduleDescription.hashCode()
+        return result
+    }
+}

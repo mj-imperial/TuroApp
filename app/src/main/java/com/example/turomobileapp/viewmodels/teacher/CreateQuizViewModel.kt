@@ -246,12 +246,6 @@ class CreateQuizViewModel @Inject constructor(
                 )
             }
 
-            if (uiState.value.quizType == "SCREENING"){
-                _uiState.update { it.copy(quizType = "SCREENING_EXAM") }
-            }else{
-                uiState.value.quizType
-            }
-
             val quizRequest = CreateQuizRequest(
                 quizTitle = uiState.value.quizTitle,
                 quizType = uiState.value.quizType,

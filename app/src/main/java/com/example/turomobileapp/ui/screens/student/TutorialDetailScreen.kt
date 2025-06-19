@@ -1,6 +1,6 @@
 package com.example.turomobileapp.ui.screens.student
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build

@@ -1,6 +1,6 @@
 package com.example.turomobileapp.ui.screens.shared
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
@@ -221,7 +221,7 @@ fun DashboardContent(
                 coursePic = course.coursePicture,
                 onCardClick = {
                     if (role == UserRole.STUDENT){
-                        navController.navigate(Screen.StudentCourseDetail.createRoute(course.courseId, course.coursePicture))
+                        navController.navigate(Screen.StudentCourseDetail.createRoute(course.courseId))
                     }else if (role ==UserRole.TEACHER){
                         navController.navigate(Screen.TeacherCourseDetail.createRoute(course.courseId, course.coursePicture))
                     }

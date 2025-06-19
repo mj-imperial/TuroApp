@@ -2,6 +2,7 @@ package com.example.turomobileapp.viewmodels
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,7 +14,7 @@ class SessionManager @Inject constructor() {
     private val _email = MutableStateFlow<String?>(null)
     private val _firstName = MutableStateFlow<String?>(null)
     private val _lastName = MutableStateFlow<String?>(null)
-    private val _profilePicUrl = MutableStateFlow<String?>(null)
+    private val _profilePic = MutableStateFlow<ByteArray?>(null)
     private val _role = MutableStateFlow<String?>(null)
 
     val userId: StateFlow<String?> = _userId
@@ -22,7 +23,7 @@ class SessionManager @Inject constructor() {
     val email: StateFlow<String?> = _email
     val firstName: StateFlow<String?> = _firstName
     val lastName: StateFlow<String?> = _lastName
-    val profilePicUrl: StateFlow<String?> = _profilePicUrl
+    val profilePic: StateFlow<ByteArray?> = _profilePic.asStateFlow()
     val role: StateFlow<String?> = _role
 
     fun startSession(
@@ -32,7 +33,7 @@ class SessionManager @Inject constructor() {
         email: String,
         firstName: String,
         lastName: String,
-        profilePicUrl: String,
+        profilePicUrl: ByteArray?,
         role: String
     ) {
         _userId.value = userId
@@ -41,7 +42,7 @@ class SessionManager @Inject constructor() {
         _email.value = email
         _firstName.value = firstName
         _lastName.value = lastName
-        _profilePicUrl.value = profilePicUrl
+        _profilePic.value = profilePicUrl
         _role.value = role
     }
 
@@ -52,16 +53,8 @@ class SessionManager @Inject constructor() {
         _email.value = null
         _firstName.value = null
         _lastName.value = null
-        _profilePicUrl.value = null
+        _profilePic.value = null
         _role.value = null
-    }
-
-    fun updateProfilePicUrl(newPic: String){
-        _profilePicUrl.value = newPic
-    }
-
-    fun setRole(role: String){
-        _role.value = role
     }
 
     fun setAgreedToTerms(newTerms: Boolean){

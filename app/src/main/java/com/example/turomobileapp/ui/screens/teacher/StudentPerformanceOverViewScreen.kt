@@ -2,7 +2,7 @@
 
 package com.example.turomobileapp.ui.screens.teacher
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

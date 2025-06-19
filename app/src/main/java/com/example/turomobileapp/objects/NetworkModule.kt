@@ -13,7 +13,6 @@ import com.example.turomobileapp.interfaces.EnrollmentApiService
 import com.example.turomobileapp.interfaces.LectureApiService
 import com.example.turomobileapp.interfaces.MessageApiService
 import com.example.turomobileapp.interfaces.ModuleApiService
-import com.example.turomobileapp.interfaces.ModuleProgressApiService
 import com.example.turomobileapp.interfaces.QuizApiService
 import com.example.turomobileapp.interfaces.ShopItemApiService
 import com.example.turomobileapp.interfaces.StudentProgressApiService
@@ -75,6 +74,7 @@ object NetworkModule{
     @Singleton
     fun provideMoshi(): Moshi =
         Moshi.Builder()
+            .add(Base64ByteArrayAdapter())
             .add(LocalDateTimeAdapter)
             .add(KotlinJsonAdapterFactory())
             .build()
@@ -142,11 +142,6 @@ object NetworkModule{
     @Singleton
     fun provideModuleApiService(retrofit: Retrofit): ModuleApiService =
         retrofit.create(ModuleApiService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideModuleProgressApiService(retrofit: Retrofit): ModuleProgressApiService =
-        retrofit.create(ModuleProgressApiService::class.java)
 
     @Provides
     @Singleton

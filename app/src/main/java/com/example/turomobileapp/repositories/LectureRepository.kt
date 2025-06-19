@@ -13,16 +13,16 @@ import javax.inject.Inject
 
 class LectureRepository @Inject constructor(private val lectureApiService: LectureApiService) {
 
-    fun createLecture(moduleId: String, lecture: LectureUploadRequest): Flow<Result<ActivityActionResponse>> =
-        handleApiResponse(
-            call = { lectureApiService.createLecture(moduleId, lecture) },
-            errorMessage = "Failed to create lecture $lecture for module $moduleId"
-        )
-
     fun uploadLectureFile(part: MultipartBody.Part): Flow<Result<FileUploadResponse>> =
         handleApiResponse(
             call = { lectureApiService.uploadFile(part) },
             errorMessage = "Failed file upload"
+        )
+
+    fun createLecture(moduleId: String, lecture: LectureUploadRequest): Flow<Result<ActivityActionResponse>> =
+        handleApiResponse(
+            call = { lectureApiService.createLecture(moduleId, lecture) },
+            errorMessage = "Failed to create lecture ${lecture.lectureName} for module $moduleId"
         )
 
     fun getLecture(lectureId: String): Flow<Result<LectureResponse>> =

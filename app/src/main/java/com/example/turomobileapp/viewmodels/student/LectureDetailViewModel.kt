@@ -70,7 +70,45 @@ data class LectureDetailUIState(
     val contentTypeName: String = "",
     val text: String? = null,
     val youtubeUrl: String? = null,
-    val fileUrl: String? = null,
+    val fileUrl: ByteArray? = byteArrayOf(),
     val fileMimeType: String? = null,
     val fileName: String? = null,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as LectureDetailUIState
+
+        if (loading!=other.loading) return false
+        if (errorMessage!=other.errorMessage) return false
+        if (lectureTitle!=other.lectureTitle) return false
+        if (lectureDescription!=other.lectureDescription) return false
+        if (unlockDateTime!=other.unlockDateTime) return false
+        if (deadlineDateTime!=other.deadlineDateTime) return false
+        if (contentTypeName!=other.contentTypeName) return false
+        if (text!=other.text) return false
+        if (youtubeUrl!=other.youtubeUrl) return false
+        if (!fileUrl.contentEquals(other.fileUrl)) return false
+        if (fileMimeType!=other.fileMimeType) return false
+        if (fileName!=other.fileName) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = loading.hashCode()
+        result = 31 * result + (errorMessage?.hashCode() ?: 0)
+        result = 31 * result + lectureTitle.hashCode()
+        result = 31 * result + lectureDescription.hashCode()
+        result = 31 * result + (unlockDateTime?.hashCode() ?: 0)
+        result = 31 * result + (deadlineDateTime?.hashCode() ?: 0)
+        result = 31 * result + contentTypeName.hashCode()
+        result = 31 * result + (text?.hashCode() ?: 0)
+        result = 31 * result + (youtubeUrl?.hashCode() ?: 0)
+        result = 31 * result + fileUrl.contentHashCode()
+        result = 31 * result + (fileMimeType?.hashCode() ?: 0)
+        result = 31 * result + (fileName?.hashCode() ?: 0)
+        return result
+    }
+}

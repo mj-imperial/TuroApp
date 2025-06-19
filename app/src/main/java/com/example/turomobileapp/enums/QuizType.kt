@@ -4,5 +4,4 @@ enum class QuizType {
     SHORT,
     PRACTICE,
     LONG,
-    SCREENING_EXAM
 }

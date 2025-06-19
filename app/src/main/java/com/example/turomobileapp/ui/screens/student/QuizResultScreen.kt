@@ -1,6 +1,6 @@
 package com.example.turomobileapp.ui.screens.student
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

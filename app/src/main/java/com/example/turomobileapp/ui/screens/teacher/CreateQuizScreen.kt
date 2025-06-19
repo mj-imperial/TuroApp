@@ -1,6 +1,6 @@
 package com.example.turomobileapp.ui.screens.teacher
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -357,13 +357,6 @@ fun CreateQuizHeader(
             onClick = {
                 onUpdateQuizType("LONG")
             }
-        ),
-        DropdownMenuItem(
-            itemName = "SCREENING",
-            onClick = {
-                onUpdateQuizType("SCREENING")
-                onUpdateNumberOfAttempts(3)
-            }
         )
     )
 
@@ -504,19 +497,6 @@ fun CreateQuizMoreInfo(
                     color = LoginText
                 )
 
-                if (quizType != "SCREENING") {
-                    IconButton(onClick = {
-                        if (numberOfAttempts > 1) {
-                            onUpdateNumberOfAttempts(numberOfAttempts - 1)
-                        }
-                    }) {
-                        Icon(
-                            painter = painterResource(R.drawable.subtract_circle),
-                            contentDescription = null
-                        )
-                    }
-                }
-
                 Box(
                     modifier = Modifier.padding(5.dp),
                     contentAlignment = Alignment.Center
@@ -526,15 +506,6 @@ fun CreateQuizMoreInfo(
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.heading3(windowInfo)
                     )
-                }
-
-                if (quizType != "SCREENING") {
-                    IconButton(onClick = { onUpdateNumberOfAttempts(numberOfAttempts + 1) }) {
-                        Icon(
-                            painter = painterResource(R.drawable.add_circle),
-                            contentDescription = null
-                        )
-                    }
                 }
             }
 

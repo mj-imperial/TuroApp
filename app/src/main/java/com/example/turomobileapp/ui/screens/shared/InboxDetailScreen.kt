@@ -1,6 +1,6 @@
 package com.example.turomobileapp.ui.screens.shared
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement

@@ -105,7 +105,7 @@ class CreateLectureViewModel @Inject constructor(
         if (unlock == null) return false
 
         return when (state.uploadType) {
-            "PDF/DOCS" -> !state.fileUrl.isNullOrBlank()
+            "PDF/DOCS" -> !state.fileUrl?.isEmpty()!!
             "VIDEO" -> !state.youtubeUrl.isNullOrBlank()
             "TEXT" -> !state.text.isNullOrBlank()
             else -> false
@@ -118,8 +118,6 @@ class CreateLectureViewModel @Inject constructor(
 
             val state = _uiState.value
 
-            var uploadedFileUrl: String? = null
-
             if (state.uploadType == "PDF/DOCS") {
                 val uri = state.fileUri
                 if (uri == null) {
@@ -130,34 +128,36 @@ class CreateLectureViewModel @Inject constructor(
                 try {
                     val mime = context.contentResolver.getType(uri) ?: "application/octet-stream"
                     val name = getDisplayName(context, uri)
-                    val bytes = context.contentResolver.openInputStream(uri)!!.readBytes()
-                    val req = bytes.toRequestBody(mime.toMediaType())
-                    val part = MultipartBody.Part.createFormData("file", name, req)
+                    val bytes = context.contentResolver.openInputStream(uri)?.readBytes()
 
-                    lectureRepository.uploadLectureFile(part).collect { result ->
-                        handleResult(
-                            result = result,
-                            onSuccess = { response ->
-                                uploadedFileUrl = response.fileUrl
-                                submitLecture(uploadedFileUrl)
-                            },
-                            onFailure = { err ->
-                                _uiState.update { it.copy(loading = false, errorMessage = err) }
-                            }
+                    if (bytes == null) {
+                        _uiState.update { it.copy(loading = false, errorMessage = "Failed to read file bytes") }
+                        return@launch
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            fileUrl = bytes,
+                            fileMimeType = mime,
+                            fileName = name
                         )
                     }
 
+                    submitLecture()
+
                 } catch (e: Exception) {
-                    _uiState.update { it.copy(loading = false, errorMessage = e.message ?: "Upload error") }
+                    _uiState.update {
+                        it.copy(loading = false, errorMessage = e.message ?: "File read error")
+                    }
                 }
 
             } else {
-                submitLecture(null)
+                submitLecture()
             }
         }
     }
 
-    private fun submitLecture(fileUrl: String?) {
+    private fun submitLecture() {
         val state = _uiState.value
 
         val lectureRequest = LectureUploadRequest(
@@ -168,7 +168,7 @@ class CreateLectureViewModel @Inject constructor(
             deadlineDate = state.deadlineDateTime,
             contentTypeName = state.uploadType,
             videoUrl = state.youtubeUrl,
-            fileUrl = fileUrl,
+            fileUrl = state.fileUrl,
             fileMimeType = state.fileMimeType,
             fileName = state.fileName,
             textBody = state.text
@@ -195,6 +195,7 @@ class CreateLectureViewModel @Inject constructor(
         }
     }
 
+
     fun clearCreateLectureStatus(){
         _uiState.update { it.copy(createLectureStatus = null) }
     }
@@ -212,8 +213,52 @@ data class CreateLectureUIState(
     val uploadType: String = "PDF/DOCS",
     val text: String? = null,
     val youtubeUrl: String? = null,
-    val fileUrl: String? = null,
+    val fileUrl: ByteArray? = null,
     val fileMimeType: String? = null,
     val fileName: String? = null,
     val fileUri: Uri? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as CreateLectureUIState
+
+        if (loading!=other.loading) return false
+        if (loadingFile!=other.loadingFile) return false
+        if (errorMessage!=other.errorMessage) return false
+        if (createLectureStatus!=other.createLectureStatus) return false
+        if (lectureTitle!=other.lectureTitle) return false
+        if (lectureDescription!=other.lectureDescription) return false
+        if (unlockDateTime!=other.unlockDateTime) return false
+        if (deadlineDateTime!=other.deadlineDateTime) return false
+        if (uploadType!=other.uploadType) return false
+        if (text!=other.text) return false
+        if (youtubeUrl!=other.youtubeUrl) return false
+        if (!fileUrl.contentEquals(other.fileUrl)) return false
+        if (fileMimeType!=other.fileMimeType) return false
+        if (fileName!=other.fileName) return false
+        if (fileUri!=other.fileUri) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = loading.hashCode()
+        result = 31 * result + loadingFile.hashCode()
+        result = 31 * result + (errorMessage?.hashCode() ?: 0)
+        result = 31 * result + (createLectureStatus?.hashCode() ?: 0)
+        result = 31 * result + lectureTitle.hashCode()
+        result = 31 * result + lectureDescription.hashCode()
+        result = 31 * result + (unlockDateTime?.hashCode() ?: 0)
+        result = 31 * result + (deadlineDateTime?.hashCode() ?: 0)
+        result = 31 * result + uploadType.hashCode()
+        result = 31 * result + (text?.hashCode() ?: 0)
+        result = 31 * result + (youtubeUrl?.hashCode() ?: 0)
+        result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
+        result = 31 * result + (fileMimeType?.hashCode() ?: 0)
+        result = 31 * result + (fileName?.hashCode() ?: 0)
+        result = 31 * result + (fileUri?.hashCode() ?: 0)
+        return result
+    }
+}

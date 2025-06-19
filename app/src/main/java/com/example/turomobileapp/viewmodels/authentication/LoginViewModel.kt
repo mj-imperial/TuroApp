@@ -80,7 +80,7 @@ class LoginViewModel @Inject constructor(
                             user.email,
                             user.firstName,
                             user.lastName,
-                            user.profilePic.toString(),
+                            user.profilePic,
                             user.roleName.toString()
                         )
                         if (user.requiresPasswordChange){

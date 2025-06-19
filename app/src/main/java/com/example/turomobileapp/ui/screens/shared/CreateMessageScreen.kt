@@ -1,6 +1,6 @@
 package com.example.turomobileapp.ui.screens.shared
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

@@ -29,7 +29,7 @@ class StudentProfileViewModel @Inject constructor(
         studentName = "${sessionManager.firstName.value} ${sessionManager.lastName.value}",
         email = sessionManager.email.value.toString(),
         role = sessionManager.role.value.toString(),
-        profilePic = sessionManager.profilePicUrl.value.toString()
+        profilePic = sessionManager.profilePic.value.toString()
     ))
     val uiState: StateFlow<StudentProfileUIState> = _uiState.asStateFlow()
 

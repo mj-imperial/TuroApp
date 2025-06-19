@@ -1,6 +1,6 @@
 package com.example.turomobileapp.ui.screens.student
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.components.BlobFileViewer
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
@@ -166,11 +167,11 @@ fun LectureDetailScreen(
                                 Spacer(modifier = Modifier.height(20.dp))
 
                                 when(uiState.contentTypeName){
-                                    "PDF/DOCS" -> LectureBodyPDF(
-                                        fileUrl = uiState.fileUrl,
-                                        fileMimeType = uiState.fileMimeType,
+                                    "PDF/DOCS" -> BlobFileViewer(
+                                        windowInfo = windowInfo,
+                                        fileBytes = uiState.fileUrl,
                                         fileName = uiState.fileName,
-                                        windowInfo = windowInfo
+                                        mimeType = uiState.fileMimeType,
                                     )
                                     "TEXT" -> LectureBodyText(
                                         windowInfo = windowInfo,
@@ -280,37 +281,6 @@ fun LectureHeader(
             fontFamily = FontFamily(Font(R.font.alata)),
             modifier = Modifier.padding(vertical = 10.dp)
         )
-    }
-}
-
-@Composable
-fun LectureBodyPDF(
-    fileUrl: String?,
-    fileMimeType: String?,
-    fileName: String?,
-    windowInfo: WindowInfo
-){
-    val context = LocalContext.current
-
-    if (fileUrl != null && fileMimeType != null) {
-        val intent = remember(fileUrl, fileMimeType) {
-            Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(fileUrl.toUri(), fileMimeType)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        }
-
-        Text(
-            text = fileName ?: "Open File",
-            fontSize = ResponsiveFont.heading3(windowInfo),
-            fontFamily = FontFamily(Font(R.font.alata)),
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier
-                .clickable { context.startActivity(intent) }
-                .padding(8.dp)
-        )
-    } else {
-        Text("No file available", fontSize = ResponsiveFont.body(windowInfo))
     }
 }
 

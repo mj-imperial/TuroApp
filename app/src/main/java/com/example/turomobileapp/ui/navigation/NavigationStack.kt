@@ -256,12 +256,11 @@ fun NavGraphBuilder.studentNavGraph(
         route = Screen.StudentCourseDetail.route,
         arguments = listOf(
             navArgument("courseId") { type = NavType.StringType },
-            navArgument("coursePic") { type = NavType.StringType }
         )
     ) {backStackEntry ->
         val courseId = backStackEntry.arguments?.getString("courseId")
-        val coursePic = backStackEntry.arguments?.getString("coursePic")
-        CourseDetailScreen(navController,courseId.toString(), sessionManager,coursePic.toString())
+        val viewModel: ViewAllModulesViewModel = hiltViewModel(backStackEntry)
+        CourseDetailScreen(navController,courseId.toString(), sessionManager,viewModel)
     }
     composable(
         route = Screen.StudentModules.route,
@@ -270,7 +269,10 @@ fun NavGraphBuilder.studentNavGraph(
         )
     ) { backStackEntry ->
         val courseId = backStackEntry.arguments?.getString("courseId")
-        val viewModel: ViewAllModulesViewModel = hiltViewModel(backStackEntry)
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry("course_detail/$courseId")
+        }
+        val viewModel: ViewAllModulesViewModel = hiltViewModel(parentEntry)
 
         StudentModulesScreen(navController, sessionManager, viewModel, courseId.toString())
     }
@@ -281,12 +283,12 @@ fun NavGraphBuilder.studentNavGraph(
             navArgument(name = "courseId") { type = NavType.StringType },
             navArgument(name = "moduleId") { type = NavType.StringType }
         )
-    ) {backStackEntry ->
+    ) { backStackEntry ->
         val courseId = backStackEntry.arguments?.getString("courseId")!!
         val moduleId = backStackEntry.arguments?.getString("moduleId")!!
         val activityFlowViewModel: ActivityFlowViewModel = hiltViewModel(backStackEntry)
         val parentEntry = remember(backStackEntry) {
-            navController.getBackStackEntry("student_modules_screen/$courseId")
+            navController.getBackStackEntry("course_detail/$courseId")
         }
         val viewModel: ViewAllModulesViewModel = hiltViewModel(parentEntry)
         StudentModuleActivitiesScreen(navController, sessionManager, viewModel, courseId, moduleId, activityFlowViewModel)

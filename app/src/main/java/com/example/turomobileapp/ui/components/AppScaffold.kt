@@ -1,3 +1,5 @@
+package com.example.turomobileapp.ui.components
+
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
@@ -10,14 +12,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.turomobileapp.ui.components.BottomNavigationBar
-import com.example.turomobileapp.ui.components.ButtonItems
-import com.example.turomobileapp.ui.components.CustomFloatingActionButton
-import com.example.turomobileapp.ui.components.ResponsiveFont
-import com.example.turomobileapp.ui.components.SideDrawer
-import com.example.turomobileapp.ui.components.TopNavigationBar
-import com.example.turomobileapp.ui.components.WindowInfo
-import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.authentication.LoginViewModel
@@ -46,7 +40,7 @@ fun AppScaffold(
     val firstName by sessionManager.firstName.collectAsState(initial = "")
     val lastName by sessionManager.lastName.collectAsState(initial = "")
     val email by sessionManager.email.collectAsState(initial = "")
-    val profilePic by sessionManager.profilePicUrl.collectAsState(initial = "")
+    val profilePic by sessionManager.profilePic.collectAsState(initial = null)
     val loginViewModel: LoginViewModel = hiltViewModel()
 
     val barHeight = when(windowInfo.screenHeightInfo) {
@@ -67,7 +61,7 @@ fun AppScaffold(
                 windowInfo = rememberWindowInfo(),
                 heading2 = heading2,
                 body = body,
-                profilePicUrl = profilePic.toString(),
+                profilePic = profilePic,
                 firstName = firstName.toString(),
                 lastName = lastName.toString(),
                 email = email.toString()

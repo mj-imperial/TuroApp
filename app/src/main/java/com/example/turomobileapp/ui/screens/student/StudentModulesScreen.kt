@@ -1,10 +1,12 @@
 package com.example.turomobileapp.ui.screens.student
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -26,20 +28,22 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -60,6 +64,10 @@ fun StudentModulesScreen(
     val pullRefreshState = rememberPullToRefreshState()
 
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getModules()
+    }
 
     AppScaffold(
         navController = navController,
@@ -104,17 +112,12 @@ fun StudentModulesScreen(
                                 previousModule.moduleProgress == 100.0
                             }
 
-                            val modulePicture = if (item.modulePicture.isEmpty()){
-                                "https://img.freepik.com/free-photo/blackboard-inscribed-with-scientific-formulas-calculations_1150-19413.jpg?semt=ais_hybrid&w=740"
-                            }else{
-                                item.modulePicture
-                            }
-
                             ModuleItem(
                                 windowInfo = windowInfo,
                                 moduleName = item.moduleName,
-                                modulePicture = modulePicture,
+                                modulePicture = item.modulePicture,
                                 isUnlocked = isUnlocked,
+                                progress = item.moduleProgress,
                                 onClickModule = {
                                     viewModel.updateModuleName(item.moduleName)
                                     navController.navigate(Screen.StudentModuleActivities.createRoute(courseId, item.moduleId))
@@ -128,14 +131,17 @@ fun StudentModulesScreen(
     )
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun ModuleItem(
     windowInfo: WindowInfo,
     moduleName: String,
-    modulePicture: String,
+    modulePicture: ByteArray,
     isUnlocked: Boolean,
+    progress: Double,
     onClickModule: () -> Unit
 ){
+    val formattedProgress = String.format("%.1f", progress)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -153,37 +159,55 @@ fun ModuleItem(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ){
-            AsyncImage(
-                model = modulePicture,
-                contentDescription = "Module Picture",
-                contentScale = ContentScale.Crop,
-                alpha = if (isUnlocked) 1f else 0.6f,
+            BlobImage(
+                byteArray = modulePicture,
                 modifier = Modifier
                     .fillMaxSize()
-                    .aspectRatio(1f)
+                    .aspectRatio(1f),
+                alpha = if (isUnlocked) 1f else 0.6f
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(15.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (!isUnlocked){
-                    Icon(
-                        painter = painterResource(R.drawable.lock),
-                        contentDescription = null,
-                        tint = MainWhite,
-                        modifier = Modifier.padding(end = 10.dp)
-                    )
-                }
-
                 Text(
-                    text = moduleName,
-                    fontSize = ResponsiveFont.body(windowInfo),
+                    text = "$formattedProgress%",
+                    fontSize = ResponsiveFont.heading1(windowInfo),
                     color = MainWhite,
                     fontFamily = FontFamily(Font(R.font.alata)),
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (!isUnlocked) {
+                        Icon(
+                            painter = painterResource(R.drawable.lock),
+                            contentDescription = null,
+                            tint = MainWhite,
+                            modifier = Modifier.padding(end = 6.dp)
+                        )
+                    }
+
+                    Text(
+                        text = moduleName,
+                        fontSize = ResponsiveFont.body(windowInfo),
+                        color = MainWhite,
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontWeight = FontWeight.Medium,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 2,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }

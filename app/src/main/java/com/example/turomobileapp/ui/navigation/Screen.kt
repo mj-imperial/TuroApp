@@ -1,7 +1,6 @@
 package com.example.turomobileapp.ui.navigation
 
 import android.net.Uri
-import com.example.turomobileapp.enums.QuizType
 
 sealed class Screen(val route: String) {
     //authentication
@@ -38,14 +37,9 @@ sealed class Screen(val route: String) {
     //student
     object Leaderboard: Screen("leaderboard_screen")
     object Shop: Screen("shop_screen")
-    object StudentCourseDetail: Screen("course_detail/{courseId}/{coursePic}") {
-        fun createRoute(courseId: String, coursePic: String): String {
-            val encodedPic = Uri.encode(coursePic)
-            return "course_detail/$courseId/$encodedPic"
-        }
-    }
-    object StudentCourseActivity: Screen("course_tutorial_screen/{courseId}/{type}"){
-        fun createRoute(courseId: String,type: QuizType) = "course_tutorial_screen/$courseId/${type.name}"
+    object StudentScreening: Screen("student_screening")
+    object StudentCourseDetail: Screen("course_detail/{courseId}") {
+        fun createRoute(courseId: String) = "course_detail/$courseId"
     }
     object StudentModules: Screen("student_modules_screen/{courseId}"){
         fun createRoute(courseId: String) = "student_modules_screen/$courseId"

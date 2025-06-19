@@ -12,4 +12,7 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">192.168.50.83</domain>
     </domain-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">172.22.152.204</domain>
+    </domain-config>
 </network-security-config>

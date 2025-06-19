@@ -1,6 +1,7 @@
 package com.example.turomobileapp.ui.screens.student
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
@@ -22,17 +23,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -43,9 +49,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
-import com.example.turomobileapp.enums.QuizType
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -58,21 +63,24 @@ import com.example.turomobileapp.ui.theme.screeningExam1
 import com.example.turomobileapp.ui.theme.screeningExam2
 import com.example.turomobileapp.ui.theme.shortquiz1
 import com.example.turomobileapp.ui.theme.shortquiz2
-import com.example.turomobileapp.ui.theme.tutorial1
-import com.example.turomobileapp.ui.theme.tutorial2
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.student.ViewAllModulesViewModel
 
-//TODO current module logic
+@SuppressLint("StateFlowValueCalledInComposition")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CourseDetailScreen(
     navController: NavController,
     courseId: String,
     sessionManager: SessionManager,
-    coursePic: String
+    viewModel: ViewAllModulesViewModel
 ){
     val windowInfo = rememberWindowInfo()
     val width = windowInfo.screenWidth
     val height = windowInfo.screenHeight
+    val pullRefreshState = rememberPullToRefreshState()
+
+    val uiState by viewModel.uiState.collectAsState()
 
     AppScaffold(
         navController = navController,
@@ -81,53 +89,65 @@ fun CourseDetailScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.SpaceAround
-            ) {
-                CourseHeader(
-                    windowInfo = windowInfo,
-                    height = height,
-                    onClickCurrentModule = { TODO() },
-                    coursePic = coursePic
-                )
+            if (uiState.loading){
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    CircularProgressIndicator()
+                }
+            }else{
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getCurrentModule()
+                    },
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        CourseHeader(
+                            windowInfo = windowInfo,
+                            height = height,
+                            onClickCurrentModule = {
+                                navController.navigate(Screen.StudentModuleActivities.createRoute(courseId, uiState.moduleId))
+                            },
+                            moduleImage = uiState.modulePicture,
+                            moduleProgress = uiState.moduleProgress,
+                            moduleName = uiState.moduleName,
+                        )
 
-                CourseActivities(
-                    windowInfo = windowInfo,
-                    height = height,
-                    navController = navController,
-                    width = width,
-                    courseId = courseId
-                )
+                        CourseActivities(
+                            windowInfo = windowInfo,
+                            height = height,
+                            navController = navController,
+                            width = width,
+                            courseId = courseId
+                        )
+                    }
+                }
             }
         }
     )
 }
 
-
-/*
-* TODO add logic for progress percentage and module name placeholder
-* */
 @Composable
 fun CourseHeader(
     windowInfo: WindowInfo,
     height: Dp,
     onClickCurrentModule: () -> Unit,
-    coursePic: String
+    moduleImage: ByteArray,
+    moduleProgress: Double,
+    moduleName: String
 ){
-    val modulePlaceholderImage = "https://images.pexels.com/photos/27409729/pexels-photo-27409729/free-photo-of-dice-game-on-black-and-white-background.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-    val progressPercentage = "67%"
-    val moduleNamePlaceholder = "MODULE 6: STATISTICS & PROBABILITIES"
-    val columnHeight = height * 0.20f
+    val columnHeight = height * 0.25f
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .height(columnHeight)
-            .padding(bottom = 10.dp),
+            .padding(bottom = 30.dp),
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
         Box(
@@ -135,12 +155,8 @@ fun CourseHeader(
                 .fillMaxSize()
                 .clickable(onClick = onClickCurrentModule)
         ){
-            AsyncImage(
-                model = if (coursePic.isNotEmpty()) coursePic else modulePlaceholderImage,
-                contentDescription = "Module Image",
-                contentScale = ContentScale.Crop,
-                clipToBounds = true,
-                alpha = 0.6f,
+            BlobImage(
+                byteArray = moduleImage,
                 modifier = Modifier.clip(RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp)).fillMaxWidth()
             )
 
@@ -152,10 +168,11 @@ fun CourseHeader(
                 horizontalAlignment = Alignment.Start,
             ) {
                 Text(
-                    text = "Progress: $progressPercentage",
-                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    text = "Progress: $moduleProgress%",
+                    fontSize = ResponsiveFont.heading1(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alexandria)),
-                    color = MainWhite
+                    color = MainWhite,
+                    fontWeight = FontWeight.ExtraBold
                 )
 
                 Row(
@@ -163,13 +180,14 @@ fun CourseHeader(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = moduleNamePlaceholder,
+                        text = moduleName,
                         fontSize = ResponsiveFont.heading3(windowInfo),
                         fontFamily = FontFamily(Font(R.font.alexandria)),
                         color = MainWhite,
-                        maxLines = 2,
+                        maxLines = 1,
                         softWrap = true,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Medium
                     )
 
                     IconButton(
@@ -214,22 +232,15 @@ fun CourseActivities(
             colors = listOf(shortquiz1,shortquiz2)
         ),
         Activities(
-            name = R.string.Tutorials,
-            icon = R.drawable.tutorial_icon,
-            route = Screen.StudentCourseActivity.route,
-            colors = listOf(tutorial1,tutorial2)
-        ),
-        Activities(
             name = R.string.Analytics,
             icon = R.drawable.practicequiz_icon,
             route = Screen.StudentCourseAnalytics.createRoute(courseId),
             colors = listOf(practice1,practice2)
         ),
-        //TODO change screening exam since screening exam will have a special ui
         Activities(
             name = R.string.ScreeningExam,
             icon = R.drawable.screeningexam_icon,
-            route = Screen.StudentCourseActivity.createRoute(courseId = courseId, type = QuizType.SCREENING_EXAM),
+            route = Screen.StudentScreening.route,
             colors = listOf(screeningExam1,screeningExam2)
         )
     )

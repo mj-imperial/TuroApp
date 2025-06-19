@@ -231,7 +231,7 @@ data class EditLectureUIState(
     val originalContentTypeName: String = "",
     val contentTypeName: String = "",
     val videoUrl: String? = null,
-    val fileUrl: String? = null,
+    val fileUrl: ByteArray? = null,
     val fileMimeType: String? = null,
     val fileName: String? = null,
     val textBody: String? = null,

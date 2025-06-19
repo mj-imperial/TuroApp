@@ -1,6 +1,6 @@
 package com.example.turomobileapp.ui.screens.teacher
 
-import AppScaffold
+import com.example.turomobileapp.ui.components.AppScaffold
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
