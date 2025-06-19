@@ -84,6 +84,7 @@ import com.example.turomobileapp.viewmodels.teacher.EditQuizViewModel
 import com.example.turomobileapp.viewmodels.teacher.EditTutorialViewModel
 import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
 import com.example.turomobileapp.viewmodels.teacher.StudentPerformanceViewModel
+import com.example.turomobileapp.viewmodels.teacher.TeacherCourseViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -435,12 +436,11 @@ fun NavGraphBuilder.teacherNavGraph(
         route = Screen.TeacherCourseDetail.route,
         arguments = listOf(
             navArgument("courseId") { type = NavType.StringType },
-            navArgument("coursePic") { type = NavType.StringType }
         )
     ) {backStackEntry ->
         val courseId = backStackEntry.arguments?.getString("courseId")
-        val coursePic = backStackEntry.arguments?.getString("coursePic")
-        TeacherCourseScreen(navController,courseId.toString(), sessionManager,coursePic.toString())
+        val viewModel: TeacherCourseViewModel = hiltViewModel()
+        TeacherCourseScreen(navController,courseId.toString(), sessionManager, viewModel)
     }
 
     composable(

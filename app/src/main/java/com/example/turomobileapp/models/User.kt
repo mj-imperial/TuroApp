@@ -1,6 +1,5 @@
 package com.example.turomobileapp.models
 
-import com.example.turomobileapp.enums.UserRole
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 

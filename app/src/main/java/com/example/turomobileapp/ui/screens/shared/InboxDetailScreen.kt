@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.shared
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
@@ -33,14 +32,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -110,13 +109,13 @@ fun InboxDetailScreen(
 
                             MessageHeader(
                                 windowInfo = windowInfo,
-                                profilePic = message.senderPic.toString(),
+                                profilePic = message.senderPic,
                                 timestamp = message.timestamp,
                                 onClickReply = {
                                     val (recipientId, recipientName, recipientPic) = if (message.senderId == currentUserId) {
-                                        Triple(message.recipientId, message.recipientName, message.recipientPic ?: "")
+                                        Triple(message.recipientId, message.recipientName, message.recipientPic ?: byteArrayOf())
                                     } else {
-                                        Triple(message.senderId, message.senderName, message.senderPic ?: "")
+                                        Triple(message.senderId, message.senderName, message.senderPic ?: byteArrayOf())
                                     }
 
                                     viewModel.setReplyInfo(recipientId, recipientName, recipientPic)
@@ -130,9 +129,9 @@ fun InboxDetailScreen(
                                 body = message.body,
                                 onClickReply = {
                                     val (recipientId, recipientName, recipientPic) = if (message.senderId == currentUserId) {
-                                        Triple(message.recipientId, message.recipientName, message.recipientPic ?: "")
+                                        Triple(message.recipientId, message.recipientName, message.recipientPic ?: byteArrayOf())
                                     } else {
-                                        Triple(message.senderId, message.senderName, message.senderPic ?: "")
+                                        Triple(message.senderId, message.senderName, message.senderPic ?: byteArrayOf())
                                     }
 
                                     viewModel.setReplyInfo(recipientId, recipientName, recipientPic)
@@ -173,7 +172,7 @@ fun SubjectHeader(
 @Composable
 fun MessageHeader(
     windowInfo: WindowInfo,
-    profilePic: String,
+    profilePic: ByteArray?,
     timestamp: Long,
     onClickReply: () -> Unit,
     displayName: String
@@ -189,10 +188,8 @@ fun MessageHeader(
         modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = profilePic,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+        BlobImage(
+            byteArray = profilePic,
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape)

@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.student
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +51,7 @@ import com.example.turomobileapp.models.StudentAchievementResponse
 import com.example.turomobileapp.models.StudentBadgeResponse
 import com.example.turomobileapp.models.StudentLeaderboardResponse
 import com.example.turomobileapp.objects.CelebrationPrefs
+import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.CustomDropDownMenu
 import com.example.turomobileapp.ui.components.DropdownMenuItem
 import com.example.turomobileapp.ui.components.ResponsiveFont
@@ -130,6 +130,7 @@ fun LeaderboardScreen(
                     onRefresh = {
                         viewModel.getLeaderboard()
                         viewModel.getBadgesForStudent()
+                        viewModel.getAchievementsForStudent()
                     },
                 ) {
                     Column(
@@ -380,7 +381,7 @@ fun AchievementsCard(
     achievements: List<StudentAchievementResponse>
 ){
     val context = LocalContext.current
-    val iconSize = windowInfo.screenHeight * 0.09f
+    val iconSize = windowInfo.screenHeight * 0.06f
 
     val unlockedAchievements = achievements.filter { it.isUnlocked }
     val lockedAchievements = achievements.filter { !it.isUnlocked }
@@ -518,7 +519,7 @@ fun IndividualAchievementCard(
             ) {
                 Text(
                     text = achievement.achievementName,
-                    fontSize = ResponsiveFont.heading1(windowInfo),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontWeight = FontWeight.Bold,
                     color = if (unlocked) TextBlack else LoginText
@@ -528,7 +529,7 @@ fun IndividualAchievementCard(
 
                 Text(
                     text = achievement.achievementDescription,
-                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontSize = ResponsiveFont.caption(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alata)),
                     maxLines = 2,
                     color = if (unlocked) TextBlack else LoginText

@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.shared
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,16 +36,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.repositories.Result
+import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.PopupMinimal
 import com.example.turomobileapp.ui.components.ResponsiveFont
@@ -208,7 +207,7 @@ fun ReplyScreen(
 fun RecipientHeader(
     windowInfo: WindowInfo,
     recipientName: String,
-    recipientPic: String
+    recipientPic: ByteArray
 ) {
     Column(
         modifier = Modifier
@@ -235,10 +234,8 @@ fun RecipientHeader(
                     .border(1.dp, LoginText, RoundedCornerShape(6.dp))
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
-                AsyncImage(
-                    model = recipientPic,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
+                BlobImage(
+                    byteArray = recipientPic,
                     modifier = Modifier
                         .size(30.dp)
                         .clip(CircleShape)

@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.student
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
@@ -47,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.BlobFileViewer
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.ResponsiveFont

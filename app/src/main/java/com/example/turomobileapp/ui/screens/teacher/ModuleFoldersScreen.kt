@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.teacher
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.repositories.Result
+import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo

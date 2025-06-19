@@ -60,8 +60,12 @@ class InboxDetailViewModel @Inject constructor(
         }
     }
 
-    fun setReplyInfo(recipientId: String, recipientName: String, recipientPic: String){
-        _uiState.update { it.copy(recipientId = recipientId, recipientName = recipientName, recipientPic = recipientPic) }
+    fun setReplyInfo(recipientId: String, recipientName: String, recipientPic: ByteArray){
+        _uiState.update { it.copy(
+            recipientId = recipientId,
+            recipientName = recipientName,
+            recipientPic = recipientPic
+        ) }
     }
 
     fun updateSubject(newSubject: String){
@@ -122,7 +126,7 @@ class InboxDetailViewModel @Inject constructor(
             subject = "",
             body = "",
             recipientId = "",
-            recipientPic = "",
+            recipientPic = byteArrayOf(),
             recipientName = "",
             replyMessageStatus = null
         ) }
@@ -135,8 +139,40 @@ data class InboxDetailUIState(
     val messages: List<InboxDetail> = emptyList(),
     val recipientId: String = "",
     val recipientName: String = "",
-    val recipientPic: String = "",
+    val recipientPic: ByteArray = byteArrayOf(),
     val subject: String = "",
     val body: String = "",
     val replyMessageStatus: Result<Unit>? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as InboxDetailUIState
+
+        if (loading!=other.loading) return false
+        if (errorMessage!=other.errorMessage) return false
+        if (messages!=other.messages) return false
+        if (recipientId!=other.recipientId) return false
+        if (recipientName!=other.recipientName) return false
+        if (!recipientPic.contentEquals(other.recipientPic)) return false
+        if (subject!=other.subject) return false
+        if (body!=other.body) return false
+        if (replyMessageStatus!=other.replyMessageStatus) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = loading.hashCode()
+        result = 31 * result + (errorMessage?.hashCode() ?: 0)
+        result = 31 * result + messages.hashCode()
+        result = 31 * result + recipientId.hashCode()
+        result = 31 * result + recipientName.hashCode()
+        result = 31 * result + recipientPic.contentHashCode()
+        result = 31 * result + subject.hashCode()
+        result = 31 * result + body.hashCode()
+        result = 31 * result + (replyMessageStatus?.hashCode() ?: 0)
+        return result
+    }
+}

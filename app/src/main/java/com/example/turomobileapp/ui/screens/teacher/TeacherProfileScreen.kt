@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.teacher
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -46,6 +45,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -136,14 +137,21 @@ fun TeacherProfileScreen(
                                         .border(4.dp, MainOrange, CircleShape)
                                         .clip(CircleShape)
                                 ) {
-                                    AsyncImage(
-                                        model = uiState.profilePic,
-                                        placeholder = painterResource(R.drawable.default_account),
-                                        error = painterResource(R.drawable.default_account),
-                                        contentDescription = "Profile picture",
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
+                                    uiState.profilePic?.let {
+                                        if (it.isEmpty()) AsyncImage(
+                                            model = uiState.profilePic,
+                                            placeholder = painterResource(R.drawable.default_account),
+                                            error = painterResource(R.drawable.default_account),
+                                            contentDescription = "Profile picture",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
+                                        )else{
+                                            BlobImage(
+                                                byteArray = uiState.profilePic!!,
+                                                modifier = Modifier.fillMaxSize(),
+                                            )
+                                        }
+                                    }
                                 }
 
                                 Spacer(modifier = Modifier.height(-imageOverlap))

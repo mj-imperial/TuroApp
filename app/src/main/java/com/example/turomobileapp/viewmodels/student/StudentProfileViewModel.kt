@@ -29,7 +29,7 @@ class StudentProfileViewModel @Inject constructor(
         studentName = "${sessionManager.firstName.value} ${sessionManager.lastName.value}",
         email = sessionManager.email.value.toString(),
         role = sessionManager.role.value.toString(),
-        profilePic = sessionManager.profilePic.value.toString()
+        profilePic = sessionManager.profilePic.value
     ))
     val uiState: StateFlow<StudentProfileUIState> = _uiState.asStateFlow()
 
@@ -88,9 +88,42 @@ data class StudentProfileUIState(
     val studentName: String = "",
     val email: String = "",
     val role: String = "",
-    val profilePic: String = "",
+    val profilePic: ByteArray? = null,
     val badges: List<StudentBadgeResponse> = emptyList(),
     val studentProgress: StudentProfileProgress? = null
 ){
     val loading: Boolean get() = loadingProgress || loadingBadges
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as StudentProfileUIState
+
+        if (loadingProgress!=other.loadingProgress) return false
+        if (loadingBadges!=other.loadingBadges) return false
+        if (errorMessage!=other.errorMessage) return false
+        if (studentName!=other.studentName) return false
+        if (email!=other.email) return false
+        if (role!=other.role) return false
+        if (!profilePic.contentEquals(other.profilePic)) return false
+        if (badges!=other.badges) return false
+        if (studentProgress!=other.studentProgress) return false
+        if (loading!=other.loading) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = loadingProgress.hashCode()
+        result = 31 * result + loadingBadges.hashCode()
+        result = 31 * result + (errorMessage?.hashCode() ?: 0)
+        result = 31 * result + studentName.hashCode()
+        result = 31 * result + email.hashCode()
+        result = 31 * result + role.hashCode()
+        result = 31 * result + (profilePic?.contentHashCode() ?: 0)
+        result = 31 * result + badges.hashCode()
+        result = 31 * result + (studentProgress?.hashCode() ?: 0)
+        result = 31 * result + loading.hashCode()
+        return result
+    }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.StudentLeaderboardResponse
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.theme.MainOrange
@@ -62,10 +63,8 @@ fun FirstPlaceRow(
         Box(
             modifier = Modifier.size(avatarSize)
         ) {
-            AsyncImage(
-                model = student.profilePic,
-                contentDescription = "Avatar of ${student.firstName}",
-                contentScale = ContentScale.Crop,
+            BlobImage(
+                byteArray = student.profilePic,
                 modifier = Modifier
                     .size(avatarSize)
                     .clip(CircleShape)
@@ -136,10 +135,8 @@ fun SecondPlaceRow(
         Box(
             modifier = Modifier.size(avatarSize)
         ) {
-            AsyncImage(
-                model = student.profilePic,
-                contentDescription = "Avatar of ${student.firstName}",
-                contentScale = ContentScale.Crop,
+            BlobImage(
+                byteArray = student.profilePic,
                 modifier = Modifier
                     .size(avatarSize)
                     .clip(CircleShape)
@@ -209,10 +206,8 @@ fun ThirdPlaceRow(
         Box(
             modifier = Modifier.size(avatarSize)
         ) {
-            AsyncImage(
-                model = student.profilePic,
-                contentDescription = "Avatar of ${student.firstName}",
-                contentScale = ContentScale.Crop,
+            BlobImage(
+                byteArray = student.profilePic,
                 modifier = Modifier
                     .size(avatarSize)
                     .clip(CircleShape)

@@ -1,7 +1,5 @@
 package com.example.turomobileapp.ui.navigation
 
-import android.net.Uri
-
 sealed class Screen(val route: String) {
     //authentication
     object Splash: Screen("splash_screen")
@@ -38,6 +36,7 @@ sealed class Screen(val route: String) {
     object Leaderboard: Screen("leaderboard_screen")
     object Shop: Screen("shop_screen")
     object StudentScreening: Screen("student_screening")
+    object StudentLongQuiz: Screen("student_long_quiz")
     object StudentCourseDetail: Screen("course_detail/{courseId}") {
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
@@ -68,11 +67,8 @@ sealed class Screen(val route: String) {
     }
 
     //teacher
-    object TeacherCourseDetail: Screen("course_detail/{courseId}/{coursePic}") {
-        fun createRoute(courseId: String, coursePic: String): String {
-            val encodedPic = Uri.encode(coursePic)
-            return "course_detail/$courseId/$encodedPic"
-        }
+    object TeacherCourseDetail: Screen("course_detail/{courseId}") {
+        fun createRoute(courseId: String) = "course_detail/$courseId"
     }
     object TeacherViewAllModules: Screen("teacher_view_all_modules/{courseId}"){
         fun createRoute(courseId: String) = "teacher_view_all_modules/$courseId"
@@ -84,7 +80,8 @@ sealed class Screen(val route: String) {
         fun createRoute(moduleId: String) = "teacher_create_edit_activity_in_module/$moduleId"
     }
     object TeacherCreateModule: Screen("teacher_createModule")
-    object TeacherViewAllStudents: Screen("teacher_viewAllStudents")
+    object TeacherCreateLongQuiz: Screen("teacher_create_long_quiz")
+    object TeacherCreateScreeningExam: Screen("teacher_create_screening_exam")
     object TeacherPerformance: Screen("teacher_performance/{courseId}"){
         fun createRoute(courseId: String) = "teacher_performance/$courseId"
     }

@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.teacher
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -49,6 +48,7 @@ import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.ModuleActivityResponse
 import com.example.turomobileapp.repositories.Result
+import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.ButtonItems
 import com.example.turomobileapp.ui.components.CustomDropDownMenu
 import com.example.turomobileapp.ui.components.DropdownMenuItem

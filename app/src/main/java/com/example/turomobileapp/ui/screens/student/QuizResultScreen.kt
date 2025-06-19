@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.student
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,6 +51,7 @@ import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.AssessmentResultResponse
 import com.example.turomobileapp.models.QuizContentResponse
+import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CircularScoreProgressBar
 import com.example.turomobileapp.ui.components.PopupMinimal

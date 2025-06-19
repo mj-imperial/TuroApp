@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.student
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
@@ -51,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.ModuleActivityResponse
+import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo

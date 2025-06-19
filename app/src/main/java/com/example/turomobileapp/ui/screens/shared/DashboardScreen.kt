@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.shared
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
@@ -39,7 +38,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -49,10 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.models.CourseResponse
+import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -223,7 +222,7 @@ fun DashboardContent(
                     if (role == UserRole.STUDENT){
                         navController.navigate(Screen.StudentCourseDetail.createRoute(course.courseId))
                     }else if (role ==UserRole.TEACHER){
-                        navController.navigate(Screen.TeacherCourseDetail.createRoute(course.courseId, course.coursePicture))
+                        navController.navigate(Screen.TeacherCourseDetail.createRoute(course.courseId))
                     }
                 },
                 body = body,
@@ -237,7 +236,7 @@ fun DashboardContent(
 fun DashboardItem(
     courseName: String,
     courseCode: String,
-    coursePic: String,
+    coursePic: ByteArray,
     onCardClick: () -> Unit,
     body: TextUnit,
     subtitle: TextUnit
@@ -251,10 +250,8 @@ fun DashboardItem(
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Column {
-            AsyncImage(
-                model = coursePic,
-                contentDescription = "Course Picture",
-                contentScale = ContentScale.Crop,
+            BlobImage(
+                byteArray = coursePic,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)

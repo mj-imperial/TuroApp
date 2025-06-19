@@ -2,7 +2,6 @@
 
 package com.example.turomobileapp.ui.screens.shared
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -47,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.CalendarResponse
+import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo

@@ -25,7 +25,7 @@ class TeacherProfileViewModel @Inject constructor(
         teacherName = "${sessionManager.firstName.value} ${sessionManager.lastName.value}",
         email = sessionManager.email.value.toString(),
         role = sessionManager.role.value.toString(),
-        profilePic = sessionManager.profilePic.value.toString()
+        profilePic = sessionManager.profilePic.value
     ))
     val uiState: StateFlow<TeacherProfileUIState> = _uiState.asStateFlow()
 
@@ -65,6 +65,34 @@ data class TeacherProfileUIState(
     val teacherName: String = "",
     val email: String = "",
     val role: String = "",
-    val profilePic: String = "",
+    val profilePic: ByteArray? = null,
     val coursesTaught: Map<String, String> = emptyMap()
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as TeacherProfileUIState
+
+        if (loading!=other.loading) return false
+        if (errorMessage!=other.errorMessage) return false
+        if (teacherName!=other.teacherName) return false
+        if (email!=other.email) return false
+        if (role!=other.role) return false
+        if (!profilePic.contentEquals(other.profilePic)) return false
+        if (coursesTaught!=other.coursesTaught) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = loading.hashCode()
+        result = 31 * result + (errorMessage?.hashCode() ?: 0)
+        result = 31 * result + teacherName.hashCode()
+        result = 31 * result + email.hashCode()
+        result = 31 * result + role.hashCode()
+        result = 31 * result + (profilePic?.contentHashCode() ?: 0)
+        result = 31 * result + coursesTaught.hashCode()
+        return result
+    }
+}

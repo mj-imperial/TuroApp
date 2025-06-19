@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.teacher
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
@@ -21,14 +20,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -39,8 +43,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -54,16 +59,23 @@ import com.example.turomobileapp.ui.theme.screeningExam1
 import com.example.turomobileapp.ui.theme.screeningExam2
 import com.example.turomobileapp.ui.theme.shortquiz1
 import com.example.turomobileapp.ui.theme.shortquiz2
+import com.example.turomobileapp.ui.theme.tutorial1
+import com.example.turomobileapp.ui.theme.tutorial2
 import com.example.turomobileapp.viewmodels.SessionManager
+import com.example.turomobileapp.viewmodels.teacher.TeacherCourseViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeacherCourseScreen(
     navController: NavController,
     courseId: String,
     sessionManager: SessionManager,
-    coursePic: String
+    viewModel: TeacherCourseViewModel
 ){
     val windowInfo = rememberWindowInfo()
+    val pullRefreshState = rememberPullToRefreshState()
+
+    val uiState by viewModel.uiState.collectAsState()
     
     AppScaffold(
         navController = navController,
@@ -74,41 +86,45 @@ fun TeacherCourseScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.SpaceAround
-            ) {
-                Text(
-                    text = stringResource(R.string.ViewModules),
-                    fontFamily = FontFamily(Font(R.font.alexandria)),
-                    fontSize = ResponsiveFont.body(windowInfo),
-                    textDecoration = TextDecoration.Underline,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .clickable(onClick = {
-                            navController.navigate(Screen.TeacherCreateModule.route)
-                        }),
-                )
-
-                CourseHeader(
-                    height = windowInfo.screenHeight,
-                    coursePic = coursePic
-                )
-
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(20.dp)
+            if (uiState.loading){
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ){
+                    CircularProgressIndicator()
+                }
+            }else{
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getCoursePicture()
+                    },
                 ) {
-                    CourseActivities(
-                        navController = navController,
-                        windowInfo = windowInfo,
-                        width = windowInfo.screenWidth,
-                        height = windowInfo.screenHeight,
-                        courseId = courseId
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.SpaceAround
+                    ) {
+                        CourseHeader(
+                            height = windowInfo.screenHeight,
+                            coursePic = uiState.coursePic
+                        )
+
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(20.dp)
+                        ) {
+                            CourseActivities(
+                                navController = navController,
+                                windowInfo = windowInfo,
+                                width = windowInfo.screenWidth,
+                                height = windowInfo.screenHeight,
+                                courseId = courseId
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -118,10 +134,8 @@ fun TeacherCourseScreen(
 @Composable
 fun CourseHeader(
     height: Dp,
-    coursePic: String
+    coursePic: ByteArray?
 ){
-    val modulePlaceholderImage = "https://images.pexels.com/photos/27409729/pexels-photo-27409729/free-photo-of-dice-game-on-black-and-white-background.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -132,13 +146,10 @@ fun CourseHeader(
         Box(
             modifier = Modifier.fillMaxSize()
         ){
-            AsyncImage(
-                model = if (coursePic.isNotEmpty()) coursePic else modulePlaceholderImage,
-                contentDescription = "Module Image",
-                contentScale = ContentScale.Crop,
-                clipToBounds = true,
-                alpha = 0.6f,
-                modifier = Modifier.clip(RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp)).fillMaxWidth()
+            BlobImage(
+                byteArray = coursePic,
+                modifier = Modifier.clip(RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp)).fillMaxWidth(),
+                alpha = 0.6f
             )
         }
     }
@@ -166,22 +177,28 @@ fun CourseActivities(
         ),
         Activities(
             name = R.string.TeacherActivity,
-            icon = R.drawable.longquiz_icon,
+            icon = R.drawable.practicequiz_icon,
             route = Screen.TeacherActivityModules.createRoute(courseId),
             colors = listOf(longquiz1,longquiz2)
         ),
         Activities(
-            name = R.string.TeacherStudents,
-            icon = R.drawable.practicequiz_icon,
-            route = Screen.TeacherViewAllStudents.route,
+            name = R.string.CreateLongQuiz,
+            icon = R.drawable.longquiz_icon,
+            route = Screen.TeacherCreateLongQuiz.route,
             colors = listOf(screeningExam1,screeningExam2)
+        ),
+        Activities(
+            name = R.string.CreateScreeningExam,
+            icon = R.drawable.additionalscreening,
+            route = Screen.TeacherCreateScreeningExam.route,
+            colors = listOf(tutorial1, tutorial2)
         ),
         Activities(
             name = R.string.TeacherPerformance,
             icon = R.drawable.shortquiz_icon,
             route = Screen.TeacherPerformance.createRoute(courseId),
             colors = listOf(performance1, performance2)
-        ),
+        )
     )
 
     Column(

@@ -182,5 +182,27 @@ data class MessageRecipient(
     val userId: String,
     val name: String,
     val email: String,
-    val profilePic: String? = null
-)
+    val profilePic: ByteArray? = null
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as MessageRecipient
+
+        if (userId!=other.userId) return false
+        if (name!=other.name) return false
+        if (email!=other.email) return false
+        if (!profilePic.contentEquals(other.profilePic)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = userId.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + email.hashCode()
+        result = 31 * result + (profilePic?.contentHashCode() ?: 0)
+        return result
+    }
+}

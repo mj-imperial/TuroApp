@@ -12,13 +12,13 @@ import androidx.compose.ui.layout.ContentScale
 //BlobImage(module.modulePicture, modifier = Modifier.size(100.dp))
 @Composable
 fun BlobImage(
-    byteArray: ByteArray,
+    byteArray: ByteArray?,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
     alpha: Float = 1f
 ) {
     val bitmap = remember(byteArray) {
-        BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)?.asImageBitmap()
+        byteArray?.let { BitmapFactory.decodeByteArray(byteArray, 0, it.size) }?.asImageBitmap()
     }
 
     bitmap?.let {

@@ -1,7 +1,9 @@
 package com.example.turomobileapp.repositories
 
+import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.CourseApiService
+import com.example.turomobileapp.models.CoursePicture
 import com.example.turomobileapp.models.CourseResponse
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -17,5 +19,11 @@ class CourseRepository @Inject constructor(private val courseApiService: CourseA
         requestAndMap(
             call = { courseApiService.getCoursesForTeacher(action = "teacherCourses", userId = userId) },
             mapper = { dto -> dto.courses }
+        )
+
+    fun getCoursePicture(courseId: String): Flow<Result<CoursePicture>> =
+        handleApiResponse(
+            call = { courseApiService.getCoursePicture(courseId) },
+            errorMessage = "Failed to get course picture for $courseId"
         )
 }

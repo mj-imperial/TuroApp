@@ -1,6 +1,5 @@
 package com.example.turomobileapp.ui.screens.student
 
-import com.example.turomobileapp.ui.components.AppScaffold
 import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -37,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -48,15 +48,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
+import com.example.turomobileapp.ui.theme.LoginTextLight
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
+import com.example.turomobileapp.ui.theme.headingText
 import com.example.turomobileapp.ui.theme.practice1
 import com.example.turomobileapp.ui.theme.practice2
 import com.example.turomobileapp.ui.theme.screeningExam1
@@ -140,76 +144,89 @@ fun CourseHeader(
     moduleImage: ByteArray,
     moduleProgress: Double,
     moduleName: String
-){
-    val columnHeight = height * 0.25f
+) {
+    val columnHeight = max(height * 0.25f, 180.dp)
+    val progressText = "Progress: ${"%.0f".format(moduleProgress)}%"
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(columnHeight)
-            .padding(bottom = 30.dp),
-        verticalArrangement = Arrangement.SpaceEvenly
+            .padding(bottom = 30.dp)
+            .clickable(onClick = onClickCurrentModule)
     ) {
+        BlobImage(
+            byteArray = moduleImage,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(bottomStart = 5.dp, bottomEnd = 5.dp)),
+            alpha = 0.6f
+        )
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable(onClick = onClickCurrentModule)
-        ){
-            BlobImage(
-                byteArray = moduleImage,
-                modifier = Modifier.clip(RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp)).fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Black.copy(alpha = 0.4f), Color.Transparent)
+                    )
+                )
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(25.dp)
+                .background(LoginTextLight.copy(alpha = 0.8f), RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(10.dp))
+                .shadow(4.dp, RoundedCornerShape(10.dp))
+                .padding(20.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = progressText,
+                fontSize = ResponsiveFont.heading1(windowInfo),
+                fontFamily = FontFamily(Font(R.font.alexandria)),
+                color = headingText,
+                fontWeight = FontWeight.ExtraBold
             )
 
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.Start,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Progress: $moduleProgress%",
-                    fontSize = ResponsiveFont.heading1(windowInfo),
+                    text = moduleName,
+                    fontSize = ResponsiveFont.heading3(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alexandria)),
-                    color = MainWhite,
-                    fontWeight = FontWeight.ExtraBold
+                    color = headingText,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = moduleName,
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        fontFamily = FontFamily(Font(R.font.alexandria)),
-                        color = MainWhite,
-                        maxLines = 1,
-                        softWrap = true,
-                        overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.Medium
+                IconButton(
+                    onClick = onClickCurrentModule,
+                    shape = CircleShape,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MainWhite,
+                        contentColor = TextBlack
                     )
-
-                    IconButton(
-                        onClick = onClickCurrentModule,
-                        enabled = true,
-                        shape = CircleShape,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MainWhite,
-                            contentColor = TextBlack
-                        )
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.readmore_icon),
-                            contentDescription = "Read More",
-                            tint = TextBlack
-                        )
-                    }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.readmore_icon),
+                        contentDescription = "Read More",
+                        tint = TextBlack
+                    )
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun CourseActivities(
@@ -241,6 +258,12 @@ fun CourseActivities(
             name = R.string.ScreeningExam,
             icon = R.drawable.screeningexam_icon,
             route = Screen.StudentScreening.route,
+            colors = listOf(screeningExam1,screeningExam2)
+        ),
+        Activities(
+            name = R.string.LongQuizExam,
+            icon = R.drawable.longquiz_icon,
+            route = Screen.StudentLongQuiz.route,
             colors = listOf(screeningExam1,screeningExam2)
         )
     )

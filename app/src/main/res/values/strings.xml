@@ -42,8 +42,10 @@
     <string name="Tutorials">SKILL HONING TUTORIALS</string>
 ]    <string name="Analytics">ANALYTICS</string>
     <string name="ScreeningExam">SCREENING EXAM</string>
+    <string name="LongQuizExam">LONG QUIZ EXAM</string>
     <string name="TeacherModules">CREATE MODULES</string>
     <string name="TeacherActivity">CREATE / EDIT ACTIVITIES</string>
     <string name="TeacherPerformance">VIEW PERFORMANCE</string>
-    <string name="TeacherStudents">SHOW ALL STUDENTS</string>
+    <string name="CreateLongQuiz">CREATE/EDIT LONG QUIZ</string>\
+    <string name="CreateScreeningExam">CREATE/EDIT SCREENING EXAM</string>
 </resources>
