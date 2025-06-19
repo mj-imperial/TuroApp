@@ -1,5 +1,8 @@
 package com.example.turomobileapp.viewmodels.teacher
 
+import android.content.Context
+import android.net.Uri
+import android.util.Base64
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditModuleViewModel @Inject constructor(
     private val moduleRepository: ModuleRepository,
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val notificationService: TuroNotificationService
 ): ViewModel(){
 
@@ -29,36 +32,33 @@ class EditModuleViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(EditModuleUIState())
     val uiState: StateFlow<EditModuleUIState> = _uiState.asStateFlow()
 
-    private val _isFormValid = MutableStateFlow(false)
-    val isFormValid: StateFlow<Boolean> = _isFormValid.asStateFlow()
-
     init {
         getModule()
     }
 
     fun updateModuleName(newModuleName: String){
         _uiState.update { it.copy(moduleName = newModuleName) }
-        _isFormValid.value = validateForm()
     }
 
     fun updateModuleDescription(newModuleDescription: String){
         _uiState.update { it.copy(moduleDescription = newModuleDescription) }
-        _isFormValid.value = validateForm()
     }
 
-    fun validateForm(): Boolean{
-        val state = _uiState
+    fun updateSelectedImage(uri: Uri, context: Context) {
+        viewModelScope.launch {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val byteArray = inputStream?.readBytes() ?: byteArrayOf()
+            inputStream?.close()
 
-        if (state.value.originalModuleName == state.value.moduleName) return false
-
-        return true
+            _uiState.update { it.copy(modulePicture = byteArray) }
+        }
     }
 
     fun getModule(){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
-            moduleRepository.getModule(_moduleId).collect { result ->
+            moduleRepository.getModule(_moduleId, _courseId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { module ->
@@ -67,7 +67,8 @@ class EditModuleViewModel @Inject constructor(
                             originalModuleName = module.moduleName,
                             moduleName = module.moduleName,
                             originalModuleDescription = module.moduleDescription,
-                            moduleDescription = module.moduleDescription
+                            moduleDescription = module.moduleDescription,
+                            modulePicture = module.modulePicture
                         ) }
                     },
                     onFailure = { err ->
@@ -82,9 +83,12 @@ class EditModuleViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
+            val encodedImage = Base64.encodeToString(_uiState.value.modulePicture, Base64.NO_WRAP)
+
             val request = ModuleUpdateRequest(
                 moduleName = _uiState.value.moduleName,
-                moduleDescription = _uiState.value.moduleDescription
+                moduleDescription = _uiState.value.moduleDescription,
+                modulePicture = encodedImage,
             )
 
             moduleRepository.updateModule(_moduleId, request).collect { result ->
@@ -119,5 +123,36 @@ data class EditModuleUIState(
     val moduleName: String = "",
     val originalModuleDescription: String = "",
     val moduleDescription: String = "",
+    val modulePicture: ByteArray = byteArrayOf(),
     val editModuleStatus: Result<Unit>? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as EditModuleUIState
+
+        if (loading!=other.loading) return false
+        if (errorMessage!=other.errorMessage) return false
+        if (originalModuleName!=other.originalModuleName) return false
+        if (moduleName!=other.moduleName) return false
+        if (originalModuleDescription!=other.originalModuleDescription) return false
+        if (moduleDescription!=other.moduleDescription) return false
+        if (!modulePicture.contentEquals(other.modulePicture)) return false
+        if (editModuleStatus!=other.editModuleStatus) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = loading.hashCode()
+        result = 31 * result + (errorMessage?.hashCode() ?: 0)
+        result = 31 * result + originalModuleName.hashCode()
+        result = 31 * result + moduleName.hashCode()
+        result = 31 * result + originalModuleDescription.hashCode()
+        result = 31 * result + moduleDescription.hashCode()
+        result = 31 * result + modulePicture.contentHashCode()
+        result = 31 * result + (editModuleStatus?.hashCode() ?: 0)
+        return result
+    }
+}

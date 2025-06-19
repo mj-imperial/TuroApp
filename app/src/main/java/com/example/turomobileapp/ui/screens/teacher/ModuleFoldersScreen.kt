@@ -9,11 +9,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -36,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -50,19 +54,22 @@ import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.LoginTextLight
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
+import com.example.turomobileapp.ui.theme.MainWhite
+import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.ui.theme.practice2
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +84,6 @@ fun ModuleFoldersScreen(
     val pullRefreshState = rememberPullToRefreshState()
 
     val uiState by viewModel.uiState.collectAsState()
-    val modules = uiState.modules
 
     var selectedToDeleteId by remember { mutableStateOf<String?>(null) }
 
@@ -124,6 +130,14 @@ fun ModuleFoldersScreen(
         )
     }
 
+    LaunchedEffect(uiState.moduleDeleteStatus) {
+        if (uiState.moduleDeleteStatus == Result.Success(Unit)) {
+            Toast.makeText( context, "Module successfully deleted.", Toast.LENGTH_SHORT).show()
+            viewModel.getModulesInCourse()
+        }
+        viewModel.resetModuleDeleteStatus()
+    }
+
     AppScaffold(
         navController = navController,
         canNavigateBack = true,
@@ -131,51 +145,54 @@ fun ModuleFoldersScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                if (uiState.loading){
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ){
-                        CircularProgressIndicator()
-                    }
-                }else{
+            if (uiState.loading){
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ){
+                    CircularProgressIndicator()
+                }
+            }else{
+                Column(
+                    modifier = Modifier
+                        .padding(padding)
+                        .padding(horizontal = 15.dp)
+                        .fillMaxSize()
+                ) {
+                    Spacer(modifier = Modifier.height(30.dp))
+                    Text(
+                        text = "MODULES",
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.title(windowInfo),
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+
                     PullToRefreshBox(
                         isRefreshing = uiState.loading,
                         state = pullRefreshState,
                         onRefresh = {
                             viewModel.getModulesInCourse()
                         },
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        LazyVerticalGrid(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(20.dp),
-                            columns = GridCells.FixedSize(windowInfo.screenWidth * 0.90f),
-                            contentPadding = PaddingValues(15.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            item {
-                                Text(
-                                    text = "MODULES",
-                                    fontFamily = FontFamily(Font(R.font.alata)),
-                                    fontSize = ResponsiveFont.title(windowInfo),
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
+                        val columns = when {
+                            windowInfo.screenWidth >= 1000.dp -> 4
+                            windowInfo.screenWidth >= 700.dp -> 3
+                            else -> 2
+                        }
 
-                            items(
-                                items = modules,
-                                key = { it.moduleId }
-                            ) {  module ->
+                        LazyVerticalGrid(
+                            modifier = Modifier.fillMaxSize(),
+                            columns = GridCells.Fixed(columns),
+                            contentPadding = PaddingValues(15.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            items(uiState.modules) { module ->
                                 ModuleFolders(
                                     windowInfo = windowInfo,
-                                    cardHeight = windowInfo.screenHeight * 0.09f,
+                                    modulePicture = module.modulePicture,
                                     moduleName = module.moduleName,
                                     onFolderClick = {
                                         navController.navigate(
@@ -189,20 +206,12 @@ fun ModuleFoldersScreen(
                                     },
                                     onDeleteClick = {
                                         selectedToDeleteId = module.moduleId
-                                    },
+                                    }
                                 )
                             }
                         }
                     }
                 }
-            }
-
-            LaunchedEffect(uiState.moduleDeleteStatus) {
-                if (uiState.moduleDeleteStatus == Result.Success(Unit)) {
-                    Toast.makeText( context, "Module successfully deleted.", Toast.LENGTH_SHORT).show()
-                    viewModel.getModulesInCourse()
-                }
-                viewModel.resetModuleDeleteStatus()
             }
         }
     )
@@ -211,71 +220,84 @@ fun ModuleFoldersScreen(
 @Composable
 fun ModuleFolders(
     windowInfo: WindowInfo,
-    cardHeight: Dp,
+    modulePicture: ByteArray,
     moduleName: String,
     onFolderClick: () -> Unit,
     onClickEdit: () -> Unit,
     onDeleteClick: () -> Unit,
-){
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(cardHeight)
+            .wrapContentHeight()
             .clickable(onClick = onFolderClick),
-        elevation = CardDefaults.cardElevation(3.dp),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(colors = listOf(MainOrange, practice2)))
-                .padding(horizontal = 15.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ){
-            Row(
-                modifier = Modifier.weight(1f).padding(end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.folder_icon),
-                    contentDescription = "$moduleName Folder",
-                    modifier = Modifier
-                        .size(cardHeight * 0.6f)
-                        .padding(end = 12.dp)
-                )
+                .aspectRatio(1f)
+        ) {
+            BlobImage(
+                byteArray = modulePicture,
+                modifier = Modifier.fillMaxSize()
+            )
 
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(15.dp),
+                horizontalArrangement = Arrangement.spacedBy(30.dp)
+            ) {
+                IconButton(
+                    onClick = onClickEdit,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .background(green, shape = RoundedCornerShape(6.dp))
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.edit_icon),
+                        contentDescription = "Edit",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onDeleteClick,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .background(MainRed, shape = RoundedCornerShape(6.dp))
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.baseline_delete_24),
+                        contentDescription = "Delete",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .background(Color.Black.copy(alpha = 0.7f))
+                    .padding(8.dp)
+            ) {
                 Text(
                     text = moduleName,
                     fontSize = ResponsiveFont.heading3(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alata)),
-                    overflow = TextOverflow.Ellipsis,
+                    color = MainWhite,
                     maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onClickEdit) {
-                    Icon(
-                        painter = painterResource(R.drawable.edit_icon),
-                        contentDescription = null,
-                        tint = green
-                    )
-                }
-
-                IconButton(onClick = onDeleteClick) {
-                    Icon(
-                        painter = painterResource(R.drawable.baseline_delete_24),
-                        contentDescription = null,
-                        tint = MainRed
-                    )
-                }
             }
         }
     }
 }
+
+
+

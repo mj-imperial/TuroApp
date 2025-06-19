@@ -172,7 +172,7 @@ fun CourseActivities(
         Activities(
             name = R.string.TeacherModules,
             icon = R.drawable.viewallmodules,
-            route = Screen.TeacherViewAllModules.createRoute(courseId),
+            route = Screen.TeacherCreateModule.createRoute(courseId),
             colors = listOf(shortquiz1,shortquiz2)
         ),
         Activities(

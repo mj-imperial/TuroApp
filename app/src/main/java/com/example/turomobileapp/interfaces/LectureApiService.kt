@@ -1,7 +1,6 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.ActivityActionResponse
-import com.example.turomobileapp.models.FileUploadResponse
 import com.example.turomobileapp.models.LectureResponse
 import com.example.turomobileapp.models.LectureUpdateRequest
 import com.example.turomobileapp.models.LectureUploadRequest
@@ -15,12 +14,6 @@ import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface LectureApiService {
-    @Multipart
-    @POST("upload_lecture_file.php")
-    suspend fun uploadFile(
-        @Part file: MultipartBody.Part
-    ): Response<FileUploadResponse>
-
     @POST("create_lecture.php")
     suspend fun createLecture(
         @Query("module_id") moduleId: String,

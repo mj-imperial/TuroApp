@@ -70,16 +70,15 @@ sealed class Screen(val route: String) {
     object TeacherCourseDetail: Screen("course_detail/{courseId}") {
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
-    object TeacherViewAllModules: Screen("teacher_view_all_modules/{courseId}"){
-        fun createRoute(courseId: String) = "teacher_view_all_modules/$courseId"
-    }
     object TeacherActivityModules: Screen("teacher_activity_modules/{courseId}"){
         fun createRoute(courseId: String) = "teacher_activity_modules/$courseId"
     }
     object TeacherCreateEditActivitiesInModule: Screen("teacher_create_edit_activity_in_module/{moduleId}"){
         fun createRoute(moduleId: String) = "teacher_create_edit_activity_in_module/$moduleId"
     }
-    object TeacherCreateModule: Screen("teacher_createModule")
+    object TeacherCreateModule: Screen("teacher_createModule/{courseId}"){
+        fun createRoute(courseId: String) = "teacher_createModule/$courseId"
+    }
     object TeacherCreateLongQuiz: Screen("teacher_create_long_quiz")
     object TeacherCreateScreeningExam: Screen("teacher_create_screening_exam")
     object TeacherPerformance: Screen("teacher_performance/{courseId}"){

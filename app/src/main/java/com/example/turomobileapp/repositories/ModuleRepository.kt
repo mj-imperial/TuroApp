@@ -14,9 +14,9 @@ import javax.inject.Inject
 
 class ModuleRepository @Inject constructor(private val moduleApiService: ModuleApiService) {
 
-    fun createModule(courseId:String, moduleName: String, moduleDescription: String): Flow<Result<ModuleResultResponse>> =
+    fun createModule(courseId:String, request: ModuleUploadRequest): Flow<Result<ModuleResultResponse>> =
         handleApiResponse(
-            call = { moduleApiService.createModule(ModuleUploadRequest(courseId, moduleName, moduleDescription)) },
+            call = { moduleApiService.createModule(courseId, request) },
             errorMessage = "Failed to create module"
         )
 
@@ -44,9 +44,9 @@ class ModuleRepository @Inject constructor(private val moduleApiService: ModuleA
             errorMessage = "Failed to delete module $moduleId"
         )
 
-    fun getModule(moduleId: String): Flow<Result<ModuleUploadRequest>> =
+    fun getModule(moduleId: String, courseId: String): Flow<Result<ModuleResponse>> =
         handleApiResponse(
-            call = { moduleApiService.getModule(moduleId) },
+            call = { moduleApiService.getModule(moduleId, courseId) },
             errorMessage = "Failed to get module $moduleId"
         )
 

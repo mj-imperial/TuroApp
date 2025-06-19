@@ -73,12 +73,14 @@ class CreateLectureViewModel @Inject constructor(
     fun onFilePicked(context: Context, uri: Uri) {
         val name = getDisplayName(context, uri)
         val mime = context.contentResolver.getType(uri)
+        val byteArray = context.contentResolver.openInputStream(uri)?.readBytes()
 
         _uiState.update {
             it.copy(
                 fileUri = uri,
                 fileName = name,
-                fileMimeType = mime
+                fileMimeType = mime,
+                fileUrl = byteArray
             )
         }
 
@@ -102,7 +104,7 @@ class CreateLectureViewModel @Inject constructor(
         if (unlock == null) return false
 
         return when (state.uploadType) {
-            "PDF/DOCS" -> !state.fileUrl?.isEmpty()!!
+            "PDF/DOCS" -> state.fileUrl != null && state.fileUrl.isNotEmpty()
             "VIDEO" -> !state.youtubeUrl.isNullOrBlank()
             "TEXT" -> !state.text.isNullOrBlank()
             else -> false
@@ -165,7 +167,7 @@ class CreateLectureViewModel @Inject constructor(
             deadlineDate = state.deadlineDateTime,
             contentTypeName = state.uploadType,
             videoUrl = state.youtubeUrl,
-            fileUrl = state.fileUrl,
+            fileUrl = state.fileUrl?.let { android.util.Base64.encodeToString(it, android.util.Base64.NO_WRAP) },
             fileMimeType = state.fileMimeType,
             fileName = state.fileName,
             textBody = state.text

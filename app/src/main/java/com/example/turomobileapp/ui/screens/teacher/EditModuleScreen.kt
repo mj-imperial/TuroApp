@@ -1,7 +1,14 @@
 package com.example.turomobileapp.ui.screens.teacher
 
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,9 +18,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +48,7 @@ import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
@@ -60,9 +73,9 @@ fun EditModuleScreen(
 ){
     val windowInfo = rememberWindowInfo()
     val context = LocalContext.current
+    val contentResolver = context.contentResolver
 
     val uiState by viewModel.uiState.collectAsState()
-    val isFormValid by viewModel.isFormValid.collectAsState()
     var openAlertDialog by remember { mutableStateOf(false) }
     var openErrorDialog by remember { mutableStateOf(false) }
 
@@ -76,6 +89,18 @@ fun EditModuleScreen(
                 ?: "Unknown error"
             Toast.makeText(context, "Failed to update module: $msg", Toast.LENGTH_LONG).show()
             viewModel.clearEditStatus()
+        }
+    }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            viewModel.updateSelectedImage(it, context)
         }
     }
 
@@ -157,7 +182,8 @@ fun EditModuleScreen(
                     modifier = Modifier
                         .padding(it)
                         .padding(20.dp)
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -240,7 +266,51 @@ fun EditModuleScreen(
                         enabled = true,
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(30.dp))
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clickable(onClick = {
+                                imagePickerLauncher.launch(arrayOf("image/*"))
+                            }),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(containerColor = SoftGray),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Box(
+                            Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            when{
+                                uiState.modulePicture.isNotEmpty() -> {
+                                    BlobImage(
+                                        byteArray = uiState.modulePicture,
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
+                                }
+
+                                else -> Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Image(
+                                        painter = painterResource(R.drawable.insert_image),
+                                        contentDescription = "Pick an Image",
+                                        modifier = Modifier.size(50.dp)
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        text = "Tap to select Image",
+                                        fontFamily = FontFamily(Font(R.font.alata)),
+                                        fontSize = ResponsiveFont.heading2(windowInfo)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(50.dp))
 
                     CapsuleButton(
                         text = {
@@ -259,7 +329,7 @@ fun EditModuleScreen(
                         buttonElevation = ButtonDefaults.buttonElevation(8.dp),
                         contentPadding = PaddingValues(10.dp),
                         buttonColors = ButtonDefaults.buttonColors(MainOrange),
-                        enabled = isFormValid
+                        enabled = true
                     )
                 }
             }

@@ -444,7 +444,7 @@ fun NavGraphBuilder.teacherNavGraph(
     }
 
     composable(
-        route = Screen.TeacherViewAllModules.route,
+        route = Screen.TeacherCreateModule.route,
         arguments = listOf(
             navArgument("courseId") { type = NavType.StringType }
         )

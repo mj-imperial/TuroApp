@@ -17,9 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -28,7 +25,7 @@ class EditLectureViewModel @Inject constructor(
     private val lectureRepository: LectureRepository,
     private val savedStateHandle: SavedStateHandle,
     private val notificationService: TuroNotificationService
-): ViewModel(){
+) : ViewModel() {
 
     private val _activityId: String = checkNotNull(savedStateHandle["activityId"])
     private val _moduleId: String = checkNotNull(savedStateHandle["moduleId"])
@@ -40,7 +37,7 @@ class EditLectureViewModel @Inject constructor(
         getLecture()
     }
 
-    fun getLecture(){
+    fun getLecture() {
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
@@ -52,7 +49,7 @@ class EditLectureViewModel @Inject constructor(
                             it.copy(
                                 loading = false,
                                 lectureTitle = lecture.lectureName,
-                                lectureDescription = lecture.lectureDescription.toString(),
+                                lectureDescription = lecture.lectureDescription.orEmpty(),
                                 unlockDate = lecture.unlockDate,
                                 deadlineDate = lecture.deadlineDate,
                                 originalContentTypeName = lecture.contentTypeName,
@@ -66,50 +63,52 @@ class EditLectureViewModel @Inject constructor(
                         }
                     },
                     onFailure = { err ->
-                         _uiState.update { it.copy(loading = false, errorMessage = err) }
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
                     }
                 )
             }
         }
     }
 
-    fun updateLectureTitle(newTitle: String){
+    fun updateLectureTitle(newTitle: String) {
         _uiState.update { it.copy(lectureTitle = newTitle) }
     }
 
-    fun updateLectureDescription(newDescription: String){
+    fun updateLectureDescription(newDescription: String) {
         _uiState.update { it.copy(lectureDescription = newDescription) }
     }
 
-    fun updateUnlockDate(newUnlockDate: LocalDateTime?){
+    fun updateUnlockDate(newUnlockDate: LocalDateTime?) {
         _uiState.update { it.copy(unlockDate = newUnlockDate) }
     }
 
-    fun updateDeadlineDate(newDeadlineDate: LocalDateTime?){
+    fun updateDeadlineDate(newDeadlineDate: LocalDateTime?) {
         _uiState.update { it.copy(deadlineDate = newDeadlineDate) }
     }
 
-    fun updateContentTypeName(newContentType: String){
+    fun updateContentTypeName(newContentType: String) {
         _uiState.update { it.copy(contentTypeName = newContentType) }
     }
 
-    fun updateVideoUrl(newUrl: String){
+    fun updateVideoUrl(newUrl: String) {
         _uiState.update { it.copy(videoUrl = newUrl) }
     }
 
-    fun updateText(newText: String){
+    fun updateText(newText: String) {
         _uiState.update { it.copy(textBody = newText) }
     }
 
     fun onFilePicked(context: Context, uri: Uri) {
         val mime = context.contentResolver.getType(uri)
         val name = getDisplayName(context, uri)
+        val byteArray = context.contentResolver.openInputStream(uri)?.readBytes()
 
         _uiState.update {
             it.copy(
                 fileUri = uri,
                 fileName = name,
-                fileMimeType = mime
+                fileMimeType = mime,
+                fileUrl = byteArray
             )
         }
     }
@@ -126,32 +125,26 @@ class EditLectureViewModel @Inject constructor(
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
             val state = _uiState.value
-            var uploadedFileUrl = state.fileUrl
 
             if (state.contentTypeName == "PDF/DOCS" && state.fileUri != null) {
                 try {
                     val mime = state.fileMimeType ?: "application/octet-stream"
-                    val bytes = context.contentResolver.openInputStream(state.fileUri)!!.readBytes()
-                    val req = bytes.toRequestBody(mime.toMediaType())
-                    val part = MultipartBody.Part.createFormData("file", state.fileName ?: "lecture", req)
+                    val name = state.fileName ?: "lecture"
+                    val bytes = context.contentResolver.openInputStream(state.fileUri)?.readBytes()
 
-                    lectureRepository.uploadLectureFile(part).collect { result ->
-                        handleResult(result,
-                            onSuccess = { response ->
-                                uploadedFileUrl = response.fileUrl
-                                _uiState.update {
-                                    it.copy(fileUrl = response.fileUrl)
-                                }
-                                resetFieldsIfContentTypeChanged()
-                                sendEditRequest()
-                            },
-                            onFailure = { error ->
-                                _uiState.update { it.copy(loading = false, errorMessage = error) }
-                            }
+                    if (bytes == null) {
+                        _uiState.update { it.copy(loading = false, errorMessage = "Failed to read file bytes") }
+                        return@launch
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            fileUrl = bytes,
+                            fileMimeType = mime,
+                            fileName = name
                         )
                     }
 
-                    return@launch
                 } catch (e: Exception) {
                     _uiState.update { it.copy(loading = false, errorMessage = e.message ?: "Upload error") }
                     return@launch
@@ -189,7 +182,7 @@ class EditLectureViewModel @Inject constructor(
                 deadlineDate = state.deadlineDate,
                 contentTypeName = state.contentTypeName,
                 videoUrl = state.videoUrl,
-                fileUrl = state.fileUrl,
+                fileUrl = state.fileUrl?.let { android.util.Base64.encodeToString(it, android.util.Base64.NO_WRAP) },
                 fileMimeType = state.fileMimeType,
                 fileName = state.fileName,
                 textBody = state.textBody
@@ -202,12 +195,12 @@ class EditLectureViewModel @Inject constructor(
                         _uiState.update { it.copy(loading = false, editLectureStatus = Result.Success(Unit)) }
 
                         notificationService.showNotification(
-                            notificationTitle =  "LECTURE UPDATED",
-                            notificationText =  "The lecture has been successfully updated.",
+                            notificationTitle = "LECTURE UPDATED",
+                            notificationText = "The lecture has been successfully updated.",
                             route = "teacher_create_edit_activity_in_module/${_moduleId}"
                         )
                     },
-                    onFailure = {err ->
+                    onFailure = { err ->
                         _uiState.update { it.copy(loading = false, errorMessage = err, editLectureStatus = null) }
                     }
                 )
@@ -215,7 +208,7 @@ class EditLectureViewModel @Inject constructor(
         }
     }
 
-    fun clearLectureStatus(){
+    fun clearLectureStatus() {
         _uiState.update { it.copy(editLectureStatus = null) }
     }
 }
@@ -236,4 +229,48 @@ data class EditLectureUIState(
     val fileName: String? = null,
     val textBody: String? = null,
     val fileUri: Uri? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as EditLectureUIState
+
+        if (loading!=other.loading) return false
+        if (errorMessage!=other.errorMessage) return false
+        if (editLectureStatus!=other.editLectureStatus) return false
+        if (lectureTitle!=other.lectureTitle) return false
+        if (lectureDescription!=other.lectureDescription) return false
+        if (unlockDate!=other.unlockDate) return false
+        if (deadlineDate!=other.deadlineDate) return false
+        if (originalContentTypeName!=other.originalContentTypeName) return false
+        if (contentTypeName!=other.contentTypeName) return false
+        if (videoUrl!=other.videoUrl) return false
+        if (!fileUrl.contentEquals(other.fileUrl)) return false
+        if (fileMimeType!=other.fileMimeType) return false
+        if (fileName!=other.fileName) return false
+        if (textBody!=other.textBody) return false
+        if (fileUri!=other.fileUri) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = loading.hashCode()
+        result = 31 * result + (errorMessage?.hashCode() ?: 0)
+        result = 31 * result + (editLectureStatus?.hashCode() ?: 0)
+        result = 31 * result + lectureTitle.hashCode()
+        result = 31 * result + lectureDescription.hashCode()
+        result = 31 * result + (unlockDate?.hashCode() ?: 0)
+        result = 31 * result + (deadlineDate?.hashCode() ?: 0)
+        result = 31 * result + originalContentTypeName.hashCode()
+        result = 31 * result + contentTypeName.hashCode()
+        result = 31 * result + (videoUrl?.hashCode() ?: 0)
+        result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
+        result = 31 * result + (fileMimeType?.hashCode() ?: 0)
+        result = 31 * result + (fileName?.hashCode() ?: 0)
+        result = 31 * result + (textBody?.hashCode() ?: 0)
+        result = 31 * result + (fileUri?.hashCode() ?: 0)
+        return result
+    }
+}
