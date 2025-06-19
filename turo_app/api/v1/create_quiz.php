@@ -239,7 +239,6 @@ try {
         'SHORT' => 2,
         'PRACTICE' => 3,
         'LONG' => 4,
-        'SCREENING_EXAM' => 6
     ];
     $quizTypeName = $data['quiz_type_name'];
     if (!isset($mapping[$quizTypeName])) {
