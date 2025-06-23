@@ -1,6 +1,7 @@
 package com.example.turomobileapp.ui.screens.student
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,7 @@ import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.MainWhite
+import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.ViewAllModulesViewModel
 
@@ -170,7 +172,8 @@ fun ModuleItem(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(12.dp),
+                    .padding(12.dp)
+                    .background(TextBlack),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -204,7 +207,7 @@ fun ModuleItem(
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontWeight = FontWeight.Medium,
                         overflow = TextOverflow.Ellipsis,
-                        maxLines = 2,
+                        maxLines = 1,
                         textAlign = TextAlign.Center
                     )
                 }

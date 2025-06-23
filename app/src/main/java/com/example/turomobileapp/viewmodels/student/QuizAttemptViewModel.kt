@@ -62,6 +62,7 @@ class QuizAttemptViewModel @Inject constructor(
                                 quizName = quiz.quizName,
                                 quizType = quiz.quizTypeName,
                                 timeLimit = quiz.timeLimit,
+                                totalPoints = quiz.overallPoints,
                                 loadingMetadata = false
                             )
                         }
@@ -149,35 +150,32 @@ class QuizAttemptViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(loadingSubmit = true, errorMessage = null) }
 
-            if (_uiState.value.answers.isEmpty()) {
-                _events.send(QuizAttemptEvent.SubmitError("You haven't answered any questions."))
-                return@launch
-            }
-
             _events.send(QuizAttemptEvent.SubmitQuiz)
 
-            val answersList = uiState.value.answers.map { (index, answer) ->
+            val answersList = uiState.value.content.mapIndexed { index, question ->
+                val answer = uiState.value.answers[index]
                 when (answer) {
-                    is Answer.OptionAnswer -> {
-                        AnswerUploadRequest(
-                            questionId = answer.questionId,
-                            optionId = answer.optionId,
-                            isCorrect = answer.isCorrect
-                        )
-                    }
-
+                    is Answer.OptionAnswer -> AnswerUploadRequest(
+                        questionId = answer.questionId,
+                        optionId = answer.optionId,
+                        isCorrect = answer.isCorrect
+                    )
                     is Answer.TextAnswer -> {
-                        val match: QuestionResponse? = answer.response.options
-                            .firstOrNull { opt ->
-                                opt.optionText.trim().equals(answer.text.trim(), ignoreCase = true)
-                            }
+                        val match = answer.response.options.firstOrNull { opt ->
+                            opt.optionText.trim().uppercase() == answer.text.trim().uppercase()
+                        }
 
                         AnswerUploadRequest(
                             questionId = answer.response.questionId,
-                            optionId   = match?.optionId ?: "",
-                            isCorrect  = match?.isCorrect ?: false
+                            optionId = match?.optionId ?: "",
+                            isCorrect = match?.isCorrect ?: false
                         )
                     }
+                    null -> AnswerUploadRequest(
+                        questionId = question.questionId,
+                        optionId = "",
+                        isCorrect = false
+                    )
                 }
             }
 
@@ -196,14 +194,8 @@ class QuizAttemptViewModel @Inject constructor(
             } else {
                 0.0
             }
-            val points: Int = when(scorePercentage){
-                100.0 -> 5
-                in 90.0..99.99 -> 4
-                in 85.0..89.99 -> 3
-                in 80.0..84.99 -> 2
-                in 70.0..79.99 -> 1
-                else -> 0
-            }
+
+            val points: Int = score * 10
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
@@ -240,6 +232,7 @@ data class QuizAttemptUIState(
     val errorMessage: String? = null,
     val quizName: String = "",
     val quizType: String = "",
+    val totalPoints: Int = 0,
     val timeLimit: Int = 0,
     val content: List<QuizContentResponse> = emptyList(),
     val currentIndex: Int = 0,

@@ -1,9 +1,16 @@
 package com.example.turomobileapp.ui.screens.teacher
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
-import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -58,6 +66,7 @@ import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.components.CustomDropDownMenu
@@ -71,6 +80,7 @@ import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.LoginTextLight
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.SoftGray
@@ -90,7 +100,7 @@ fun CreateQuizScreen(
     viewModel: CreateQuizViewModel,
     moduleId: String
 ){
-    val context = LocalContext.current
+
     val windowInfo = rememberWindowInfo()
 
     val uiState by viewModel.uiState.collectAsState()
@@ -102,13 +112,7 @@ fun CreateQuizScreen(
 
     LaunchedEffect(uiState.createQuizStatus) {
         if (uiState.createQuizStatus is Result.Success) {
-            Toast.makeText(context, "Quiz successfully created.",Toast.LENGTH_SHORT).show()
             navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
-            viewModel.clearCreateQuizStatus()
-        }else if(uiState.createQuizStatus is Result.Failure){
-            val msg = uiState.errorMessage
-                ?: "Unknown error"
-            Toast.makeText(context, "Failed to create quiz: $msg", Toast.LENGTH_LONG).show()
             viewModel.clearCreateQuizStatus()
         }
     }
@@ -210,7 +214,6 @@ fun CreateQuizScreen(
                         onUpdateQuizType = viewModel::updateQuizType,
                         quizDescription = uiState.quizDescription,
                         onUpdateQuizDescription = viewModel::updateQuizDescription,
-                        onUpdateNumberOfAttempts = viewModel::updateNumberOfAttempts
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -229,7 +232,6 @@ fun CreateQuizScreen(
                         onUpdateDuration = viewModel::updateTimeLimit,
                         hasAnswersShown = uiState.hasAnswersShown,
                         onUpdateShowAnswers = viewModel::updateShowAnswers,
-                        quizType = uiState.quizType
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -274,13 +276,16 @@ fun CreateQuizScreen(
                             windowInfo = windowInfo,
                             questionNumber = questions.indexOf(question) + 1,
                             question = question,
-                            questionTempId = question.tempId,
                             onQuestionTextChanged = viewModel::updateQuestionText,
                             onAddOption = viewModel::addOption,
                             onUpdateOptionText = viewModel::updateOptionText,
                             onSetSingleCorrectOption = viewModel::setSingleCorrectOption,
                             onRemoveOption = viewModel::removeOption,
-                            onUpdateQuestionScore = viewModel::updateQuestionScore
+                            onUpdateQuestionScore = viewModel::updateQuestionScore,
+                            onAddImage = { questionId, uri, context ->
+                                viewModel.updateQuestionImage(questionId, uri, context)
+                            },
+                            onRemoveImage = viewModel::removeQuestionImage,
                         )
                     }
                 }
@@ -335,7 +340,6 @@ fun CreateQuizHeader(
     onUpdateName: (String) -> Unit,
     quizType: String,
     onUpdateQuizType: (String) -> Unit,
-    onUpdateNumberOfAttempts: (Int) -> Unit,
     quizDescription: String,
     onUpdateQuizDescription: (String) -> Unit
 ){
@@ -350,12 +354,6 @@ fun CreateQuizHeader(
             itemName = "PRACTICE",
             onClick = {
                 onUpdateQuizType("PRACTICE")
-            }
-        ),
-        DropdownMenuItem(
-            itemName = "LONG",
-            onClick = {
-                onUpdateQuizType("LONG")
             }
         )
     )
@@ -456,7 +454,6 @@ fun CreateQuizMoreInfo(
     onUpdateDuration: (Int) -> Unit,
     hasAnswersShown: Boolean?,
     onUpdateShowAnswers: (Boolean) -> Unit,
-    quizType: String
 ){
     Card(
         modifier = Modifier
@@ -497,6 +494,17 @@ fun CreateQuizMoreInfo(
                     color = LoginText
                 )
 
+                IconButton(onClick = {
+                    if (numberOfAttempts > 1){
+                        onUpdateNumberOfAttempts(numberOfAttempts - 1)
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.subtract_circle),
+                        contentDescription = null
+                    )
+                }
+
                 Box(
                     modifier = Modifier.padding(5.dp),
                     contentAlignment = Alignment.Center
@@ -505,6 +513,13 @@ fun CreateQuizMoreInfo(
                         text = numberOfAttempts.toString(),
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.heading3(windowInfo)
+                    )
+                }
+
+                IconButton(onClick = { onUpdateNumberOfAttempts(numberOfAttempts + 1)} ) {
+                    Icon(
+                        painter = painterResource(R.drawable.add_circle),
+                        contentDescription = null
                     )
                 }
             }
@@ -528,10 +543,10 @@ fun CreateQuizMoreInfo(
                 Text(
                     text = "SHOW ANSWERS: ",
                     fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontSize = ResponsiveFont.body(windowInfo),
                     color = LoginText
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
 
                 RadioButton(
                     selected = hasAnswersShown == true,
@@ -541,11 +556,11 @@ fun CreateQuizMoreInfo(
                 Text(
                     text = "YES",
                     fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontSize = ResponsiveFont.body(windowInfo),
                     color = LoginText
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(6.dp))
 
                 RadioButton(
                     selected = hasAnswersShown == false,
@@ -555,7 +570,7 @@ fun CreateQuizMoreInfo(
                 Text(
                     text = "NO",
                     fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontSize = ResponsiveFont.body(windowInfo),
                     color = LoginText
                 )
             }
@@ -571,14 +586,30 @@ fun QuizQuestionCard(
     windowInfo: WindowInfo,
     questionNumber: Int,
     question: PendingQuestion,
-    questionTempId: String,
     onQuestionTextChanged: (String, String) -> Unit,
     onAddOption: (String) -> Unit,
     onUpdateOptionText: (String, String, String) -> Unit,
     onSetSingleCorrectOption: (String, String) -> Unit,
     onRemoveOption: (String, String) -> Unit,
-    onUpdateQuestionScore: (String, Int) -> Unit
+    onUpdateQuestionScore: (String, Int) -> Unit,
+    onAddImage: (String, Uri, Context) -> Unit,
+    onRemoveImage: (String) -> Unit,
 ){
+    val context = LocalContext.current
+    val contentResolver = context.contentResolver
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+           onAddImage(question.tempId, it, context)
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -602,9 +633,63 @@ fun QuizQuestionCard(
                 textAlign = TextAlign.Start
             )
 
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .border(0.5.dp, LoginText)
+                    .background(LoginTextLight)
+                    .clickable(onClick = {
+                        imagePickerLauncher.launch(arrayOf("image/*"))
+                    }),
+                contentAlignment = Alignment.Center
+            ){
+                question.tempImage?.let {
+                    if (it.isNotEmpty()){
+                        BlobImage(
+                            byteArray = question.tempImage,
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+                        IconButton(
+                            onClick = { onRemoveImage(question.tempId) },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(6.dp)
+                                .size(24.dp)
+                                .background(MainRed, shape = RoundedCornerShape(6.dp))
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_delete_24),
+                                contentDescription = "Delete",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }else{
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.insert_image),
+                                contentDescription = "Pick an Image",
+                                modifier = Modifier.size(50.dp)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Tap to select Image",
+                                fontFamily = FontFamily(Font(R.font.alata)),
+                                fontSize = ResponsiveFont.heading2(windowInfo)
+                            )
+                        }
+                    }
+                }
+            }
+
             CapsuleTextField(
                 value = question.text,
-                onValueChange = { onQuestionTextChanged(questionTempId,it) },
+                onValueChange = { onQuestionTextChanged(question.tempId,it) },
                 placeholder = {
                     Text(
                         text = "Type the question here...",
@@ -639,7 +724,7 @@ fun QuizQuestionCard(
                     value = question.score.toString(),
                     onValueChange = {
                         val intVal = it.toIntOrNull() ?: 0
-                        onUpdateQuestionScore(questionTempId, intVal)
+                        onUpdateQuestionScore(question.tempId, intVal)
                     },
                     placeholder = {
                         Text(
@@ -674,7 +759,7 @@ fun QuizQuestionCard(
                     ) {
                         RadioButton(
                             selected = option.isCorrect,
-                            onClick = { onSetSingleCorrectOption(questionTempId,option.tempId) },
+                            onClick = { onSetSingleCorrectOption(question.tempId,option.tempId) },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = green,
                                 unselectedColor = LoginText
@@ -686,7 +771,7 @@ fun QuizQuestionCard(
                         CapsuleTextField(
                             value = option.text,
                             onValueChange = {
-                                onUpdateOptionText(questionTempId, option.tempId, it)
+                                onUpdateOptionText(question.tempId, option.tempId, it)
                             },
                             placeholder = {
                                 Text(
@@ -708,7 +793,7 @@ fun QuizQuestionCard(
                             enabled = true
                         )
 
-                        IconButton(onClick = { onRemoveOption(questionTempId,option.tempId) }) {
+                        IconButton(onClick = { onRemoveOption(question.tempId,option.tempId) }) {
                             Icon(
                                 painter = painterResource(R.drawable.baseline_delete_24),
                                 contentDescription = null,
@@ -719,7 +804,7 @@ fun QuizQuestionCard(
                 }
 
                 IconButton(
-                    onClick = { onAddOption(questionTempId) },
+                    onClick = { onAddOption(question.tempId) },
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(top = 4.dp)

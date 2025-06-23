@@ -33,17 +33,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.QuizScore
 import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -133,7 +132,7 @@ fun StudentIndividualPerformanceScreen(
 @Composable
 fun IndividualPerformanceBox(
     windowInfo: WindowInfo,
-    studentPic: String,
+    studentPic: ByteArray?,
     studentName: String,
     completedAssessments: Int,
     averageGrade: Double,
@@ -165,10 +164,8 @@ fun IndividualPerformanceBox(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                AsyncImage(
-                    model = studentPic,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
+                BlobImage(
+                    byteArray = studentPic,
                     modifier = Modifier
                         .size(60.dp)
                         .clip(CircleShape)

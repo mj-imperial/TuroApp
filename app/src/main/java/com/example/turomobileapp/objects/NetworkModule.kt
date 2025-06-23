@@ -29,6 +29,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Named
 import javax.inject.Singleton
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -36,16 +37,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule{
 
-    val ip = "192.168.1.13"
-//        192.168.50.83
-//        "192.168.242.83"
-//        192.168.1.13
-    //10.0.2.2
     @Provides
     @Singleton
+    @Named("BaseUrl")
     fun provideBaseUrl(): String =
-        // change to production URL when live
-        "http:/$ip//turo_app/api/v1/"
+        "https://turoonline.live/api/v1/"
 
     @Provides
     @Singleton
@@ -59,12 +55,12 @@ object NetworkModule{
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        loggingInterceptor: HttpLoggingInterceptor
+        loggingInterceptor: HttpLoggingInterceptor,
+        authInterceptor: AuthInterceptor
     ): OkHttpClient =
         OkHttpClient.Builder()
-            // logging
+            .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
-            // generous timeouts
             .connectTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
@@ -76,13 +72,13 @@ object NetworkModule{
         Moshi.Builder()
             .add(Base64ByteArrayAdapter())
             .add(LocalDateTimeAdapter)
-            .add(KotlinJsonAdapterFactory())
+            .addLast(KotlinJsonAdapterFactory())
             .build()
 
     @Provides
     @Singleton
     fun provideRetrofit(
-        baseUrl: String,
+        @Named("BaseUrl") baseUrl: String,
         client: OkHttpClient,
         moshi: Moshi
     ): Retrofit =
@@ -167,5 +163,4 @@ object NetworkModule{
     @Singleton
     fun provideUserApiService(retrofit: Retrofit): UserApiService =
         retrofit.create(UserApiService::class.java)
-
 }

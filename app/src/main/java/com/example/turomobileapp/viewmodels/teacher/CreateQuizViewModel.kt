@@ -1,7 +1,13 @@
 package com.example.turomobileapp.viewmodels.teacher
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
+import android.util.Base64
 import androidx.annotation.RequiresApi
+import androidx.core.graphics.scale
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
@@ -27,7 +34,7 @@ import javax.inject.Inject
 class CreateQuizViewModel @Inject constructor(
     private val quizRepository: QuizRepository,
     private val savedStateHandle: SavedStateHandle,
-    private val notificationService: TuroNotificationService
+    private val notificationService: TuroNotificationService,
 ): ViewModel(){
 
     private val _moduleId: String = checkNotNull(savedStateHandle["moduleId"])
@@ -98,6 +105,30 @@ class CreateQuizViewModel @Inject constructor(
         _isFormValid.value = isFormValid()
     }
 
+    fun updateQuestionImage(tempQuestionId: String, uri: Uri, context: Context) {
+        viewModelScope.launch {
+            val compressedBytes = compressImageUriToByteArray(context, uri)
+
+            _pendingQuestions.update { list ->
+                list.map { q ->
+                    if (q.tempId == tempQuestionId) {
+                        q.copy(tempImage = compressedBytes ?: byteArrayOf())
+                    } else q
+                }
+            }
+        }
+    }
+
+    fun removeQuestionImage(tempQuestionId: String) {
+        _pendingQuestions.update { list ->
+            list.map { q ->
+                if (q.tempId == tempQuestionId) {
+                    q.copy(tempImage = byteArrayOf())
+                } else q
+            }
+        }
+    }
+
     fun updateQuestionText(tempQuestionId: String, newText: String) {
         _pendingQuestions.update { list ->
             list.map { q ->
@@ -137,7 +168,7 @@ class CreateQuizViewModel @Inject constructor(
     fun updateOptionText(
         tempQuestionId: String,
         tempOptionId: String,
-        newText: String
+        newText: String,
     ) {
         _pendingQuestions.update { list ->
             list.map { q ->
@@ -156,7 +187,7 @@ class CreateQuizViewModel @Inject constructor(
 
     fun setSingleCorrectOption(
         tempQuestionId: String,
-        tempOptionIdToMark: String
+        tempOptionIdToMark: String,
     ) {
         _pendingQuestions.update { list ->
             list.map { question ->
@@ -238,9 +269,16 @@ class CreateQuizViewModel @Inject constructor(
                     )
                 }
 
+                val encodedImage = question.tempImage?.let {
+                    if (!it.isEmpty()) {
+                        Base64.encodeToString(question.tempImage, Base64.NO_WRAP)
+                    } else null
+                }
+
                 CreateQuizQuestions(
                     questionText = question.text,
                     questionType = questionType,
+                    questionImage = encodedImage,
                     score = question.score,
                     options = options
                 )
@@ -280,6 +318,36 @@ class CreateQuizViewModel @Inject constructor(
         }
     }
 
+    private fun compressImageUriToByteArray(
+        context: Context,
+        uri: Uri,
+        quality: Int = 70,
+        maxWidth: Int = 600,
+        maxHeight: Int = 600,
+    ): ByteArray? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val originalBitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            val ratio: Float = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
+            val (newWidth, newHeight) = if (ratio > 1) {
+                maxWidth to (maxWidth / ratio).toInt()
+            } else {
+                (maxHeight * ratio).toInt() to maxHeight
+            }
+
+            val resizedBitmap = originalBitmap.scale(newWidth, newHeight)
+
+            val outputStream = ByteArrayOutputStream()
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
+            outputStream.toByteArray()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     fun clearCreateQuizStatus(){
         _uiState.update { it.copy(createQuizStatus = null) }
     }
@@ -295,21 +363,46 @@ data class CreateQuizUIState(
     val unlockDateTime: LocalDateTime? = null,
     val deadlineDateTime: LocalDateTime? = null,
     val numberOfAttempts: Int = 1,
-    val timeLimit: Int = 0, //in seconds
+    val timeLimit: Int = 0,
     val hasAnswersShown: Boolean = false,
-    val questions: List<CreateQuizQuestions> = emptyList()
+    val questions: List<CreateQuizQuestions> = emptyList(),
 )
 
 data class PendingQuestion(
     val tempId: String = UUID.randomUUID().toString(),
+    val tempImage: ByteArray? = byteArrayOf(),
     var text: String = "",
     val options: MutableList<PendingOption> = mutableListOf(),
-    var score: Int = 1
-)
+    var score: Int = 1,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as PendingQuestion
+
+        if (score!=other.score) return false
+        if (tempId!=other.tempId) return false
+        if (!tempImage.contentEquals(other.tempImage)) return false
+        if (text!=other.text) return false
+        if (options!=other.options) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = score
+        result = 31 * result + tempId.hashCode()
+        result = 31 * result + (tempImage?.contentHashCode() ?: 0)
+        result = 31 * result + text.hashCode()
+        result = 31 * result + options.hashCode()
+        return result
+    }
+}
 
 data class PendingOption(
     val tempId: String = UUID.randomUUID().toString(),
     var text: String = "",
-    var isCorrect: Boolean = false
+    var isCorrect: Boolean = false,
 )
 

@@ -4,13 +4,10 @@ import com.example.turomobileapp.models.ActivityActionResponse
 import com.example.turomobileapp.models.LectureResponse
 import com.example.turomobileapp.models.LectureUpdateRequest
 import com.example.turomobileapp.models.LectureUploadRequest
-import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Multipart
 import retrofit2.http.POST
-import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface LectureApiService {

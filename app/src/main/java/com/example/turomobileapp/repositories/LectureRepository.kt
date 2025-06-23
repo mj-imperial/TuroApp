@@ -7,7 +7,6 @@ import com.example.turomobileapp.models.LectureResponse
 import com.example.turomobileapp.models.LectureUpdateRequest
 import com.example.turomobileapp.models.LectureUploadRequest
 import kotlinx.coroutines.flow.Flow
-import okhttp3.MultipartBody
 import javax.inject.Inject
 
 class LectureRepository @Inject constructor(private val lectureApiService: LectureApiService) {

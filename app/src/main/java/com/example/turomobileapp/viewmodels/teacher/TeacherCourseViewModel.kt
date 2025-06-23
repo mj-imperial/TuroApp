@@ -32,7 +32,7 @@ class TeacherCourseViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
-            courseRepository.getCoursePicture(_courseId).collect { result ->
+            courseRepository.getCoursePicture().collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { resp ->

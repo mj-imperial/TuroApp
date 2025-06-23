@@ -21,9 +21,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,6 +68,7 @@ import com.example.turomobileapp.ui.theme.practice2
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.teacher.ActivityActionsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreateEditActivitiesInModuleScreen(
@@ -76,6 +80,7 @@ fun CreateEditActivitiesInModuleScreen(
     val context = LocalContext.current
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
+    val pullRefreshState = rememberPullToRefreshState()
 
     val activitiesSortedByDate: List<ModuleActivityResponse> = uiState.activities
         .mapNotNull { activity ->
@@ -142,6 +147,7 @@ fun CreateEditActivitiesInModuleScreen(
             Toast.makeText(context, "Activity successfully deleted.",Toast.LENGTH_SHORT).show()
         }
         viewModel.resetDeleteStatusResult()
+        viewModel.getActivitiesInModule()
     }
 
     AppScaffold(
@@ -161,94 +167,102 @@ fun CreateEditActivitiesInModuleScreen(
                     CircularProgressIndicator()
                 }
             }else{
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(25.dp)
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getActivitiesInModule()
+                    },
                 ) {
-                    CustomDropDownMenu(
-                        menuText = currentMenu,
-                        dropdownMenuItems = menuList
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(25.dp)
+                    ) {
+                        CustomDropDownMenu(
+                            menuText = currentMenu,
+                            dropdownMenuItems = menuList
+                        )
 
-                    when(currentMenu){
-                        "Lecture" -> ActivityGrid(
-                            windowInfo = windowInfo,
-                            activities = lectures,
-                            activityType = "LECTURE",
-                            onEdit = {
-                                navController.navigate(Screen.TeacherEditLecture.createRoute(moduleId, it.activityId))
+                        when(currentMenu){
+                            "Lecture" -> ActivityGrid(
+                                windowInfo = windowInfo,
+                                activities = lectures,
+                                activityType = "LECTURE",
+                                onEdit = {
+                                    navController.navigate(Screen.TeacherEditLecture.createRoute(moduleId, it.activityId))
+                                },
+                                onDeleteClick = { activityId ->
+                                    selectedToDeleteId = activityId
+                                }
+                            )
+                            "Tutorial" -> ActivityGrid(
+                                windowInfo = windowInfo,
+                                activities = tutorials,
+                                activityType = "TUTORIAL",
+                                onEdit = {
+                                    navController.navigate(Screen.TeacherEditTutorial.createRoute(moduleId, it.activityId))
+                                },
+                                onDeleteClick = { activityId ->
+                                    selectedToDeleteId = activityId
+                                }
+                            )
+                            "Quiz" -> ActivityGrid(
+                                windowInfo = windowInfo,
+                                activities = quizzes,
+                                activityType = "QUIZ",
+                                onEdit = {
+                                    navController.navigate(Screen.TeacherEditQuiz.createRoute(it.activityId, moduleId))
+                                },
+                                onDeleteClick = { activityId ->
+                                    selectedToDeleteId = activityId
+                                }
+                            )
+                        }
+                    }
+
+                    if (selectedToDeleteId != null){
+                        PopupAlertWithActions(
+                            onDismissRequest = { selectedToDeleteId = null },
+                            onConfirmation = {
+                                viewModel.deleteActivity(selectedToDeleteId!!)
+                                selectedToDeleteId = null
                             },
-                            onDeleteClick = { activityId ->
-                                selectedToDeleteId = activityId
-                            }
-                        )
-                        "Tutorial" -> ActivityGrid(
-                            windowInfo = windowInfo,
-                            activities = tutorials,
-                            activityType = "TUTORIAL",
-                            onEdit = {
-                                navController.navigate(Screen.TeacherEditTutorial.createRoute(moduleId, it.activityId))
+                            icon = painterResource(R.drawable.delete_vector_icon),
+                            title = {
+                                Text(
+                                    text = "DELETE ACTIVITY",
+                                    fontFamily = FontFamily(Font(R.font.alata)),
+                                    fontSize = ResponsiveFont.title(windowInfo),
+                                    fontWeight = FontWeight.Medium
+                                )
                             },
-                            onDeleteClick = { activityId ->
-                                selectedToDeleteId = activityId
-                            }
-                        )
-                        "Quiz" -> ActivityGrid(
-                            windowInfo = windowInfo,
-                            activities = quizzes,
-                            activityType = "QUIZ",
-                            onEdit = {
-                                navController.navigate(Screen.TeacherEditQuiz.createRoute(it.activityId, moduleId))
+                            dialogText = {
+                                Text(
+                                    text = "Are you sure you want to delete this item? \nThis action cannot be undone",
+                                    fontFamily = FontFamily(Font(R.font.alata)),
+                                    fontSize = ResponsiveFont.heading3(windowInfo),
+                                )
                             },
-                            onDeleteClick = { activityId ->
-                                selectedToDeleteId = activityId
+                            confirmText = {
+                                Text(
+                                    text = "Yes",
+                                    fontFamily = FontFamily(Font(R.font.alata)),
+                                    fontSize = ResponsiveFont.heading3(windowInfo),
+                                    color = MainRed
+                                )
+                            },
+                            dismissText = {
+                                Text(
+                                    text = "No",
+                                    fontFamily = FontFamily(Font(R.font.alata)),
+                                    fontSize = ResponsiveFont.heading3(windowInfo),
+                                    color = LoginText
+                                )
                             }
                         )
                     }
-                }
-
-                if (selectedToDeleteId != null){
-                    PopupAlertWithActions(
-                        onDismissRequest = { selectedToDeleteId = null },
-                        onConfirmation = {
-                            viewModel.deleteActivity(selectedToDeleteId!!)
-                            selectedToDeleteId = null
-                        },
-                        icon = painterResource(R.drawable.delete_vector_icon),
-                        title = {
-                            Text(
-                                text = "DELETE ACTIVITY",
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                fontSize = ResponsiveFont.title(windowInfo),
-                                fontWeight = FontWeight.Medium
-                            )
-                        },
-                        dialogText = {
-                            Text(
-                                text = "Are you sure you want to delete this item? \nThis action cannot be undone",
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                fontSize = ResponsiveFont.heading3(windowInfo),
-                            )
-                        },
-                        confirmText = {
-                            Text(
-                                text = "Yes",
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                fontSize = ResponsiveFont.heading3(windowInfo),
-                                color = MainRed
-                            )
-                        },
-                        dismissText = {
-                            Text(
-                                text = "No",
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                fontSize = ResponsiveFont.heading3(windowInfo),
-                                color = LoginText
-                            )
-                        }
-                    )
                 }
             }
         }

@@ -96,10 +96,10 @@ class ViewAllModulesViewModel @Inject constructor(
                     result = result,
                     onSuccess = { resp ->
                         viewModelScope.launch {
-                            val quizOrder = listOf("PRACTICE", "SHORT", "LONG")
+                            val quizOrder = listOf("PRACTICE", "SHORT")
                             val lectures = resp.filter { it.activityType == "LECTURE" }
                             val tutorials = resp.filter { it.activityType == "TUTORIAL" }
-                            val quizzes = resp.filter { it.activityType == "QUIZ" && it.quizTypeName != "SCREENING_EXAM" }
+                            val quizzes = resp.filter { it.activityType == "QUIZ" && it.quizTypeName != "SCREENING_EXAM" && it.quizTypeName != "LONG"}
 
                             val studentId: String = sessionManager.userId.filterNotNull().first()
 

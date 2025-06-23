@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.models.CourseResponse
@@ -146,11 +147,11 @@ fun DashboardScreen(
     val roleStr by sessionManager.role.collectAsState(initial = "")
     val role = if (roleStr == "STUDENT") UserRole.STUDENT else UserRole.TEACHER
 
-    LaunchedEffect(userId, roleStr) {
+    LaunchedEffect(Unit) {
         if (!userId.isNullOrBlank() && !roleStr.isNullOrBlank()) {
             val id = userId!!
             Log.d("DashboardScreen", "Loading courses for $id / $role")
-            viewModel.loadCourses(id, role)
+            viewModel.loadCourses()
         }
     }
 
@@ -177,7 +178,7 @@ fun DashboardScreen(
                         isRefreshing = uiState.loading,
                         state = pullRefreshState,
                         onRefresh = {
-                            viewModel.loadCourses(userId.toString(), role)
+                            viewModel.loadCourses()
                         },
                     ) {
                         DashboardContent(
@@ -236,7 +237,7 @@ fun DashboardContent(
 fun DashboardItem(
     courseName: String,
     courseCode: String,
-    coursePic: ByteArray,
+    coursePic: ByteArray?,
     onCardClick: () -> Unit,
     body: TextUnit,
     subtitle: TextUnit
@@ -250,12 +251,20 @@ fun DashboardItem(
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Column {
-            BlobImage(
-                byteArray = coursePic,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-            )
+            coursePic?.let {
+                if (it.isNotEmpty()) {
+                    BlobImage(
+                        byteArray = coursePic,
+                        modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)
+                    )
+                }else{
+                    AsyncImage(
+                        model = "https://img.freepik.com/free-photo/blackboard-inscribed-with-scientific-formulas-calculations_1150-19413.jpg?semt=ais_hybrid&w=740",
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)
+                    )
+                }
+            }
 
             Column(
                 modifier = Modifier

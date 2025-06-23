@@ -506,7 +506,7 @@ fun CodeStep(
                 ),
                 roundedCornerShape = 29.dp,
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(60.dp)
                     .focusRequester(focusRequesters[i])
                     .onKeyEvent { keyEvent ->
                         if (keyEvent.type == KeyEventType.KeyUp && keyEvent.type == KeyEventType.KeyDown) {

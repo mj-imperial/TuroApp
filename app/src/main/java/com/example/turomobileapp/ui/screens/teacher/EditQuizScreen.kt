@@ -1,9 +1,16 @@
 package com.example.turomobileapp.ui.screens.teacher
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
-import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +34,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,6 +43,8 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +56,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -60,6 +71,7 @@ import com.example.turomobileapp.R
 import com.example.turomobileapp.models.QuizContentResponse
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.components.CustomDropDownMenu
@@ -73,6 +85,7 @@ import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
+import com.example.turomobileapp.ui.theme.LoginTextLight
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.SoftGray
@@ -84,6 +97,7 @@ import com.example.turomobileapp.viewmodels.teacher.PendingQuestion
 import java.time.Duration
 import java.time.LocalDateTime
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EditQuizScreen(
@@ -93,7 +107,7 @@ fun EditQuizScreen(
     moduleId: String
 ){
     val windowInfo = rememberWindowInfo()
-    val context = LocalContext.current
+    val pullRefreshState = rememberPullToRefreshState()
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -106,13 +120,7 @@ fun EditQuizScreen(
 
     LaunchedEffect(uiState.editQuizStatus) {
         if (uiState.editQuizStatus is Result.Success){
-            Toast.makeText(context, "Quiz successfully created.",Toast.LENGTH_SHORT).show()
             navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
-            viewModel.clearEditStatus()
-        }else if(uiState.editQuizStatus is Result.Failure){
-            val msg = uiState.errorMessage
-                ?: "Unknown error"
-            Toast.makeText(context, "Failed to create quiz: $msg", Toast.LENGTH_LONG).show()
             viewModel.clearEditStatus()
         }
     }
@@ -189,197 +197,216 @@ fun EditQuizScreen(
                     CircularProgressIndicator()
                 }
             }else{
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 40.dp)
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.getQuiz()
+                        viewModel.getQuizContent()
+                    },
                 ) {
-                    item {
-                        Text(
-                            text = "Update Quiz",
-                            fontFamily = FontFamily(Font(R.font.alata)),
-                            fontSize = ResponsiveFont.heading1(windowInfo),
-                            color = TextBlack,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp)
-                        )
-                    }
-
-                    item {
-                        EditQuizHeader(
-                            windowInfo = windowInfo,
-                            quizType = uiState.quizType,
-                            onUpdateQuizType = viewModel::updateQuizType,
-                            quizName = uiState.quizTitle,
-                            onUpdateName = viewModel::updateQuizTitle,
-                            quizDescription = uiState.quizDescription,
-                            onUpdateQuizDescription = viewModel::updateQuizDescription
-                        )
-
-                        Spacer(modifier = Modifier.height(14.dp))
-                    }
-
-                    item {
-                        EditQuizMoreInfo(
-                            windowInfo = windowInfo,
-                            unlockDateState = uiState.unlockDateTime,
-                            onUpdateUnlockDate = viewModel::updateUnlockDateTime,
-                            deadlineDateState = uiState.deadlineDateTime,
-                            onUpdateDeadlineDate = viewModel::updateDeadlineDateTime,
-                            numberOfAttempts = uiState.numberOfAttempts,
-                            onUpdateNumberOfAttempts = viewModel::updateNumberOfAttempts,
-                            timeLimitState = remember { mutableStateOf(Duration.ofSeconds(uiState.timeLimit.toLong())) },
-                            onUpdateDuration = viewModel::updateTimeLimit,
-                            hasAnswersShown = uiState.hasAnswersShown,
-                            onUpdateShowAnswers = viewModel::updateHasAnswersShown
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
-
-                    items(
-                        items = oldQuestions,
-                        key = { it.questionId }
-                    ) { question ->
-                        val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = { dismissValue ->
-                                if (dismissValue == SwipeToDismissBoxValue.EndToStart ) {
-                                    viewModel.removeOldQuestion(question.questionId)
-                                    true
-                                } else {
-                                    false
-                                }
-                            }
-                        )
-
-                        SwipeToDismissBox(
-                            state = dismissState,
-                            modifier = Modifier.fillMaxWidth(),
-                            enableDismissFromStartToEnd = false,
-                            enableDismissFromEndToStart = true,
-                            gesturesEnabled = true,
-                            backgroundContent = {
-                                val color = if (dismissState.targetValue == SwipeToDismissBoxValue.Settled)
-                                    Color.Transparent else MainRed
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(color, RoundedCornerShape(10.dp))
-                                        .padding(horizontal = 20.dp),
-                                    contentAlignment = Alignment.CenterEnd
-                                ) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-                                }
-                            },
-                        ) {
-                            EditQuizQuestionCard(
-                                windowInfo = windowInfo,
-                                questionNumber = oldQuestions.indexOf(question) + 1,
-                                isOldQuestion = true,
-                                oldQuestion = question,
-                                questionId = question.questionId,
-                                onQuestionTextChanged = viewModel::updateOldQuestionText,
-                                onAddOption = viewModel::addOptionToOldQuestion,
-                                onUpdateOptionText = viewModel::updateOldOptionText,
-                                onSetSingleCorrectOption = viewModel::setSingleCorrectOldOption,
-                                onRemoveOption = viewModel::removeOptionFromOldQuestion,
-                                onUpdateQuestionScore = viewModel::updateOldQuestionScore
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(bottom = 40.dp)
+                    ) {
+                        item {
+                            Text(
+                                text = "Update Quiz",
+                                fontFamily = FontFamily(Font(R.font.alata)),
+                                fontSize = ResponsiveFont.heading1(windowInfo),
+                                color = TextBlack,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp)
                             )
                         }
-                    }
-                    
-                    items(
-                        items = newQuestions,
-                        key = { it.tempId }
-                    ) {question ->
-                        val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = { dismissValue ->
-                                if (dismissValue == SwipeToDismissBoxValue.EndToStart ) {
-                                    viewModel.removeNewQuestion(question.tempId)
-                                    true
-                                } else {
-                                    false
-                                }
-                            }
-                        )
 
-                        SwipeToDismissBox(
-                            state = dismissState,
-                            modifier = Modifier.fillMaxWidth(),
-                            enableDismissFromStartToEnd = false,
-                            enableDismissFromEndToStart = true,
-                            gesturesEnabled = true,
-                            backgroundContent = {
-                                val color = if (dismissState.targetValue == SwipeToDismissBoxValue.Settled)
-                                    Color.Transparent else MainRed
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(color, RoundedCornerShape(10.dp))
-                                        .padding(horizontal = 20.dp),
-                                    contentAlignment = Alignment.CenterEnd
-                                ) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-                                }
-                            },
-                        ) {
-                            EditQuizQuestionCard(
+                        item {
+                            EditQuizHeader(
                                 windowInfo = windowInfo,
-                                questionNumber = oldQuestions.size + (newQuestions.indexOf(question) + 1),
-                                isOldQuestion = false,
-                                newQuestion = question,
-                                questionId = question.tempId,
-                                onQuestionTextChanged = viewModel::updateNewQuestionText,
-                                onAddOption = viewModel::addOptionToNewQuestion,
-                                onUpdateOptionText = viewModel::updateNewOptionText,
-                                onSetSingleCorrectOption = viewModel::setSingleCorrectNewOption,
-                                onRemoveOption = viewModel::removeOptionFromNewQuestion,
-                                onUpdateQuestionScore = viewModel::updateNewQuestionScore
+                                quizType = uiState.quizType,
+                                onUpdateQuizType = viewModel::updateQuizType,
+                                quizName = uiState.quizTitle,
+                                onUpdateName = viewModel::updateQuizTitle,
+                                quizDescription = uiState.quizDescription,
+                                onUpdateQuizDescription = viewModel::updateQuizDescription
                             )
-                        }
-                    }
 
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            IconButton(
-                                onClick = { viewModel.addQuestion() },
+                            Spacer(modifier = Modifier.height(14.dp))
+                        }
+
+                        item {
+                            EditQuizMoreInfo(
+                                windowInfo = windowInfo,
+                                unlockDateState = uiState.unlockDateTime,
+                                onUpdateUnlockDate = viewModel::updateUnlockDateTime,
+                                deadlineDateState = uiState.deadlineDateTime,
+                                onUpdateDeadlineDate = viewModel::updateDeadlineDateTime,
+                                numberOfAttempts = uiState.numberOfAttempts,
+                                onUpdateNumberOfAttempts = viewModel::updateNumberOfAttempts,
+                                timeLimitState = remember { mutableStateOf(Duration.ofSeconds(uiState.timeLimit.toLong())) },
+                                onUpdateDuration = viewModel::updateTimeLimit,
+                                hasAnswersShown = uiState.hasAnswersShown,
+                                onUpdateShowAnswers = viewModel::updateHasAnswersShown
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+
+                        items(
+                            items = oldQuestions,
+                            key = { it.questionId }
+                        ) { question ->
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                confirmValueChange = { dismissValue ->
+                                    if (dismissValue == SwipeToDismissBoxValue.EndToStart ) {
+                                        viewModel.removeOldQuestion(question.questionId)
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                }
+                            )
+
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                modifier = Modifier.fillMaxWidth(),
+                                enableDismissFromStartToEnd = false,
+                                enableDismissFromEndToStart = true,
+                                gesturesEnabled = true,
+                                backgroundContent = {
+                                    val color = if (dismissState.targetValue == SwipeToDismissBoxValue.Settled)
+                                        Color.Transparent else MainRed
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(color, RoundedCornerShape(10.dp))
+                                            .padding(horizontal = 20.dp),
+                                        contentAlignment = Alignment.CenterEnd
+                                    ) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                    }
+                                },
                             ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.add_circle),
-                                    contentDescription = "Add Question",
-                                    modifier = Modifier.size(40.dp),
-                                    tint = MainOrange
+                                EditQuizQuestionCard(
+                                    windowInfo = windowInfo,
+                                    questionNumber = oldQuestions.indexOf(question) + 1,
+                                    isOldQuestion = true,
+                                    oldQuestion = question,
+                                    questionId = question.questionId,
+                                    onQuestionTextChanged = viewModel::updateOldQuestionText,
+                                    onAddOption = viewModel::addOptionToOldQuestion,
+                                    onUpdateOptionText = viewModel::updateOldOptionText,
+                                    onSetSingleCorrectOption = viewModel::setSingleCorrectOldOption,
+                                    onRemoveOption = viewModel::removeOptionFromOldQuestion,
+                                    onUpdateQuestionScore = viewModel::updateOldQuestionScore,
+                                    onAddImage = { questionId, uri, context ->
+                                        viewModel.updateOldImage(questionId, uri, context)
+                                    },
+                                    onRemoveImage = viewModel::deleteOldImage,
+                                    questionImage = question.questionImage
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(15.dp))
-                    }
-                    
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
-                            CapsuleButton(
-                                text = {
-                                    Text(
-                                        text = "UPDATE QUIZ",
-                                        fontFamily = FontFamily(Font(R.font.alata)),
-                                        fontSize = ResponsiveFont.heading1(windowInfo),
-                                        color = TextBlack
-                                    )
-                                },
-                                onClick = { openAlertDialog = true },
-                                roundedCornerShape = 10.dp,
-                                buttonElevation = ButtonDefaults.buttonElevation(5.dp),
-                                contentPadding = PaddingValues(10.dp),
-                                buttonColors = ButtonDefaults.buttonColors(MainOrange),
-                                modifier = Modifier.fillMaxWidth(),
-                                enabled = isFormValid
+                        items(
+                            items = newQuestions,
+                            key = { it.tempId }
+                        ) {question ->
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                confirmValueChange = { dismissValue ->
+                                    if (dismissValue == SwipeToDismissBoxValue.EndToStart ) {
+                                        viewModel.removeNewQuestion(question.tempId)
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                }
                             )
+
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                modifier = Modifier.fillMaxWidth(),
+                                enableDismissFromStartToEnd = false,
+                                enableDismissFromEndToStart = true,
+                                gesturesEnabled = true,
+                                backgroundContent = {
+                                    val color = if (dismissState.targetValue == SwipeToDismissBoxValue.Settled)
+                                        Color.Transparent else MainRed
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(color, RoundedCornerShape(10.dp))
+                                            .padding(horizontal = 20.dp),
+                                        contentAlignment = Alignment.CenterEnd
+                                    ) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                    }
+                                },
+                            ) {
+                                EditQuizQuestionCard(
+                                    windowInfo = windowInfo,
+                                    questionNumber = oldQuestions.size + (newQuestions.indexOf(question) + 1),
+                                    isOldQuestion = false,
+                                    newQuestion = question,
+                                    questionId = question.tempId,
+                                    onQuestionTextChanged = viewModel::updateNewQuestionText,
+                                    onAddOption = viewModel::addOptionToNewQuestion,
+                                    onUpdateOptionText = viewModel::updateNewOptionText,
+                                    onSetSingleCorrectOption = viewModel::setSingleCorrectNewOption,
+                                    onRemoveOption = viewModel::removeOptionFromNewQuestion,
+                                    onUpdateQuestionScore = viewModel::updateNewQuestionScore,
+                                    onAddImage = { questionId, uri, context ->
+                                        viewModel.addImage(questionId, uri, context)
+                                    },
+                                    onRemoveImage = viewModel::removeNewImage,
+                                    questionImage = question.tempImage
+                                )
+                            }
+                        }
+
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                IconButton(
+                                    onClick = { viewModel.addQuestion() },
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.add_circle),
+                                        contentDescription = "Add Question",
+                                        modifier = Modifier.size(40.dp),
+                                        tint = MainOrange
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(15.dp))
+                        }
+
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
+                                CapsuleButton(
+                                    text = {
+                                        Text(
+                                            text = "UPDATE QUIZ",
+                                            fontFamily = FontFamily(Font(R.font.alata)),
+                                            fontSize = ResponsiveFont.heading1(windowInfo),
+                                            color = TextBlack
+                                        )
+                                    },
+                                    onClick = { openAlertDialog = true },
+                                    roundedCornerShape = 10.dp,
+                                    buttonElevation = ButtonDefaults.buttonElevation(5.dp),
+                                    contentPadding = PaddingValues(10.dp),
+                                    buttonColors = ButtonDefaults.buttonColors(MainOrange),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = isFormValid
+                                )
+                            }
                         }
                     }
                 }
@@ -409,18 +436,6 @@ fun EditQuizHeader(
             itemName = "PRACTICE",
             onClick = {
                 onUpdateQuizType("PRACTICE")
-            }
-        ),
-        DropdownMenuItem(
-            itemName = "LONG",
-            onClick = {
-                onUpdateQuizType("LONG")
-            }
-        ),
-        DropdownMenuItem(
-            itemName = "SCREENING",
-            onClick = {
-                onUpdateQuizType("SCREENING")
             }
         )
     )
@@ -610,10 +625,10 @@ fun EditQuizMoreInfo(
                 Text(
                     text = "SHOW ANSWERS: ",
                     fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontSize = ResponsiveFont.body(windowInfo),
                     color = LoginText
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
 
                 RadioButton(
                     selected = hasAnswersShown == true,
@@ -623,11 +638,11 @@ fun EditQuizMoreInfo(
                 Text(
                     text = "YES",
                     fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontSize = ResponsiveFont.body(windowInfo),
                     color = LoginText
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(6.dp))
 
                 RadioButton(
                     selected = hasAnswersShown == false,
@@ -637,7 +652,7 @@ fun EditQuizMoreInfo(
                 Text(
                     text = "NO",
                     fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontSize = ResponsiveFont.body(windowInfo),
                     color = LoginText
                 )
             }
@@ -662,7 +677,24 @@ fun EditQuizQuestionCard(
     onSetSingleCorrectOption: (String, String) -> Unit,
     onRemoveOption: (String, String) -> Unit,
     onUpdateQuestionScore: (String, Int) -> Unit,
+    questionImage: ByteArray?,
+    onAddImage: (String, Uri, Context) -> Unit,
+    onRemoveImage: (String) -> Unit
 ){
+    val context = LocalContext.current
+    val contentResolver = context.contentResolver
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            onAddImage(questionId, it, context)
+        }
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -685,6 +717,60 @@ fun EditQuizQuestionCard(
                 fontSize = ResponsiveFont.heading2(windowInfo),
                 textAlign = TextAlign.Start
             )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .border(0.5.dp, LoginText)
+                    .background(LoginTextLight)
+                    .clickable(onClick = {
+                        imagePickerLauncher.launch(arrayOf("image/*"))
+                    }),
+                contentAlignment = Alignment.Center
+            ){
+                questionImage?.let {
+                    if (it.isNotEmpty()){
+                        BlobImage(
+                            byteArray = questionImage,
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+                        IconButton(
+                            onClick = { onRemoveImage(questionId) },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(6.dp)
+                                .size(24.dp)
+                                .background(MainRed, shape = RoundedCornerShape(6.dp))
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_delete_24),
+                                contentDescription = "Delete",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }else{
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.insert_image),
+                                contentDescription = "Pick an Image",
+                                modifier = Modifier.size(50.dp)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Tap to select Image",
+                                fontFamily = FontFamily(Font(R.font.alata)),
+                                fontSize = ResponsiveFont.heading2(windowInfo)
+                            )
+                        }
+                    }
+                }
+            }
 
             CapsuleTextField(
                 value = if (isOldQuestion) oldQuestion!!.questionText else newQuestion!!.text,

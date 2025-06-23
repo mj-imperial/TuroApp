@@ -100,7 +100,7 @@ fun FirstPlaceRow(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${student.totalPoints} pts",
+                text = "${student.averageScore}%",
                 fontSize = ResponsiveFont.heading3(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = TextBlack
@@ -171,7 +171,7 @@ fun SecondPlaceRow(
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
-                text = "${student.totalPoints} pts",
+                text = "${student.averageScore}%",
                 fontSize = ResponsiveFont.body(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.DarkGray
@@ -242,7 +242,7 @@ fun ThirdPlaceRow(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "${student.totalPoints} pts",
+                text = "${student.averageScore}%",
                 fontSize = ResponsiveFont.body(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.DarkGray
@@ -316,7 +316,7 @@ fun RegularPlaceRow(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "${student.totalPoints} pts",
+                text = "${student.averageScore}%",
                 fontSize = ResponsiveFont.body(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.DarkGray

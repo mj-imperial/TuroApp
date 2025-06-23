@@ -60,8 +60,6 @@ import com.example.turomobileapp.ui.theme.LoginTextLight
 import com.example.turomobileapp.ui.theme.LoginTextLight2
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.headingText
-import com.example.turomobileapp.ui.theme.longquiz1
-import com.example.turomobileapp.ui.theme.longquiz2
 import com.example.turomobileapp.ui.theme.performance1
 import com.example.turomobileapp.ui.theme.performance2
 import com.example.turomobileapp.ui.theme.practice1
@@ -97,7 +95,6 @@ fun StudentModuleActivitiesScreen(
     val tutorials = uiState.activities.filter { it.activityType == "TUTORIAL" }
     val tutorialQuizzes = uiState.activities.filter { it.activityType == "QUIZ" && it.quizTypeName?.uppercase() == "PRACTICE" }
     val shortQuizzes = uiState.activities.filter { it.activityType == "QUIZ" && it.quizTypeName?.uppercase() == "SHORT" }
-    val longQuizzes = uiState.activities.filter { it.activityType == "QUIZ" && it.quizTypeName?.uppercase() == "LONG" }
 
     val onNavigateToActivity: (ModuleActivityResponse) -> Unit = { activity ->
         activityFlowViewModel.setActivityList(uiState.activities)
@@ -186,17 +183,6 @@ fun StudentModuleActivitiesScreen(
                             windowInfo = windowInfo,
                             onNavigateToActivity = onNavigateToActivity,
                             colors = listOf(shortquiz1, shortquiz2)
-                        )
-                        
-                        activitySectionContent(
-                            title = "LONG QUIZZES",
-                            subtitle = "Test your skills.",
-                            activities = longQuizzes,
-                            image1 = R.drawable.longquiz_icon,
-                            image2 = null,
-                            windowInfo = windowInfo,
-                            onNavigateToActivity = onNavigateToActivity,
-                            colors = listOf(longquiz1, longquiz2)
                         )
                     }
                 }

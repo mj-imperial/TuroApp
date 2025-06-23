@@ -71,10 +71,37 @@ data class QuizContentResponses(
 data class QuizContentResponse(
     @Json(name = "question_id") val questionId: String,
     @Json(name = "question_text") val questionText: String,
+    @Json(name = "question_image") val questionImage: ByteArray?,
     @Json(name = "type_name") val questionTypeName: String,
     @Json(name = "score") val score: Int,
     @Json(name = "options") val options: List<QuestionResponse>
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as QuizContentResponse
+
+        if (score!=other.score) return false
+        if (questionId!=other.questionId) return false
+        if (questionText!=other.questionText) return false
+        if (!questionImage.contentEquals(other.questionImage)) return false
+        if (questionTypeName!=other.questionTypeName) return false
+        if (options!=other.options) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = score
+        result = 31 * result + questionId.hashCode()
+        result = 31 * result + questionText.hashCode()
+        result = 31 * result + (questionImage?.contentHashCode() ?: 0)
+        result = 31 * result + questionTypeName.hashCode()
+        result = 31 * result + options.hashCode()
+        return result
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class QuestionResponse(
@@ -110,6 +137,7 @@ data class CreateQuizRequest(
 data class CreateQuizQuestions(
     @Json(name = "question_id") val questionId: String? = null,
     @Json(name = "question_text") val questionText: String = "",
+    @Json(name = "question_image") val questionImage: String? = null,
     @Json(name = "type_name") val questionType: String = "",
     @Json(name = "score") val score: Int = 0,
     @Json(name = "options") val options: List<CreateQuizOptions>

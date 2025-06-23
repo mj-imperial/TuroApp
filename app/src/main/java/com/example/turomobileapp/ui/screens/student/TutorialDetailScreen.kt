@@ -57,6 +57,11 @@ import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.TutorialDetailViewModel
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.SimpleYouTubePlayerOptionsBuilder
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayer
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayerHostState
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayerState
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubeVideoId
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -70,7 +75,7 @@ fun TutorialDetailScreen(
     sessionManager: SessionManager,
     activityId: String,
     courseId: String,
-    activityFlowViewModel: ActivityFlowViewModel
+    activityFlowViewModel: ActivityFlowViewModel,
 ){
     val windowInfo = rememberWindowInfo()
     val pullRefreshState = rememberPullToRefreshState()
@@ -262,7 +267,15 @@ fun TutorialBody(
     windowInfo: WindowInfo,
     tutorialDescription: String,
     videoUrl: String,
-){
+) {
+    val context = LocalContext.current
+    val intent = remember(videoUrl) {
+        Intent(Intent.ACTION_VIEW, videoUrl.toUri())
+    }
+
+    val videoId = remember(videoUrl) { extractYoutubeVideoId(videoUrl) }
+    val hostState = remember { YouTubePlayerHostState() }
+
     Column(
         modifier = Modifier.fillMaxWidth().padding(10.dp),
         verticalArrangement = Arrangement.Top,
@@ -272,33 +285,54 @@ fun TutorialBody(
             text = tutorialDescription,
             fontSize = ResponsiveFont.heading3(windowInfo),
             fontFamily = FontFamily(Font(R.font.alata)),
-            minLines = 1,
-            softWrap = true,
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
         Spacer(modifier = Modifier.height(20.dp))
-
-        val context = LocalContext.current
-        val intent = remember(videoUrl) {
-            Intent(Intent.ACTION_VIEW, videoUrl.toUri())
-        }
 
         Text(
             text = videoUrl,
             fontSize = ResponsiveFont.heading3(windowInfo),
             fontFamily = FontFamily(Font(R.font.alata)),
             textDecoration = TextDecoration.Underline,
-            minLines = 1,
-            softWrap = true,
             modifier = Modifier
                 .padding(bottom = 20.dp)
-                .clickable(onClick = {
+                .clickable {
                     context.startActivity(intent)
-                })
+                }
+        )
+
+        val currentState = hostState.currentState
+        if (currentState is YouTubePlayerState.Error) {
+            Text(
+                text = "Error: ${currentState.message}",
+                color = Color.Red
+            )
+        }
+
+        LaunchedEffect(currentState) {
+            if (currentState is YouTubePlayerState.Ready && videoId != null) {
+                hostState.loadVideo(YouTubeVideoId(videoId))
+            }
+        }
+
+        YouTubePlayer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp),
+            hostState = hostState,
+            options = SimpleYouTubePlayerOptionsBuilder.builder {
+                autoplay(false)
+                controls(true)
+                rel(false)
+                ivLoadPolicy(false)
+                ccLoadPolicy(false)
+                fullscreen = true
+            }
         )
     }
 }
+
 
 @Composable
 fun PreviousNextButtonTutorial(
@@ -306,7 +340,7 @@ fun PreviousNextButtonTutorial(
     onClickPrevious: () -> Unit,
     onClickNext: () -> Unit,
     isPreviousEnabled: Boolean,
-    isNextEnabled: Boolean
+    isNextEnabled: Boolean,
 ){
     val buttonWidth = (windowInfo.screenWidth) * 0.3f
     Row(
@@ -353,5 +387,14 @@ fun PreviousNextButtonTutorial(
             buttonColors = ButtonDefaults.buttonColors(Color.Transparent),
             enabled = isNextEnabled
         )
+    }
+}
+
+fun extractYoutubeVideoId(url: String): String? {
+    return try {
+        val uri = url.toUri()
+        uri.getQueryParameter("v") ?: uri.lastPathSegment
+    } catch (e: Exception) {
+        null
     }
 }

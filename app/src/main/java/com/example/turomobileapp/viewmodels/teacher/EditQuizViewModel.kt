@@ -1,6 +1,11 @@
 package com.example.turomobileapp.viewmodels.teacher
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
+import android.util.Base64
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -20,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
@@ -158,6 +164,58 @@ class EditQuizViewModel @Inject constructor(
             list.filterNot { it.tempId == tempQuestionId }
         }
         _isFormValid.value = isFormValid()
+    }
+
+    fun updateOldImage(questionId: String, uri: Uri, context: Context) {
+        viewModelScope.launch {
+            val compressedBytes = compressImageUriToByteArray(context, uri)
+            _uiState.update { state ->
+                state.copy(
+                    questions = state.questions.map { q ->
+                        if (q.questionId == questionId) {
+                            q.copy(questionImage = compressedBytes ?: byteArrayOf())
+                        } else q
+                    }
+                )
+            }
+        }
+    }
+
+    fun deleteOldImage(questionId: String){
+        _uiState.update { state ->
+            state.copy(
+                questions = state.questions.map { q ->
+                    if (q.questionId == questionId){
+                        q.copy(questionImage = byteArrayOf())
+                    } else q
+                }
+            )
+        }
+    }
+
+    fun addImage(tempQuestionId: String, uri: Uri, context: Context) {
+        viewModelScope.launch {
+            val compressedBytes = compressImageUriToByteArray(context, uri)
+
+            _pendingQuestions.update { list ->
+                list.map { q ->
+                    if (q.tempId == tempQuestionId) {
+                        q.copy(tempImage = compressedBytes ?: byteArrayOf())
+                    } else q
+                }
+            }
+        }
+    }
+
+    fun removeNewImage(tempQuestionId: String){
+        _pendingQuestions.update {
+                list ->
+            list.map { q ->
+                if (q.tempId == tempQuestionId){
+                    q.copy(tempImage = byteArrayOf())
+                } else q
+            }
+        }
     }
 
     fun updateOldQuestionText(questionId: String, newText: String){
@@ -420,10 +478,17 @@ class EditQuizViewModel @Inject constructor(
                     )
                 }
 
+                val encodedImage = question.questionImage?.let {
+                    if (!it.isEmpty()) {
+                        Base64.encodeToString(question.questionImage, Base64.NO_WRAP)
+                    } else null
+                }
+
                 CreateQuizQuestions(
                     questionId = question.questionId,
                     questionText = question.questionText,
                     questionType = if (question.options.size > 1) "MULTIPLE_CHOICE" else "SHORT_ANSWER",
+                    questionImage = encodedImage,
                     score = question.score,
                     options = options
                 )
@@ -439,9 +504,16 @@ class EditQuizViewModel @Inject constructor(
                     )
                 }
 
+                val encodedImage = question.tempImage?.let {
+                    if (!it.isEmpty()) {
+                        Base64.encodeToString(question.tempImage, Base64.NO_WRAP)
+                    } else null
+                }
+
                 CreateQuizQuestions(
                     questionText = question.text,
                     questionType = questionType,
+                    questionImage = encodedImage,
                     score = question.score,
                     options = options
                 )
@@ -491,6 +563,36 @@ class EditQuizViewModel @Inject constructor(
 
     fun clearEditStatus(){
         _uiState.update { it.copy(editQuizStatus = null) }
+    }
+
+    private fun compressImageUriToByteArray(
+        context: Context,
+        uri: Uri,
+        quality: Int = 70,
+        maxWidth: Int = 600,
+        maxHeight: Int = 600
+    ): ByteArray? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val originalBitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            val ratio: Float = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
+            val (newWidth, newHeight) = if (ratio > 1) {
+                maxWidth to (maxWidth / ratio).toInt()
+            } else {
+                (maxHeight * ratio).toInt() to maxHeight
+            }
+
+            val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true)
+
+            val outputStream = ByteArrayOutputStream()
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
+            outputStream.toByteArray()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 }
 

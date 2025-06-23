@@ -24,7 +24,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.turomobileapp.R
 import com.example.turomobileapp.ui.navigation.Screen
-import com.example.turomobileapp.ui.navigation.navigationItems
+import com.example.turomobileapp.ui.navigation.navigationItemsStudent
+import com.example.turomobileapp.ui.navigation.navigationItemsTeacher
 import com.example.turomobileapp.ui.theme.MainOrange
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
@@ -33,7 +34,8 @@ import com.example.turomobileapp.ui.theme.MainWhite
 fun BottomNavigationBar(
     navController: NavController,
     barHeight: Dp,
-    caption: TextUnit
+    caption: TextUnit,
+    isStudent: Boolean
 ){
     NavigationBar(
         containerColor = MainRed,
@@ -47,6 +49,8 @@ fun BottomNavigationBar(
         val currentRoute = navBackStackEntry?.destination?.route
 
         val iconSize = barHeight * 0.5f
+
+        val navigationItems = if (isStudent) navigationItemsStudent else navigationItemsTeacher
 
         navigationItems.forEach { item ->
             val isSelected = currentRoute == item.route

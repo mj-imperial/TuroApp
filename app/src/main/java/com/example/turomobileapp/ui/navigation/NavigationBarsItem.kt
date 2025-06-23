@@ -10,7 +10,7 @@ data class NavigationBarsItem(
     val route: String
 )
 
-val navigationItems = listOf(
+val navigationItemsStudent = listOf(
     NavigationBarsItem(
         title = R.string.Dashboard,
         icon = R.drawable.dashboard_icon,
@@ -25,6 +25,24 @@ val navigationItems = listOf(
         title = R.string.Leaderboard,
         icon = R.drawable.leaderboard_icon,
         route = Screen.Leaderboard.route
+    ),
+    NavigationBarsItem(
+        title = R.string.Inbox,
+        icon = R.drawable.inbox_icon,
+        route = Screen.Inbox.route
+    )
+)
+
+val navigationItemsTeacher = listOf(
+    NavigationBarsItem(
+        title = R.string.Dashboard,
+        icon = R.drawable.dashboard_icon,
+        route = Screen.Dashboard.route
+    ),
+    NavigationBarsItem(
+        title = R.string.Calendar,
+        icon = R.drawable.calendar_icon,
+        route = Screen.Calendar.route
     ),
     NavigationBarsItem(
         title = R.string.Inbox,

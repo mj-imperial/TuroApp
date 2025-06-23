@@ -41,6 +41,7 @@ fun AppScaffold(
     val lastName by sessionManager.lastName.collectAsState(initial = "")
     val email by sessionManager.email.collectAsState(initial = "")
     val profilePic by sessionManager.profilePic.collectAsState(initial = null)
+    val role by sessionManager.role.collectAsState(initial = "")
     val loginViewModel: LoginViewModel = hiltViewModel()
 
     val barHeight = when(windowInfo.screenHeightInfo) {
@@ -91,7 +92,8 @@ fun AppScaffold(
             BottomNavigationBar(
                 navController = navController,
                 barHeight = barHeight,
-                caption = caption
+                caption = caption,
+                isStudent = role == "STUDENT"
             )
         }) { innerPadding ->
             content(innerPadding)

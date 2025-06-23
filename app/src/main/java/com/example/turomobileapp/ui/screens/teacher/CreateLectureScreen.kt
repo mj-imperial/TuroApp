@@ -163,97 +163,108 @@ fun CreateLectureScreen(
         sessionManager = sessionManager,
         hasFloatingActionButton = false,
         content = { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    Text(
-                        text = "CREATE LECTURE",
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading1(windowInfo),
-                        color = TextBlack,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 5.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
+            if (uiState.loading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.4f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color.White)
                 }
-
-                item {
-                    CreateLectureHeader(
-                        windowInfo = windowInfo,
-                        currentUploadType = uiState.uploadType,
-                        onUploadTypeChange = viewModel::updateUploadType,
-                        lectureName = uiState.lectureTitle,
-                        onUpdateLectureName = viewModel::updateLectureTitle,
-                        lectureDescription = uiState.lectureDescription,
-                        onUpdateLectureDescription = viewModel::updateLectureDescription,
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-
-                item {
-                    CreateLectureMoreInfo(
-                        unlockDate = uiState.unlockDateTime,
-                        onUpdateUnlockDate = viewModel::updateUnlockDateTime,
-                        deadlineDate = uiState.deadlineDateTime,
-                        onUpdateDeadlineDate = viewModel::updateDeadlineDateTime
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-                
-                item {
-                    when(uiState.uploadType){
-                        "PDF/DOCS" -> CreatePDFCard(
-                            height = windowInfo.screenHeight * 0.3f,
-                            onPickFile = { uri ->
-                                viewModel.onFilePicked(context, uri)
-                            },
-                            windowInfo = windowInfo,
-                            fileName = uiState.fileName,
-                            isLoading = uiState.loadingFile,
+            }else{
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        Text(
+                            text = "CREATE LECTURE",
+                            fontFamily = FontFamily(Font(R.font.alata)),
+                            fontSize = ResponsiveFont.heading1(windowInfo),
+                            color = TextBlack,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 5.dp)
                         )
-                        "YOUTUBE LINK" -> CreateYoutubeLink(
-                            windowInfo = windowInfo,
-                            youtubeLink = uiState.youtubeUrl.toString(),
-                            onUpdateYoutubeLink = viewModel::updateYoutubeUrl,
-                        )
-                        "TEXT" -> CreateText(
-                            windowInfo = windowInfo,
-                            text = uiState.text.toString(),
-                            onUpdateText = viewModel::updateText,
-                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
-                    Spacer(modifier = Modifier.height(35.dp))
-                }
 
-                item {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
-                        CapsuleButton(
-                            text = {
-                                Text(
-                                    text = "CREATE LECTURE",
-                                    fontFamily = FontFamily(Font(R.font.alata)),
-                                    fontSize = ResponsiveFont.heading1(windowInfo),
-                                    color = TextBlack
-                                )
-                            },
-                            onClick = { openAlertDialog = true },
-                            roundedCornerShape = 10.dp,
-                            buttonElevation = ButtonDefaults.buttonElevation(5.dp),
-                            contentPadding = PaddingValues(10.dp),
-                            buttonColors = ButtonDefaults.buttonColors(MainOrange),
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = isFormValid
+                    item {
+                        CreateLectureHeader(
+                            windowInfo = windowInfo,
+                            currentUploadType = uiState.uploadType,
+                            onUploadTypeChange = viewModel::updateUploadType,
+                            lectureName = uiState.lectureTitle,
+                            onUpdateLectureName = viewModel::updateLectureTitle,
+                            lectureDescription = uiState.lectureDescription,
+                            onUpdateLectureDescription = viewModel::updateLectureDescription,
                         )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+
+                    item {
+                        CreateLectureMoreInfo(
+                            unlockDate = uiState.unlockDateTime,
+                            onUpdateUnlockDate = viewModel::updateUnlockDateTime,
+                            deadlineDate = uiState.deadlineDateTime,
+                            onUpdateDeadlineDate = viewModel::updateDeadlineDateTime
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
+                    item {
+                        when(uiState.uploadType){
+                            "PDF/DOCS" -> CreatePDFCard(
+                                height = windowInfo.screenHeight * 0.3f,
+                                onPickFile = { uri ->
+                                    viewModel.onFilePicked(context, uri)
+                                },
+                                windowInfo = windowInfo,
+                                fileName = uiState.fileName,
+                                isLoading = uiState.loadingFile,
+                            )
+                            "YOUTUBE LINK" -> CreateYoutubeLink(
+                                windowInfo = windowInfo,
+                                youtubeLink = uiState.youtubeUrl.toString(),
+                                onUpdateYoutubeLink = viewModel::updateYoutubeUrl,
+                            )
+                            "TEXT" -> CreateText(
+                                windowInfo = windowInfo,
+                                text = uiState.text.toString(),
+                                onUpdateText = viewModel::updateText,
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(35.dp))
+                    }
+
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
+                            CapsuleButton(
+                                text = {
+                                    Text(
+                                        text = "CREATE LECTURE",
+                                        fontFamily = FontFamily(Font(R.font.alata)),
+                                        fontSize = ResponsiveFont.heading1(windowInfo),
+                                        color = TextBlack
+                                    )
+                                },
+                                onClick = { openAlertDialog = true },
+                                roundedCornerShape = 10.dp,
+                                buttonElevation = ButtonDefaults.buttonElevation(5.dp),
+                                contentPadding = PaddingValues(10.dp),
+                                buttonColors = ButtonDefaults.buttonColors(MainOrange),
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = isFormValid
+                            )
+                        }
                     }
                 }
             }

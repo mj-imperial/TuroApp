@@ -72,11 +72,39 @@ data class StudentPerformanceListResponse(
     @Json(name = "student_id") val studentId: String,
     @Json(name = "student_name") val studentName: String,
     @Json(name = "course_name") val courseName: String,
-    @Json(name = "profile_pic") val profilePic: String?,
+    @Json(name = "profile_pic") val profilePic: ByteArray?,
     @Json(name = "completed_assessments") val completedAssessments: Int,
     @Json(name = "total_points") val totalPoints: Int,
     @Json(name = "average_score") val averageScore: Double
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as StudentPerformanceListResponse
+
+        if (completedAssessments!=other.completedAssessments) return false
+        if (totalPoints!=other.totalPoints) return false
+        if (averageScore!=other.averageScore) return false
+        if (studentId!=other.studentId) return false
+        if (studentName!=other.studentName) return false
+        if (courseName!=other.courseName) return false
+        if (!profilePic.contentEquals(other.profilePic)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = completedAssessments
+        result = 31 * result + totalPoints
+        result = 31 * result + averageScore.hashCode()
+        result = 31 * result + studentId.hashCode()
+        result = 31 * result + studentName.hashCode()
+        result = 31 * result + courseName.hashCode()
+        result = 31 * result + (profilePic?.contentHashCode() ?: 0)
+        return result
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class StudentPerformanceResponse(

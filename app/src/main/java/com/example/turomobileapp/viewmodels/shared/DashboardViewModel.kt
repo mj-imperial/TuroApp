@@ -22,34 +22,20 @@ class DashboardViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(DashboardUIState())
     val uiState: StateFlow<DashboardUIState> = _uiState.asStateFlow()
 
-    fun loadCourses(userId: String, role: UserRole){
+    fun loadCourses(){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
-            if (role == UserRole.STUDENT){
-                courseRepository.getCoursesForStudent(userId.toString()).collect { result ->
-                    handleResult(
-                        result = result,
-                        onSuccess = { courses ->
-                            _uiState.update { it.copy(loading = false, courses = courses) }
-                        },
-                        onFailure = { err ->
-                            _uiState.update { it.copy(loading = false, errorMessage = err) }
-                        }
-                    )
-                }
-            }else if(role == UserRole.TEACHER){
-                courseRepository.getCoursesForTeacher(userId.toString()).collect { result ->
-                    handleResult(
-                        result = result,
-                        onSuccess = { courses ->
-                            _uiState.update { it.copy(loading = false, courses = courses) }
-                        },
-                        onFailure = { err ->
-                            _uiState.update { it.copy(loading = false, errorMessage = err) }
-                        }
-                    )
-                }
+            courseRepository.getCoursesForUser().collect { result ->
+                handleResult(
+                    result = result,
+                    onSuccess = { courses ->
+                        _uiState.update { it.copy(loading = false, courses = courses) }
+                    },
+                    onFailure = { err ->
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                    }
+                )
             }
         }
     }

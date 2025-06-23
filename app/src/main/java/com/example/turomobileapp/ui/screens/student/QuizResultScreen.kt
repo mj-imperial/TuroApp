@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -52,8 +52,10 @@ import com.example.turomobileapp.R
 import com.example.turomobileapp.models.AssessmentResultResponse
 import com.example.turomobileapp.models.QuizContentResponse
 import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CircularScoreProgressBar
+import com.example.turomobileapp.ui.components.PopupAlertWithActions
 import com.example.turomobileapp.ui.components.PopupMinimal
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
@@ -64,6 +66,7 @@ import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.ui.theme.green
+import com.example.turomobileapp.ui.theme.headingText
 import com.example.turomobileapp.ui.theme.hiddenAnswers1
 import com.example.turomobileapp.ui.theme.hiddenAnswers2
 import com.example.turomobileapp.viewmodels.SessionManager
@@ -75,7 +78,8 @@ fun QuizResultScreen(
     navController: NavController,
     sessionManager: SessionManager,
     viewModel: AssessmentResultViewModel,
-    fromSubmit: Boolean
+    fromSubmit: Boolean,
+    quizId: String
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
@@ -100,6 +104,52 @@ fun QuizResultScreen(
         return
     }
 
+    var openQuizDialog by remember { mutableStateOf(false) }
+
+    if (openQuizDialog){
+        PopupAlertWithActions(
+            onDismissRequest = {
+                openQuizDialog = false
+            },
+            onConfirmation = {
+                navController.navigate(Screen.StudentQuizAttempt.createRoute(quizId))
+            },
+            icon = painterResource(R.drawable.screeningexam_icon),
+            title = {
+                Text(
+                    text = "TAKE QUIZ",
+                    fontSize = ResponsiveFont.title(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = TextBlack
+                )
+            },
+            dialogText = {
+                Text(
+                    text = "Are you sure you want to take the Quiz?",
+                    fontSize = ResponsiveFont.heading2(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = TextBlack
+                )
+            },
+            confirmText = {
+                Text(
+                    text = "CONFIRM",
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = green
+                )
+            },
+            dismissText = {
+                Text(
+                    text = "DISMISS",
+                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                    color = MainRed
+                )
+            }
+        )
+    }
+
     if (uiState.results.isEmpty()) {
         Column(
             Modifier
@@ -111,7 +161,8 @@ fun QuizResultScreen(
             Text(
                 text = "You haven’t attempted this quiz yet.",
                 fontSize = ResponsiveFont.heading1(windowInfo),
-                fontFamily = FontFamily(Font(R.font.alata))
+                fontFamily = FontFamily(Font(R.font.alata)),
+                color = headingText
             )
             Spacer(Modifier.height(16.dp))
             CapsuleButton(
@@ -123,12 +174,12 @@ fun QuizResultScreen(
                         color = MainWhite
                     )
                 },
-                modifier = Modifier.size(windowInfo.screenWidth*0.2f),
-                onClick = { navController.navigate(Screen.StudentActivityDetail.route) },
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { openQuizDialog = true },
                 roundedCornerShape = 10.dp,
                 buttonElevation = ButtonDefaults.buttonElevation(8.dp),
                 contentPadding = PaddingValues(5.dp),
-                buttonColors = ButtonDefaults.buttonColors(contentColor = green),
+                buttonColors = ButtonDefaults.buttonColors(containerColor = green, contentColor = MainWhite),
                 enabled = true
             )
         }
@@ -153,11 +204,11 @@ fun QuizResultScreen(
     if (openAlertDialog){
         PopupMinimal(
             onDismissRequest = { openAlertDialog = false },
-            width = windowInfo.screenWidth * 0.7f,
+            width = windowInfo.screenWidth * 0.95f,
             height = windowInfo.screenHeight * 0.2f,
             padding = 15.dp,
             roundedCornerShape = 10.dp,
-            dialogText = "You got ${selectedResult.earnedPoints} for scoring ${selectedResult.scorePercentage} on your latest attempt.",
+            dialogText = "You got ${selectedResult.earnedPoints} pts. for scoring ${selectedResult.scorePercentage}% on your latest attempt.",
             fontFamily = FontFamily(Font(R.font.alata)),
             fontSize = ResponsiveFont.heading3(windowInfo),
             textColor = TextBlack
@@ -226,7 +277,7 @@ fun QuizResultScreen(
                             TakeQuizAgainButton(
                                 windowInfo = windowInfo,
                                 onClickTakeQuizAgain = {
-                                    navController.navigate(Screen.StudentActivityDetail.route)
+                                    openQuizDialog = true
                                 }
                             )
                         }
@@ -379,7 +430,7 @@ fun QuizResultQuestions(
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
-                                MainWhite,hiddenAnswers1,hiddenAnswers2
+                                MainWhite, hiddenAnswers1, hiddenAnswers2
                             )
                         )
                     ),
@@ -417,6 +468,14 @@ fun QuizResultQuestions(
                             fontSize = ResponsiveFont.heading2(windowInfo),
                             fontFamily = FontFamily(Font(R.font.alata))
                         )
+                        question.questionImage?.let {
+                            if (it.isNotEmpty()){
+                                BlobImage(
+                                    byteArray = question.questionImage,
+                                    modifier = Modifier.fillMaxWidth().height(200.dp).padding(vertical = 10.dp)
+                                )
+                            }
+                        }
                         Spacer(Modifier.height(8.dp))
                         Text(
                             text = question.questionText,
@@ -431,7 +490,7 @@ fun QuizResultQuestions(
                                 !showAnswers -> Color.Transparent
                                 isChosen && isCorrect -> Color(0xFFE6F4EA)
                                 isChosen && !isCorrect -> Color(0xFFFDECEA)
-                                !isChosen && isCorrect -> Color(0xFFE6F4EA)
+                                !isChosen && isCorrect -> Color(0xFFE6F4EA) // always show correct
                                 else -> Color.Transparent
                             }
                             val border = if (showAnswers && (isChosen || isCorrect)) {
@@ -442,7 +501,12 @@ fun QuizResultQuestions(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(bg, RoundedCornerShape(4.dp))
-                                    .then(if (border != null) Modifier.border(border, RoundedCornerShape(4.dp)) else Modifier)
+                                    .then(
+                                        if (border!=null) Modifier.border(
+                                            border,
+                                            RoundedCornerShape(4.dp)
+                                        ) else Modifier
+                                    )
                                     .padding(8.dp)
                             ) {
                                 RadioButton(

@@ -63,7 +63,7 @@ class StudentPerformanceViewModel @Inject constructor(
     fun updateIndividualStudentInfo(
         studentId: String,
         studentName: String,
-        profilePic: String,
+        profilePic: ByteArray?,
         completedAssessments: Int,
         averageGrade: Double,
         points: Int,
@@ -123,9 +123,37 @@ data class StudentPerformanceOverviewUIState(
 data class CurrentStudentInfo(
     val studentId: String,
     val studentName: String,
-    val profilePic: String,
+    val profilePic: ByteArray?,
     val completedAssessments: Int,
     val averageGrade: Double,
     val points: Int,
     val rank: Int
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as CurrentStudentInfo
+
+        if (completedAssessments!=other.completedAssessments) return false
+        if (averageGrade!=other.averageGrade) return false
+        if (points!=other.points) return false
+        if (rank!=other.rank) return false
+        if (studentId!=other.studentId) return false
+        if (studentName!=other.studentName) return false
+        if (!profilePic.contentEquals(other.profilePic)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = completedAssessments
+        result = 31 * result + averageGrade.hashCode()
+        result = 31 * result + points
+        result = 31 * result + rank
+        result = 31 * result + studentId.hashCode()
+        result = 31 * result + studentName.hashCode()
+        result = 31 * result + profilePic.contentHashCode()
+        return result
+    }
+}

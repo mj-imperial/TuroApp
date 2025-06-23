@@ -73,24 +73,20 @@ class LoginViewModel @Inject constructor(
                             )
                         }
                         _eventFlow.tryEmit(LoginEvent.ShowToast("Login successful"))
-                        sessionManager.startSession(
-                            user.userId,
-                            user.agreedToTerms,
-                            user.requiresPasswordChange,
-                            user.email,
-                            user.firstName,
-                            user.lastName,
-                            user.profilePic,
-                            user.roleName.toString()
-                        )
-                        if (user.requiresPasswordChange){
-                            _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.userId,user.email,true))
-                        } else if(!user.agreedToTerms){
-                            _eventFlow.tryEmit(LoginEvent.NavigateToTermsAgreement(user.userId, user.agreedToTerms,
-                                user.roleName.toString()
+
+                        viewModelScope.launch {
+                            sessionManager.saveTokens(user.accessToken)
+                            sessionManager.startSession(user)
+                        }
+
+                        if (user.data.requiresPasswordChange){
+                            _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.data.userId,user.data.email,true))
+                        } else if(!user.data.agreedToTerms){
+                            _eventFlow.tryEmit(LoginEvent.NavigateToTermsAgreement(user.data.userId, user.data.agreedToTerms,
+                                user.data.roleId
                             ))
                         } else{
-                            _eventFlow.tryEmit(LoginEvent.NavigateToDashboard(user.userId))
+                            _eventFlow.tryEmit(LoginEvent.NavigateToDashboard(user.data.userId))
                         }
                     },
                     onFailure = { error ->
@@ -142,7 +138,7 @@ data class LoginUiState(
 sealed class LoginEvent {
     data class ShowToast(val message: String) : LoginEvent()
     data class NavigateToChangeDefaultPassword(val userId: String, val email: String,val requiresChange: Boolean) : LoginEvent()
-    data class NavigateToTermsAgreement(val userId: String, val agreedToTerms: Boolean, val role: String) : LoginEvent()
+    data class NavigateToTermsAgreement(val userId: String, val agreedToTerms: Boolean, val role: Int) : LoginEvent()
     data class NavigateToDashboard(val userId: String) : LoginEvent()
 }
 

@@ -53,6 +53,7 @@ import com.example.turomobileapp.R
 import com.example.turomobileapp.enums.QuestionType
 import com.example.turomobileapp.models.QuestionResponse
 import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
@@ -215,7 +216,8 @@ fun QuizAttemptScreen(
                     onNextClicked = viewModel::onNextClicked,
                     onOpenAlertDialog = {
                         openAlertDialog = true
-                    }
+                    },
+                    questionImage = question.questionImage
                 )
 
                 Text(
@@ -275,6 +277,7 @@ fun QuestionBox(
     uiState: QuizAttemptUIState,
     windowInfo: WindowInfo,
     questionNumber: Int,
+    questionImage: ByteArray?,
     questionText: String,
     questionType: QuestionType,
     options: List<QuestionResponse>,
@@ -324,6 +327,15 @@ fun QuestionBox(
                     fontFamily = FontFamily(Font(R.font.albert_sans_thin)),
                     fontWeight = FontWeight.Bold
                 )
+
+                questionImage?.let {
+                    if (it.isNotEmpty()){
+                        BlobImage(
+                            byteArray = questionImage,
+                            modifier = Modifier.fillMaxWidth().height(200.dp).padding(vertical = 10.dp)
+                        )
+                    }
+                }
 
                 Text(
                     text = questionText,

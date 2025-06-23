@@ -42,7 +42,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -50,9 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.ui.components.AppScaffold
+import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.CircularScoreProgressBar
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
@@ -233,7 +232,7 @@ fun StudentPerformanceOverViewScreen(
                         itemsIndexed(sortedStudents) { index, student ->
                             StudentProgressRow(
                                 windowInfo = windowInfo,
-                                profileUrl = student.profilePic.toString(),
+                                profileUrl = student.profilePic,
                                 fullName = student.studentName,
                                 numberOfAssessments = uiState.numberOfAssessment,
                                 completedAssessments = student.completedAssessments,
@@ -243,7 +242,7 @@ fun StudentPerformanceOverViewScreen(
                                     viewModel.updateIndividualStudentInfo(
                                         studentId = student.studentId,
                                         studentName = student.studentName,
-                                        profilePic = student.profilePic.toString(),
+                                        profilePic = student.profilePic,
                                         completedAssessments = student.completedAssessments,
                                         averageGrade = student.averageScore,
                                         points = student.totalPoints,
@@ -416,7 +415,7 @@ fun OverallCourseModuleInfo(
                     Text(
                         text = "Highest Module Avg.",
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        fontSize = ResponsiveFont.body(windowInfo),
                         color = headingText,
                         textAlign = TextAlign.Center
                     )
@@ -430,14 +429,14 @@ fun OverallCourseModuleInfo(
                     Text(
                         text = "Lowest Module Avg.",
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        fontSize = ResponsiveFont.body(windowInfo),
                         color = headingText,
                         textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(15.dp))
+            Spacer(modifier = Modifier.width(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -451,7 +450,7 @@ fun OverallCourseModuleInfo(
                     Text(
                         text = highestModuleName,
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.body(windowInfo),
+                        fontSize = ResponsiveFont.caption(windowInfo),
                         color = headingText,
                         textAlign = TextAlign.Center
                     )
@@ -465,14 +464,14 @@ fun OverallCourseModuleInfo(
                     Text(
                         text = lowestModuleName,
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.body(windowInfo),
+                        fontSize = ResponsiveFont.caption(windowInfo),
                         color = headingText,
                         textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(30.dp))
+            Spacer(modifier = Modifier.width(40.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -568,7 +567,7 @@ fun OverallCourseAssessmentInfo(
                     Text(
                         text = "Highest Assessment Avg.",
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        fontSize = ResponsiveFont.body(windowInfo),
                         color = headingText,
                         textAlign = TextAlign.Center
                     )
@@ -582,14 +581,14 @@ fun OverallCourseAssessmentInfo(
                     Text(
                         text = "Lowest Assessment Avg.",
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        fontSize = ResponsiveFont.body(windowInfo),
                         color = headingText,
                         textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(15.dp))
+            Spacer(modifier = Modifier.width(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -603,7 +602,7 @@ fun OverallCourseAssessmentInfo(
                     Text(
                         text = highestAssessmentName,
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.body(windowInfo),
+                        fontSize = ResponsiveFont.caption(windowInfo),
                         color = headingText,
                         textAlign = TextAlign.Center
                     )
@@ -617,14 +616,14 @@ fun OverallCourseAssessmentInfo(
                     Text(
                         text = lowestAssessmentName,
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.body(windowInfo),
+                        fontSize = ResponsiveFont.caption(windowInfo),
                         color = headingText,
                         textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(30.dp))
+            Spacer(modifier = Modifier.width(40.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -662,7 +661,7 @@ fun OverallCourseAssessmentInfo(
 @Composable
 fun StudentProgressRow(
     windowInfo: WindowInfo,
-    profileUrl: String,
+    profileUrl: ByteArray?,
     fullName: String,
     numberOfAssessments: Int,
     completedAssessments: Int,
@@ -686,10 +685,8 @@ fun StudentProgressRow(
                 .padding(horizontal = 8.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = profileUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            BlobImage(
+                byteArray = profileUrl,
                 modifier = Modifier
                     .size(35.dp)
                     .clip(CircleShape)

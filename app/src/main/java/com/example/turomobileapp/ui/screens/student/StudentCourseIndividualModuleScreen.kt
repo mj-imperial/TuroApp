@@ -1,6 +1,7 @@
 package com.example.turomobileapp.ui.screens.student
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +39,7 @@ import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.theme.headingText
+import com.example.turomobileapp.ui.theme.hiddenAnswers1
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.StudentCourseAnalyticsViewModel
 
@@ -88,14 +92,37 @@ fun StudentCourseIndividualModuleScreen(
                         }
 
                         items(module.quizScores) { quiz ->
-                            ScoreBox(
-                                windowInfo = windowInfo,
-                                activityName = quiz.activityName,
-                                highestScorePercentage = quiz.highestScorePercentage,
-                                lowestScorePercentage = quiz.lowestScorePercentage,
-                                latestScorePercentage = quiz.latestScorePercentage
-                            )
-                            Spacer(modifier = Modifier.height(15.dp))
+                            if (module.quizScores.isEmpty()){
+                                Card(
+                                    modifier = Modifier
+                                        .height(windowInfo.screenHeight * 0.3f)
+                                        .width(windowInfo.screenWidth * 0.9f),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = CardDefaults.cardColors(containerColor = hiddenAnswers1),
+                                    elevation = CardDefaults.cardElevation(1.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize().padding(10.dp),
+                                        contentAlignment = Alignment.Center
+                                    ){
+                                        Text(
+                                            text = "You have not answered an assessment.",
+                                            fontFamily = FontFamily(Font(R.font.alata)),
+                                            fontSize = ResponsiveFont.heading2(windowInfo),
+                                            color = headingText,
+                                        )
+                                    }
+                                }
+                            }else{
+                                ScoreBox(
+                                    windowInfo = windowInfo,
+                                    activityName = quiz.activityName,
+                                    highestScorePercentage = quiz.highestScorePercentage,
+                                    lowestScorePercentage = quiz.lowestScorePercentage,
+                                    latestScorePercentage = quiz.latestScorePercentage
+                                )
+                                Spacer(modifier = Modifier.height(15.dp))
+                            }
                         }
                     }
                 }

@@ -9,21 +9,15 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class CourseRepository @Inject constructor(private val courseApiService: CourseApiService) {
-    fun getCoursesForStudent(userId: String): Flow<Result<List<CourseResponse>>> =
+    fun getCoursesForUser(): Flow<Result<List<CourseResponse>>> =
         requestAndMap(
-            call = { courseApiService.getCoursesForStudent(action = "studentCourses", userId = userId) },
+            call = { courseApiService.getCoursesForUser() },
             mapper = { dto -> dto.courses }
         )
 
-    fun getCoursesForTeacher(userId: String): Flow<Result<List<CourseResponse>>> =
-        requestAndMap(
-            call = { courseApiService.getCoursesForTeacher(action = "teacherCourses", userId = userId) },
-            mapper = { dto -> dto.courses }
-        )
-
-    fun getCoursePicture(courseId: String): Flow<Result<CoursePicture>> =
+    fun getCoursePicture(): Flow<Result<CoursePicture>> =
         handleApiResponse(
-            call = { courseApiService.getCoursePicture(courseId) },
-            errorMessage = "Failed to get course picture for $courseId"
+            call = { courseApiService.getCoursePicture() },
+            errorMessage = "Failed to get course picture"
         )
 }

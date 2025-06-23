@@ -378,10 +378,11 @@ fun NavGraphBuilder.studentNavGraph(
             navDeepLink { uriPattern = "turo://quiz_result_screen/{quizId}/{fromSubmit}" }
         )
     ) { backStackEntry ->
+        val quizId = backStackEntry.arguments!!.getString("quizId")!!
         val fromSubmit = backStackEntry.arguments?.getBoolean("fromSubmit") ?: false
 
         val viewModel: AssessmentResultViewModel = hiltViewModel()
-        QuizResultScreen(navController, sessionManager, viewModel, fromSubmit)
+        QuizResultScreen(navController, sessionManager, viewModel, fromSubmit, quizId)
     }
 
     composable(Screen.Leaderboard.route) {

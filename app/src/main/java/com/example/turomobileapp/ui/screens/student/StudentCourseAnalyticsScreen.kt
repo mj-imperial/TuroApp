@@ -316,7 +316,7 @@ fun IndividualCourseModuleInfo(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Highest Module Avg.",
+                        text = "Highest AVG.",
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.heading3(windowInfo),
                         color = headingText,
@@ -332,7 +332,7 @@ fun IndividualCourseModuleInfo(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Lowest Module Avg.",
+                        text = "Lowest AVG.",
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.heading3(windowInfo),
                         color = headingText,
@@ -341,7 +341,7 @@ fun IndividualCourseModuleInfo(
                 }
             }
 
-            Spacer(modifier = Modifier.width(40.dp))
+            Spacer(modifier = Modifier.width(50.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -480,7 +480,7 @@ fun IndividualCourseAssessmentInfo(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Highest Assessment Avg.",
+                        text = "Highest AVG.",
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.heading3(windowInfo),
                         color = headingText,
@@ -496,7 +496,7 @@ fun IndividualCourseAssessmentInfo(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Lowest Assessment Avg.",
+                        text = "Lowest AVG.",
                         fontFamily = FontFamily(Font(R.font.alata)),
                         fontSize = ResponsiveFont.heading3(windowInfo),
                         color = headingText,
@@ -618,6 +618,7 @@ fun ModuleRow(
                 fontFamily = FontFamily(Font(R.font.alata)),
                 fontSize = ResponsiveFont.heading2(windowInfo),
                 color = headingText,
+                maxLines = 1
             )
 
             Column(

@@ -55,9 +55,15 @@ import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.LoginText
 import com.example.turomobileapp.ui.theme.MainRed
+import com.example.turomobileapp.ui.theme.headingText
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.LectureDetailViewModel
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.SimpleYouTubePlayerOptionsBuilder
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayer
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayerHostState
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayerState
+import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubeVideoId
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -253,7 +259,8 @@ fun LectureTitle(
         Text(
             text = lectureName,
             fontSize = ResponsiveFont.title(windowInfo),
-            fontFamily = FontFamily(Font(R.font.alata))
+            fontFamily = FontFamily(Font(R.font.alata)),
+            color = headingText
         )
     }
 }
@@ -311,19 +318,55 @@ fun LectureBodyVideo(
         Intent(Intent.ACTION_VIEW, videoUrl.toUri())
     }
 
-    Text(
-        text = videoUrl,
-        fontSize = ResponsiveFont.heading3(windowInfo),
-        fontFamily = FontFamily(Font(R.font.alata)),
-        textDecoration = TextDecoration.Underline,
-        minLines = 1,
-        softWrap = true,
-        modifier = Modifier
-            .padding(bottom = 20.dp)
-            .clickable(onClick = {
-                context.startActivity(intent)
-            })
-    )
+    val videoId = remember(videoUrl) { extractYoutubeVideoId(videoUrl) }
+    val hostState = remember { YouTubePlayerHostState() }
+
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(10.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = videoUrl,
+            fontSize = ResponsiveFont.heading3(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier
+                .padding(bottom = 20.dp)
+                .clickable {
+                    context.startActivity(intent)
+                }
+        )
+
+        val currentState = hostState.currentState
+        if (currentState is YouTubePlayerState.Error) {
+            Text(
+                text = "Error: ${currentState.message}",
+                color = Color.Red
+            )
+        }
+
+        LaunchedEffect(currentState) {
+            if (currentState is YouTubePlayerState.Ready && videoId != null) {
+                hostState.loadVideo(YouTubeVideoId(videoId))
+            }
+        }
+
+        YouTubePlayer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp),
+            hostState = hostState,
+            options = SimpleYouTubePlayerOptionsBuilder.builder {
+                autoplay(false)
+                controls(true)
+                rel(false)
+                ivLoadPolicy(false)
+                ccLoadPolicy(false)
+                fullscreen = true
+            }
+        )
+    }
 }
 
 @Composable

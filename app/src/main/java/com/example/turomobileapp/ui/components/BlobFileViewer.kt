@@ -43,7 +43,7 @@ fun BlobFileViewer(
 
         val uri = FileProvider.getUriForFile(
             context,
-            "${context.packageName}.fileprovider",
+            "${context.packageName}.provider",
             tempFile
         )
 
@@ -61,8 +61,8 @@ fun BlobFileViewer(
             textDecoration = TextDecoration.Underline,
             color = Color.Blue,
             modifier = Modifier
-                .clickable { context.startActivity(intent) }
                 .padding(8.dp)
+                .clickable { context.startActivity(intent) }
         )
     } else {
         Text("No file available", modifier = modifier.padding(8.dp))

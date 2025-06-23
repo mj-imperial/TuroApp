@@ -13,7 +13,7 @@ import retrofit2.http.Query
 
 interface UserApiService {
     @FormUrlEncoded
-    @POST("login.php")
+    @POST("auth/login")
     suspend fun login(
         @Field("email") userEmail: String,
         @Field("password") password: String

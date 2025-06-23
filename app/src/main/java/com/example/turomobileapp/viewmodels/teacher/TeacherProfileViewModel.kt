@@ -39,7 +39,7 @@ class TeacherProfileViewModel @Inject constructor(
 
             val teacherId: String = sessionManager.userId.filterNotNull().first()
 
-            courseRepository.getCoursesForTeacher(teacherId).collect { result ->
+            courseRepository.getCoursesForUser().collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { resp ->

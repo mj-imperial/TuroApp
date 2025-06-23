@@ -124,4 +124,9 @@ dependencies {
     //confetti
     implementation("nl.dionsegijn:konfetti-compose:2.0.5")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    //youtube player
+    implementation("io.github.ilyapavlovskii:youtubeplayer-compose-android:2024.02.25")
+
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }
