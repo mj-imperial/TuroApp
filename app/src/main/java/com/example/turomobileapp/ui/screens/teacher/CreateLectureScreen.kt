@@ -231,16 +231,6 @@ fun CreateLectureScreen(
                                 fileName = uiState.fileName,
                                 isLoading = uiState.loadingFile,
                             )
-                            "YOUTUBE LINK" -> CreateYoutubeLink(
-                                windowInfo = windowInfo,
-                                youtubeLink = uiState.youtubeUrl.toString(),
-                                onUpdateYoutubeLink = viewModel::updateYoutubeUrl,
-                            )
-                            "TEXT" -> CreateText(
-                                windowInfo = windowInfo,
-                                text = uiState.text.toString(),
-                                onUpdateText = viewModel::updateText,
-                            )
                         }
                         Spacer(modifier = Modifier.height(35.dp))
                     }
@@ -507,78 +497,4 @@ fun CreatePDFCard(
             }
         }
     }
-}
-
-@Composable
-fun CreateYoutubeLink(
-    windowInfo: WindowInfo,
-    youtubeLink: String,
-    onUpdateYoutubeLink: (String) -> Unit
-){
-    CapsuleTextField(
-        value = youtubeLink,
-        onValueChange = {
-            onUpdateYoutubeLink(it)
-        },
-        placeholder = {
-            Text(
-                text = "TYPE YOUTUBE LINK",
-                fontFamily = FontFamily(Font(R.font.alata)),
-                fontSize = ResponsiveFont.heading2(windowInfo),
-                color = LoginText
-            )
-        },
-        label = {
-            Text(
-                text = "YOUTUBE LINK",
-                fontFamily = FontFamily(Font(R.font.alata)),
-                fontSize = ResponsiveFont.heading2(windowInfo),
-                color = LoginText
-            )
-        },
-        isSingleLine = false,
-        roundedCornerShape = 10.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(elevation = 3.dp, shape = RoundedCornerShape(10.dp), clip = false)
-            .background(color = SoftGray, shape = RoundedCornerShape(10.dp)),
-        enabled = true,
-        maxLines = 3
-    )
-}
-
-@Composable
-fun CreateText(
-    windowInfo: WindowInfo,
-    text: String,
-    onUpdateText: (String) -> Unit
-){
-    CapsuleTextField(
-        value = text,
-        onValueChange = { onUpdateText(it) },
-        placeholder = {
-            Text(
-                text = "TYPE CONTENT",
-                fontFamily = FontFamily(Font(R.font.alata)),
-                fontSize = ResponsiveFont.heading2(windowInfo),
-                color = LoginText
-            )
-        },
-        label = {
-            Text(
-                text = "TYPE CONTENT",
-                fontFamily = FontFamily(Font(R.font.alata)),
-                fontSize = ResponsiveFont.heading2(windowInfo),
-                color = LoginText
-            )
-        },
-        isSingleLine = false,
-        roundedCornerShape = 10.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(elevation = 3.dp, shape = RoundedCornerShape(10.dp), clip = false)
-            .background(color = SoftGray, shape = RoundedCornerShape(10.dp)),
-        enabled = true,
-        maxLines = 8
-    )
 }

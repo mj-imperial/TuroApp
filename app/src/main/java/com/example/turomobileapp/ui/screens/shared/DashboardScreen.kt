@@ -251,19 +251,21 @@ fun DashboardItem(
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Column {
-            coursePic?.let {
-                if (it.isNotEmpty()) {
-                    BlobImage(
-                        byteArray = coursePic,
-                        modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)
-                    )
-                }else{
-                    AsyncImage(
-                        model = "https://img.freepik.com/free-photo/blackboard-inscribed-with-scientific-formulas-calculations_1150-19413.jpg?semt=ais_hybrid&w=740",
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)
-                    )
-                }
+            if (coursePic != null){
+                BlobImage(
+                    byteArray = coursePic,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                )
+            }else{
+                AsyncImage(
+                    model = "https://img.freepik.com/free-photo/blackboard-inscribed-with-scientific-formulas-calculations_1150-19413.jpg?semt=ais_hybrid&w=740",
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                )
             }
 
             Column(

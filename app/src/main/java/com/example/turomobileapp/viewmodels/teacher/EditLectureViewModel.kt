@@ -54,11 +54,9 @@ class EditLectureViewModel @Inject constructor(
                                 deadlineDate = lecture.deadlineDate,
                                 originalContentTypeName = lecture.contentTypeName,
                                 contentTypeName = lecture.contentTypeName,
-                                videoUrl = lecture.videoUrl,
                                 fileUrl = lecture.fileUrl,
                                 fileName = lecture.fileName,
                                 fileMimeType = lecture.fileMimeType,
-                                textBody = lecture.textBody
                             )
                         }
                     },
@@ -88,14 +86,6 @@ class EditLectureViewModel @Inject constructor(
 
     fun updateContentTypeName(newContentType: String) {
         _uiState.update { it.copy(contentTypeName = newContentType) }
-    }
-
-    fun updateVideoUrl(newUrl: String) {
-        _uiState.update { it.copy(videoUrl = newUrl) }
-    }
-
-    fun updateText(newText: String) {
-        _uiState.update { it.copy(textBody = newText) }
     }
 
     fun onFilePicked(context: Context, uri: Uri) {
@@ -165,8 +155,6 @@ class EditLectureViewModel @Inject constructor(
                 fileMimeType = if (state.contentTypeName != "PDF/DOCS") null else state.fileMimeType,
                 fileName = if (state.contentTypeName != "PDF/DOCS") null else state.fileName,
                 fileUri = if (state.contentTypeName != "PDF/DOCS") null else state.fileUri,
-                textBody = if (state.contentTypeName != "TEXT") null else state.textBody,
-                videoUrl = if (state.contentTypeName != "VIDEO") null else state.videoUrl
             )
         }
     }
@@ -181,11 +169,9 @@ class EditLectureViewModel @Inject constructor(
                 unlockDate = state.unlockDate,
                 deadlineDate = state.deadlineDate,
                 contentTypeName = state.contentTypeName,
-                videoUrl = state.videoUrl,
                 fileUrl = state.fileUrl?.let { android.util.Base64.encodeToString(it, android.util.Base64.NO_WRAP) },
                 fileMimeType = state.fileMimeType,
                 fileName = state.fileName,
-                textBody = state.textBody
             )
 
             lectureRepository.updateLecture(_activityId, _moduleId, updateLecture).collect { result ->
@@ -223,11 +209,9 @@ data class EditLectureUIState(
     val deadlineDate: LocalDateTime? = null,
     val originalContentTypeName: String = "",
     val contentTypeName: String = "",
-    val videoUrl: String? = null,
     val fileUrl: ByteArray? = null,
     val fileMimeType: String? = null,
     val fileName: String? = null,
-    val textBody: String? = null,
     val fileUri: Uri? = null
 ) {
     override fun equals(other: Any?): Boolean {
@@ -245,11 +229,9 @@ data class EditLectureUIState(
         if (deadlineDate!=other.deadlineDate) return false
         if (originalContentTypeName!=other.originalContentTypeName) return false
         if (contentTypeName!=other.contentTypeName) return false
-        if (videoUrl!=other.videoUrl) return false
         if (!fileUrl.contentEquals(other.fileUrl)) return false
         if (fileMimeType!=other.fileMimeType) return false
         if (fileName!=other.fileName) return false
-        if (textBody!=other.textBody) return false
         if (fileUri!=other.fileUri) return false
 
         return true
@@ -265,11 +247,9 @@ data class EditLectureUIState(
         result = 31 * result + (deadlineDate?.hashCode() ?: 0)
         result = 31 * result + originalContentTypeName.hashCode()
         result = 31 * result + contentTypeName.hashCode()
-        result = 31 * result + (videoUrl?.hashCode() ?: 0)
         result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
         result = 31 * result + (fileMimeType?.hashCode() ?: 0)
         result = 31 * result + (fileName?.hashCode() ?: 0)
-        result = 31 * result + (textBody?.hashCode() ?: 0)
         result = 31 * result + (fileUri?.hashCode() ?: 0)
         return result
     }

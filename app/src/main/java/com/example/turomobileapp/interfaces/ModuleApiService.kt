@@ -55,7 +55,7 @@ interface ModuleApiService {
         @Body module: ModuleUpdateRequest
     ): Response<ModuleResultResponse>
 
-    @GET("get_current_module_for_student.php")
+    @GET("get-current-module")
     suspend fun getCurrentModule(
         @Query("student_id") studentId: String,
         @Query("course_id") courseId: String

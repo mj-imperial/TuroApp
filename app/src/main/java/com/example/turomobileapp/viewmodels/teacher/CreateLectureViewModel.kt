@@ -60,16 +60,6 @@ class CreateLectureViewModel @Inject constructor(
         _isFormValid.value = validateForm()
     }
 
-    fun updateText(newText: String){
-        _uiState.update { it.copy(text = newText) }
-        _isFormValid.value = validateForm()
-    }
-
-    fun updateYoutubeUrl(newYoutubeUrl: String){
-        _uiState.update { it.copy(youtubeUrl = newYoutubeUrl) }
-        _isFormValid.value = validateForm()
-    }
-
     fun onFilePicked(context: Context, uri: Uri) {
         val name = getDisplayName(context, uri)
         val mime = context.contentResolver.getType(uri)
@@ -105,8 +95,6 @@ class CreateLectureViewModel @Inject constructor(
 
         return when (state.uploadType) {
             "PDF/DOCS" -> state.fileUrl != null && state.fileUrl.isNotEmpty()
-            "VIDEO" -> !state.youtubeUrl.isNullOrBlank()
-            "TEXT" -> !state.text.isNullOrBlank()
             else -> false
         }
     }
@@ -166,11 +154,9 @@ class CreateLectureViewModel @Inject constructor(
             unlockDate = state.unlockDateTime,
             deadlineDate = state.deadlineDateTime,
             contentTypeName = state.uploadType,
-            videoUrl = state.youtubeUrl,
             fileUrl = state.fileUrl?.let { android.util.Base64.encodeToString(it, android.util.Base64.NO_WRAP) },
             fileMimeType = state.fileMimeType,
             fileName = state.fileName,
-            textBody = state.text
         )
 
         viewModelScope.launch {
@@ -210,8 +196,6 @@ data class CreateLectureUIState(
     val unlockDateTime: LocalDateTime? = null,
     val deadlineDateTime: LocalDateTime? = null,
     val uploadType: String = "PDF/DOCS",
-    val text: String? = null,
-    val youtubeUrl: String? = null,
     val fileUrl: ByteArray? = null,
     val fileMimeType: String? = null,
     val fileName: String? = null,
@@ -232,8 +216,6 @@ data class CreateLectureUIState(
         if (unlockDateTime!=other.unlockDateTime) return false
         if (deadlineDateTime!=other.deadlineDateTime) return false
         if (uploadType!=other.uploadType) return false
-        if (text!=other.text) return false
-        if (youtubeUrl!=other.youtubeUrl) return false
         if (!fileUrl.contentEquals(other.fileUrl)) return false
         if (fileMimeType!=other.fileMimeType) return false
         if (fileName!=other.fileName) return false
@@ -252,8 +234,6 @@ data class CreateLectureUIState(
         result = 31 * result + (unlockDateTime?.hashCode() ?: 0)
         result = 31 * result + (deadlineDateTime?.hashCode() ?: 0)
         result = 31 * result + uploadType.hashCode()
-        result = 31 * result + (text?.hashCode() ?: 0)
-        result = 31 * result + (youtubeUrl?.hashCode() ?: 0)
         result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
         result = 31 * result + (fileMimeType?.hashCode() ?: 0)
         result = 31 * result + (fileName?.hashCode() ?: 0)

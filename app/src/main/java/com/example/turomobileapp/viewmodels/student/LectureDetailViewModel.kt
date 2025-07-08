@@ -44,8 +44,6 @@ class LectureDetailViewModel @Inject constructor(
                             unlockDateTime = resp.unlockDate,
                             deadlineDateTime = resp.deadlineDate,
                             contentTypeName = resp.contentTypeName,
-                            text = resp.textBody,
-                            youtubeUrl = resp.videoUrl,
                             fileUrl = resp.fileUrl,
                             fileMimeType = resp.fileMimeType,
                             fileName = resp.fileName
@@ -68,8 +66,6 @@ data class LectureDetailUIState(
     val unlockDateTime: LocalDateTime? = null,
     val deadlineDateTime: LocalDateTime? = null,
     val contentTypeName: String = "",
-    val text: String? = null,
-    val youtubeUrl: String? = null,
     val fileUrl: ByteArray? = byteArrayOf(),
     val fileMimeType: String? = null,
     val fileName: String? = null,
@@ -87,8 +83,6 @@ data class LectureDetailUIState(
         if (unlockDateTime!=other.unlockDateTime) return false
         if (deadlineDateTime!=other.deadlineDateTime) return false
         if (contentTypeName!=other.contentTypeName) return false
-        if (text!=other.text) return false
-        if (youtubeUrl!=other.youtubeUrl) return false
         if (!fileUrl.contentEquals(other.fileUrl)) return false
         if (fileMimeType!=other.fileMimeType) return false
         if (fileName!=other.fileName) return false
@@ -104,9 +98,7 @@ data class LectureDetailUIState(
         result = 31 * result + (unlockDateTime?.hashCode() ?: 0)
         result = 31 * result + (deadlineDateTime?.hashCode() ?: 0)
         result = 31 * result + contentTypeName.hashCode()
-        result = 31 * result + (text?.hashCode() ?: 0)
-        result = 31 * result + (youtubeUrl?.hashCode() ?: 0)
-        result = 31 * result + fileUrl.contentHashCode()
+        result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
         result = 31 * result + (fileMimeType?.hashCode() ?: 0)
         result = 31 * result + (fileName?.hashCode() ?: 0)
         return result

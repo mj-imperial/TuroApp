@@ -2,7 +2,6 @@ package com.example.turomobileapp.viewmodels.shared
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.helperfunctions.handleResult
 import com.example.turomobileapp.models.CourseResponse
 import com.example.turomobileapp.repositories.CourseRepository
@@ -45,5 +44,4 @@ data class DashboardUIState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
     val courses: List<CourseResponse> = emptyList(),
-    val role: UserRole = UserRole.STUDENT
 )

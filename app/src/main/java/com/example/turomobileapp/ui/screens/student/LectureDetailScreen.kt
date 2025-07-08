@@ -1,12 +1,10 @@
 package com.example.turomobileapp.ui.screens.student
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,18 +30,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.ui.components.AppScaffold
@@ -59,11 +53,6 @@ import com.example.turomobileapp.ui.theme.headingText
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.LectureDetailViewModel
-import io.github.ilyapavlovskii.multiplatform.youtubeplayer.SimpleYouTubePlayerOptionsBuilder
-import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayer
-import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayerHostState
-import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayerState
-import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubeVideoId
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -179,14 +168,6 @@ fun LectureDetailScreen(
                                         fileName = uiState.fileName,
                                         mimeType = uiState.fileMimeType,
                                     )
-                                    "TEXT" -> LectureBodyText(
-                                        windowInfo = windowInfo,
-                                        textBody = uiState.text.toString()
-                                    )
-                                    "VIDEO" -> LectureBodyVideo(
-                                        windowInfo = windowInfo,
-                                        videoUrl = uiState.youtubeUrl.toString()
-                                    )
                                 }
                             }
 
@@ -287,84 +268,6 @@ fun LectureHeader(
             fontSize = ResponsiveFont.heading3(windowInfo),
             fontFamily = FontFamily(Font(R.font.alata)),
             modifier = Modifier.padding(vertical = 10.dp)
-        )
-    }
-}
-
-@Composable
-fun LectureBodyText(
-    windowInfo: WindowInfo,
-    textBody: String
-){
-    Text(
-        text = textBody,
-        fontSize = ResponsiveFont.heading3(windowInfo),
-        fontFamily = FontFamily(Font(R.font.alata)),
-        textDecoration = TextDecoration.Underline,
-        minLines = 1,
-        softWrap = true,
-        modifier = Modifier
-            .padding(bottom = 20.dp)
-    )
-}
-
-@Composable
-fun LectureBodyVideo(
-    windowInfo: WindowInfo,
-    videoUrl: String,
-){
-    val context = LocalContext.current
-    val intent = remember(videoUrl) {
-        Intent(Intent.ACTION_VIEW, videoUrl.toUri())
-    }
-
-    val videoId = remember(videoUrl) { extractYoutubeVideoId(videoUrl) }
-    val hostState = remember { YouTubePlayerHostState() }
-
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(10.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = videoUrl,
-            fontSize = ResponsiveFont.heading3(windowInfo),
-            fontFamily = FontFamily(Font(R.font.alata)),
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier
-                .padding(bottom = 20.dp)
-                .clickable {
-                    context.startActivity(intent)
-                }
-        )
-
-        val currentState = hostState.currentState
-        if (currentState is YouTubePlayerState.Error) {
-            Text(
-                text = "Error: ${currentState.message}",
-                color = Color.Red
-            )
-        }
-
-        LaunchedEffect(currentState) {
-            if (currentState is YouTubePlayerState.Ready && videoId != null) {
-                hostState.loadVideo(YouTubeVideoId(videoId))
-            }
-        }
-
-        YouTubePlayer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp),
-            hostState = hostState,
-            options = SimpleYouTubePlayerOptionsBuilder.builder {
-                autoplay(false)
-                controls(true)
-                rel(false)
-                ivLoadPolicy(false)
-                ccLoadPolicy(false)
-                fullscreen = true
-            }
         )
     }
 }
