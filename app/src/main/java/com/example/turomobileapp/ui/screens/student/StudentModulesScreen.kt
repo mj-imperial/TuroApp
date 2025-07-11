@@ -22,7 +22,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -34,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -107,18 +105,10 @@ fun StudentModulesScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         itemsIndexed(uiState.modules) { index, item ->
-                            val isUnlocked = if (index == 0){
-                                true
-                            }else{
-                                val previousModule = uiState.modules[index - 1]
-                                previousModule.moduleProgress == 100.0
-                            }
-
                             ModuleItem(
                                 windowInfo = windowInfo,
                                 moduleName = item.moduleName,
                                 modulePicture = item.modulePicture,
-                                isUnlocked = isUnlocked,
                                 progress = item.moduleProgress,
                                 onClickModule = {
                                     viewModel.updateModuleName(item.moduleName)
@@ -139,7 +129,6 @@ fun ModuleItem(
     windowInfo: WindowInfo,
     moduleName: String,
     modulePicture: ByteArray,
-    isUnlocked: Boolean,
     progress: Double,
     onClickModule: () -> Unit
 ){
@@ -150,7 +139,6 @@ fun ModuleItem(
             .wrapContentHeight()
             .clickable(
                 onClick = onClickModule,
-                enabled = isUnlocked,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple()
             ),
@@ -166,7 +154,7 @@ fun ModuleItem(
                 modifier = Modifier
                     .fillMaxSize()
                     .aspectRatio(1f),
-                alpha = if (isUnlocked) 1f else 0.6f
+                alpha = 1f
             )
 
             Column(
@@ -191,15 +179,6 @@ fun ModuleItem(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (!isUnlocked) {
-                        Icon(
-                            painter = painterResource(R.drawable.lock),
-                            contentDescription = null,
-                            tint = MainWhite,
-                            modifier = Modifier.padding(end = 6.dp)
-                        )
-                    }
-
                     Text(
                         text = moduleName,
                         fontSize = ResponsiveFont.body(windowInfo),

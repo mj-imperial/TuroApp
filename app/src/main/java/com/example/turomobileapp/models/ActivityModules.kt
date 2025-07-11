@@ -66,8 +66,7 @@ data class ModuleResponse(
 
 @JsonClass(generateAdapter = true)
 data class ModulesResponseStudent(
-    @Json(name = "success") val success: Boolean,
-    @Json(name = "modules") val modules: List<ModuleResponseStudent>
+    @Json(name = "data") val modules: List<ModuleResponseStudent>
 )
 
 @JsonClass(generateAdapter = true)
@@ -76,10 +75,8 @@ data class ModuleResponseStudent(
     @Json(name = "module_name") val moduleName: String,
     @Json(name = "module_picture") val modulePicture: ByteArray,
     @Json(name = "module_description") val moduleDescription: String,
-    @Json(name = "progress") val moduleProgress: Double,
-    @Json(name = "is_Catch_Up") val isCatchUpInt: Int
+    @Json(name = "progress") val moduleProgress: Double
 ){
-    val isCatchUp: Boolean get() = isCatchUpInt != 0
     override fun equals(other: Any?): Boolean {
         if (this===other) return true
         if (javaClass!=other?.javaClass) return false
@@ -87,32 +84,28 @@ data class ModuleResponseStudent(
         other as ModuleResponseStudent
 
         if (moduleProgress!=other.moduleProgress) return false
-        if (isCatchUpInt!=other.isCatchUpInt) return false
         if (moduleId!=other.moduleId) return false
         if (moduleName!=other.moduleName) return false
         if (!modulePicture.contentEquals(other.modulePicture)) return false
         if (moduleDescription!=other.moduleDescription) return false
-        if (isCatchUp!=other.isCatchUp) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = moduleProgress.hashCode()
-        result = 31 * result + isCatchUpInt
         result = 31 * result + moduleId.hashCode()
         result = 31 * result + moduleName.hashCode()
         result = 31 * result + modulePicture.contentHashCode()
         result = 31 * result + moduleDescription.hashCode()
-        result = 31 * result + isCatchUp.hashCode()
         return result
     }
+
 }
 
 @JsonClass(generateAdapter = true)
 data class ModuleActivitiesResponse(
-    @Json(name = "success") val success: Boolean,
-    @Json(name = "activities") val activities: List<ModuleActivityResponse>
+    @Json(name = "data") val activities: List<ModuleActivityResponse>
 )
 
 @Parcelize
@@ -144,8 +137,6 @@ data class ActivityActionResponse(
 data class TutorialResponse(
     @Json(name = "activity_name") val activityName: String,
     @Json(name = "activity_description") val activityDescription: String,
-    @Json(name = "unlock_date") val unlockDate: LocalDateTime?,
-    @Json(name = "deadline_date") val deadlineDate: LocalDateTime?,
     @Json(name = "video_url") val videoUrl: String
 )
 
@@ -176,12 +167,7 @@ data class LectureUploadRequest(
 data class LectureResponse(
     @Json(name = "activity_name") val lectureName: String,
     @Json(name = "activity_description") val lectureDescription: String?,
-    @Json(name = "unlock_date") val unlockDate: LocalDateTime?,
-    @Json(name = "deadline_date") val deadlineDate: LocalDateTime?,
-    @Json(name = "content_type_name") val contentTypeName: String,
-    @Json(name = "file_url") val fileUrl: ByteArray? = null,
-    @Json(name = "file_mime_type") val fileMimeType: String? = null,
-    @Json(name = "file_name") val fileName: String? = null,
+    @Json(name = "file_url") val fileUrl: ByteArray? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this===other) return true
@@ -191,12 +177,7 @@ data class LectureResponse(
 
         if (lectureName!=other.lectureName) return false
         if (lectureDescription!=other.lectureDescription) return false
-        if (unlockDate!=other.unlockDate) return false
-        if (deadlineDate!=other.deadlineDate) return false
-        if (contentTypeName!=other.contentTypeName) return false
         if (!fileUrl.contentEquals(other.fileUrl)) return false
-        if (fileMimeType!=other.fileMimeType) return false
-        if (fileName!=other.fileName) return false
 
         return true
     }
@@ -204,12 +185,7 @@ data class LectureResponse(
     override fun hashCode(): Int {
         var result = lectureName.hashCode()
         result = 31 * result + (lectureDescription?.hashCode() ?: 0)
-        result = 31 * result + (unlockDate?.hashCode() ?: 0)
-        result = 31 * result + (deadlineDate?.hashCode() ?: 0)
-        result = 31 * result + contentTypeName.hashCode()
         result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
-        result = 31 * result + (fileMimeType?.hashCode() ?: 0)
-        result = 31 * result + (fileName?.hashCode() ?: 0)
         return result
     }
 }

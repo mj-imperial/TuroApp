@@ -2,7 +2,6 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.ModuleActivitiesResponse
 import com.example.turomobileapp.models.ModuleResponse
-import com.example.turomobileapp.models.ModuleResponseStudent
 import com.example.turomobileapp.models.ModuleResultResponse
 import com.example.turomobileapp.models.ModuleUpdateRequest
 import com.example.turomobileapp.models.ModuleUploadRequest
@@ -21,13 +20,13 @@ interface ModuleApiService {
         @Query("course_id") courseId: String
     ): Response<ModulesResponse>
 
-    @GET("get_course_modules_for_student.php")
+    @GET("get-course_modules-for-student")
     suspend fun getModulesForCourseStudent(
         @Query("course_id") courseId: String,
         @Query("student_id") studentId: String
     ): Response<ModulesResponseStudent>
 
-    @GET("get_activities_in_module.php")
+    @GET("get-activities-in-module")
     suspend fun getActivitiesInModule(
         @Query("module_id") moduleId: String,
     ): Response<ModuleActivitiesResponse>
@@ -54,10 +53,4 @@ interface ModuleApiService {
         @Query("module_id") moduleId: String,
         @Body module: ModuleUpdateRequest
     ): Response<ModuleResultResponse>
-
-    @GET("get-current-module")
-    suspend fun getCurrentModule(
-        @Query("student_id") studentId: String,
-        @Query("course_id") courseId: String
-    ): Response<ModuleResponseStudent>
 }

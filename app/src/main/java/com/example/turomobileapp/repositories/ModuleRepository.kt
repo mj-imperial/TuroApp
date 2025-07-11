@@ -55,11 +55,4 @@ class ModuleRepository @Inject constructor(private val moduleApiService: ModuleA
             call = { moduleApiService.updateModule(moduleId, module) },
             errorMessage = "Failed to update module $moduleId"
         )
-
-    fun getCurrentModule(studentId: String, courseId: String): Flow<Result<ModuleResponseStudent>> =
-        handleApiResponse(
-            call = { moduleApiService.getCurrentModule(studentId, courseId) },
-            errorMessage = "Failed to get current module for $studentId"
-        )
-
 }

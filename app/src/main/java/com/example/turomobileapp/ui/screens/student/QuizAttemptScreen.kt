@@ -57,6 +57,8 @@ import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
+import com.example.turomobileapp.ui.components.PopupMinimal
+import com.example.turomobileapp.ui.components.PopupWithImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -65,6 +67,7 @@ import com.example.turomobileapp.ui.theme.LoginText
 import com.example.turomobileapp.ui.theme.MainRed
 import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
+import com.example.turomobileapp.ui.theme.courseInfo2
 import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.ui.theme.quizDetail1
 import com.example.turomobileapp.ui.theme.quizDetail2
@@ -81,6 +84,7 @@ fun QuizAttemptScreen(
     sessionManager: SessionManager,
     quizId: String,
     viewModel: QuizAttemptViewModel,
+    moduleId: String
 ) {
     val ctx = LocalContext.current
     BackHandler {
@@ -97,7 +101,10 @@ fun QuizAttemptScreen(
             onDismissRequest = {
                 openAlertDialog = false
             },
-            onConfirmation = viewModel::onSubmitClicked,
+            onConfirmation = {
+                openAlertDialog = false
+                viewModel.onSubmitClicked()
+            },
             icon = painterResource(R.drawable.quiz),
             title = {
                 Text(
@@ -138,7 +145,7 @@ fun QuizAttemptScreen(
         viewModel.events.collect { ev ->
             when (ev) {
                 is QuizAttemptEvent.SubmitSuccess -> {
-                    navController.navigate(Screen.StudentQuizResult.createRoute(quizId, true)) {
+                    navController.navigate(Screen.StudentQuizResult.createRoute(moduleId, quizId, true)) {
                         popUpTo(Screen.StudentQuizAttempt.route) { inclusive = true }
                     }
                 }
@@ -186,50 +193,78 @@ fun QuizAttemptScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.SpaceAround,
-                horizontalAlignment = Alignment.Start
+            Box(
+                modifier = Modifier.fillMaxSize()
             ) {
-                val question = uiState.content[uiState.currentIndex]
-                val options = question.options
-
-                QuizAttemptHeader(
-                    height = windowInfo.screenHeight * 0.15f,
-                    windowInfo = windowInfo,
-                    quizType = uiState.quizType,
-                    quizName = uiState.quizName
-                )
-
-                QuestionBox(
-                    uiState = uiState,
-                    windowInfo = windowInfo,
-                    questionNumber = uiState.currentIndex + 1,
-                    questionText = question.questionText,
-                    questionType = QuestionType.valueOf(question.questionTypeName),
-                    options = options,
-                    onShortAnswerEntered = viewModel::onShortAnswerEntered,
-                    onOptionSelected = viewModel::onOptionSelected,
-                    onNextClicked = viewModel::onNextClicked,
-                    onOpenAlertDialog = {
-                        openAlertDialog = true
-                    },
-                    questionImage = question.questionImage
-                )
-
-                Text(
-                    text = timerText,
-                    color = LoginText,
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo),
-                    textAlign = TextAlign.Center,
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 5.dp)
-                )
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.SpaceAround,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    val content = uiState.content.shuffled().take(uiState.questionSize)
+                    val question = content[uiState.currentIndex]
+                    val options = question.options
+
+                    QuizAttemptHeader(
+                        height = windowInfo.screenHeight * 0.15f,
+                        windowInfo = windowInfo,
+                        quizType = uiState.quizType,
+                        quizName = uiState.quizName
+                    )
+
+                    QuestionBox(
+                        uiState = uiState,
+                        windowInfo = windowInfo,
+                        questionNumber = uiState.currentIndex + 1,
+                        questionText = question.questionText,
+                        questionType = QuestionType.valueOf(question.questionTypeName),
+                        options = options,
+                        onShortAnswerEntered = viewModel::onShortAnswerEntered,
+                        onOptionSelected = viewModel::onOptionSelected,
+                        onNextClicked = viewModel::onNextClicked,
+                        onOpenAlertDialog = {
+                            openAlertDialog = true
+                        },
+                        questionImage = question.questionImage
+                    )
+
+                    Text(
+                        text = timerText,
+                        color = LoginText,
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 5.dp)
+                    )
+                }
+
+                if (uiState.loadingSubmit) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column {
+                            Text(
+                                text = "Submitting Quiz.....",
+                                fontFamily = FontFamily(Font(R.font.alata)),
+                                fontSize = ResponsiveFont.heading2(windowInfo),
+                                color = TextBlack,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 5.dp)
+                            )
+                            CircularProgressIndicator(color = MainWhite)
+                        }
+                    }
+                }
             }
         }
     )
@@ -246,7 +281,7 @@ fun QuizAttemptHeader(
         modifier = Modifier
             .fillMaxWidth()
             .height(height)
-            .padding(vertical = 30.dp,horizontal = 20.dp),
+            .padding(vertical = 30.dp, horizontal = 20.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -299,7 +334,7 @@ fun QuestionBox(
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            quizDetail1,quizDetail2
+                            quizDetail1, quizDetail2
                         )
                     )
                 )
@@ -332,7 +367,9 @@ fun QuestionBox(
                     if (it.isNotEmpty()){
                         BlobImage(
                             byteArray = questionImage,
-                            modifier = Modifier.fillMaxWidth().height(200.dp).padding(vertical = 10.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp)
                         )
                     }
                 }
@@ -433,11 +470,9 @@ fun QuestionBox(
             roundedCornerShape = 5.dp,
             buttonElevation = ButtonDefaults.buttonElevation(5.dp),
             contentPadding = PaddingValues(5.dp),
-            buttonColors = ButtonDefaults.buttonColors(LoginText),
-            enabled = true
+            buttonColors = ButtonDefaults.buttonColors(courseInfo2),
+            enabled = !uiState.hasSubmitted && !uiState.loadingSubmit
         )
-
-
     }
 }
 

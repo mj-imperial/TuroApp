@@ -3,7 +3,6 @@ package com.example.turomobileapp.ui.screens.student
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +31,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -45,7 +45,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
@@ -79,13 +78,12 @@ fun QuizResultScreen(
     sessionManager: SessionManager,
     viewModel: AssessmentResultViewModel,
     fromSubmit: Boolean,
-    quizId: String
+    quizId: String,
+    moduleId: String
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
-
-    val quiz = uiState.quiz
 
     uiState.errorMessage?.let { message ->
         Box(
@@ -112,7 +110,7 @@ fun QuizResultScreen(
                 openQuizDialog = false
             },
             onConfirmation = {
-                navController.navigate(Screen.StudentQuizAttempt.createRoute(quizId))
+                navController.navigate(Screen.StudentQuizAttempt.createRoute(moduleId, quizId))
             },
             icon = painterResource(R.drawable.screeningexam_icon),
             title = {
@@ -150,47 +148,11 @@ fun QuizResultScreen(
         )
     }
 
-    if (uiState.results.isEmpty()) {
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "You haven’t attempted this quiz yet.",
-                fontSize = ResponsiveFont.heading1(windowInfo),
-                fontFamily = FontFamily(Font(R.font.alata)),
-                color = headingText
-            )
-            Spacer(Modifier.height(16.dp))
-            CapsuleButton(
-                text = {
-                    Text(
-                        text = "TAKE QUIZ",
-                        fontSize = ResponsiveFont.heading2(windowInfo),
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        color = MainWhite
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { openQuizDialog = true },
-                roundedCornerShape = 10.dp,
-                buttonElevation = ButtonDefaults.buttonElevation(8.dp),
-                contentPadding = PaddingValues(5.dp),
-                buttonColors = ButtonDefaults.buttonColors(containerColor = green, contentColor = MainWhite),
-                enabled = true
-            )
-        }
-        return
-    }
-
     val orderedResults = remember(uiState.results) {
         uiState.results.sortedBy { it.attemptNumber }
     }
     var selectedAttempt by rememberSaveable(orderedResults) {
-        mutableStateOf(orderedResults.last().attemptNumber)
+        mutableIntStateOf(orderedResults.last().attemptNumber)
     }
     val scoreList = remember(orderedResults) {
         orderedResults.map { it.scorePercentage }
@@ -198,7 +160,7 @@ fun QuizResultScreen(
     val keptScore: Double = remember(orderedResults) {
         orderedResults.first { it.isKept }.scorePercentage
     }
-    val selectedResult = orderedResults.first { it.attemptNumber == selectedAttempt }
+    val selectedResult = orderedResults.first { it.isKept }
 
     var openAlertDialog by remember { mutableStateOf(fromSubmit) }
     if (openAlertDialog){
@@ -231,7 +193,40 @@ fun QuizResultScreen(
                 ) {
                     CircularProgressIndicator()
                 }
-            }else{
+            }else if (uiState.results.isEmpty()) {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "You haven’t attempted this quiz yet.",
+                        fontSize = ResponsiveFont.heading1(windowInfo),
+                        fontFamily = FontFamily(Font(R.font.alata)),
+                        color = headingText
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    CapsuleButton(
+                        text = {
+                            Text(
+                                text = "TAKE QUIZ",
+                                fontSize = ResponsiveFont.heading2(windowInfo),
+                                fontFamily = FontFamily(Font(R.font.alata)),
+                                color = MainWhite
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { openQuizDialog = true },
+                        roundedCornerShape = 10.dp,
+                        buttonElevation = ButtonDefaults.buttonElevation(8.dp),
+                        contentPadding = PaddingValues(5.dp),
+                        buttonColors = ButtonDefaults.buttonColors(containerColor = green, contentColor = MainWhite),
+                        enabled = true
+                    )
+                }
+            } else{
                 PullToRefreshBox(
                     isRefreshing = uiState.loading,
                     state = pullRefreshState,
@@ -250,13 +245,9 @@ fun QuizResultScreen(
                         item {
                             QuizResultHeader(
                                 quizName = uiState.quiz!!.quizName,
-                                attemptSize = quiz?.numberOfAttempts,
                                 totalPoints = uiState.quiz!!.overallPoints,
                                 scoreList = scoreList,
                                 windowInfo = windowInfo,
-                                onClickAttempt = { num ->
-                                    selectedAttempt = num
-                                },
                                 selectedAttempt = selectedAttempt,
                                 earnedPoints = selectedResult.earnedPoints,
                                 keptScore = keptScore
@@ -292,11 +283,9 @@ fun QuizResultScreen(
 fun QuizResultHeader(
     windowInfo: WindowInfo,
     quizName: String,
-    attemptSize: Int?,
     totalPoints: Int,
     scoreList: List<Double>,
     selectedAttempt: Int,
-    onClickAttempt: (Int) -> Unit,
     earnedPoints: Int,
     keptScore: Double
 ){
@@ -341,28 +330,11 @@ fun QuizResultHeader(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "ATTEMPT HISTORY",
+                    text = "KEPT SCORE",
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontSize = ResponsiveFont.heading2(windowInfo),
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
-
-                attemptSize?.let {
-                    for (i in 1..it.toInt()) {
-                        val hasResult = i <= scoreInt.size
-                        val scoreText = if (hasResult) "${scoreInt[i - 1]}/$totalPoints" else "--/$totalPoints"
-
-                        Text(
-                            text = "ATTEMPT $i: $scoreText",
-                            fontFamily = FontFamily(Font(R.font.alata)),
-                            fontSize = ResponsiveFont.body(windowInfo),
-                            textDecoration = if (hasResult && i == selectedAttempt) TextDecoration.Underline else TextDecoration.None,
-                            modifier = if (hasResult) Modifier
-                                .clickable { onClickAttempt(i) }
-                                .padding(vertical = 4.dp)
-                            else Modifier.padding(vertical = 4.dp))
-                    }
-                }
             }
 
             Column(
@@ -373,7 +345,7 @@ fun QuizResultHeader(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 CircularScoreProgressBar(
-                    scorePercentage = scoreList[selectedAttempt - 1],
+                    scorePercentage = scoreList[(selectedAttempt - 1).coerceIn(0, scoreList.lastIndex)],
                     diameter = (windowInfo.screenWidth*0.4f) * 0.6f,
                     fontSize = ResponsiveFont.heading2(windowInfo),
                 )
@@ -386,7 +358,7 @@ fun QuizResultHeader(
                 )
                 Spacer(Modifier.height(5.dp))
                 Text(
-                    text = "KEPT SCORE: $keptScoreInt/$totalPoints",
+                    text = "$keptScoreInt/$totalPoints",
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontSize = ResponsiveFont.heading3(windowInfo),
                     fontWeight = FontWeight.Medium
@@ -454,7 +426,7 @@ fun QuizResultQuestions(
             }
         }else{
             content.forEachIndexed { index, question ->
-                val chosenOptionId = resultShown.answers.firstOrNull { it.questionId == question.questionId }?.optionId
+                val chosenOptionId = resultShown.answers?.firstOrNull { it.questionId == question.questionId }?.optionId
                 Card(
                     shape = RoundedCornerShape(8.dp),
                     elevation = CardDefaults.elevatedCardElevation(4.dp),

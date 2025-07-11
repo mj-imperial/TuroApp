@@ -36,7 +36,7 @@ sealed class Screen(val route: String) {
     object Leaderboard: Screen("leaderboard_screen")
     object Shop: Screen("shop_screen")
     object StudentScreening: Screen("student_screening")
-    object StudentLongQuiz: Screen("student_long_quiz")
+    object StudentLongQuiz: Screen("student_long_quiz/{courseId}")
     object StudentCourseDetail: Screen("course_detail/{courseId}") {
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
@@ -50,11 +50,11 @@ sealed class Screen(val route: String) {
         fun createRoute(courseId: String, moduleId: String, activityId: String, activityType: String) =
             "activity_detail/$courseId/$moduleId/$activityId/$activityType"
     }
-    object StudentQuizAttempt: Screen("quiz_attempt_screen/{quizId}"){
-        fun createRoute(quizId: String) = "quiz_attempt_screen/$quizId"
+    object StudentQuizAttempt: Screen("quiz_attempt_screen/{moduleId}/{quizId}"){
+        fun createRoute(moduleId: String, quizId: String) = "quiz_attempt_screen/$moduleId/$quizId"
     }
-    object StudentQuizResult: Screen("quiz_result_screen/{quizId}/{fromSubmit}"){
-        fun createRoute(quizId: String, fromSubmit: Boolean) = "quiz_result_screen/$quizId/$fromSubmit"
+    object StudentQuizResult: Screen("quiz_result_screen/{moduleId}/{quizId}/{fromSubmit}"){
+        fun createRoute(moduleId: String, quizId: String, fromSubmit: Boolean) = "quiz_result_screen/$moduleId/$quizId/$fromSubmit"
     }
     object ScreeningExamDetail: Screen("screening_exam_detail_screen/{activityId}"){
         fun createRoute(activityId: String) = "screening_exam_detail_screen/$activityId"

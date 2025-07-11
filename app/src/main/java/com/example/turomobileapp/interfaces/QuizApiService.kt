@@ -2,6 +2,7 @@ package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.ActivityActionResponse
 import com.example.turomobileapp.models.CreateQuizRequest
+import com.example.turomobileapp.models.LongQuizzesListResponse
 import com.example.turomobileapp.models.QuizContentResponses
 import com.example.turomobileapp.models.QuizResponse
 import com.example.turomobileapp.models.QuizUploadResponse
@@ -24,12 +25,12 @@ interface QuizApiService {
         @Query("course_id") courseId: String
     ): Response<QuizzesResponse>
 
-    @GET("get_quiz.php")
+    @GET("get-quiz")
     suspend fun getQuiz(
         @Query("activity_id") quizId: String
     ): Response<QuizResponse>
 
-    @GET("get_quiz_content.php")
+    @GET("get-quiz-content")
     suspend fun getQuizContent(
         @Query("activity_id") quizId: String
     ): Response<QuizContentResponses>
@@ -40,4 +41,9 @@ interface QuizApiService {
         @Query("module_id") moduleId: String,
         @Body quiz: CreateQuizRequest
     ): Response<ActivityActionResponse>
+
+    @GET("get-long-quiz-list")
+    suspend fun getLongQuizList(
+
+    ): Response<LongQuizzesListResponse>
 }

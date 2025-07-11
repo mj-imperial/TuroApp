@@ -21,22 +21,13 @@ import java.io.File
 fun BlobFileViewer(
     windowInfo: WindowInfo,
     fileBytes: ByteArray?,
-    fileName: String?,
-    mimeType: String?,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
-    if (fileBytes?.isNotEmpty() == true && mimeType != null) {
-        val extension = when (mimeType) {
-            "application/pdf" -> ".pdf"
-            "application/msword" -> ".doc"
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> ".docx"
-            else -> ""
-        }
-
+    if (fileBytes?.isNotEmpty() == true) {
         val tempFile = remember(fileBytes) {
-            File.createTempFile("file_preview_", extension, context.cacheDir).apply {
+            File.createTempFile("file_preview_", ".pdf", context.cacheDir).apply {
                 writeBytes(fileBytes)
             }
         }
@@ -47,15 +38,15 @@ fun BlobFileViewer(
             tempFile
         )
 
-        val intent = remember(uri, mimeType) {
+        val intent = remember(uri, "application/pdf") {
             Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, mimeType)
+                setDataAndType(uri, "application/pdf")
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
             }
         }
 
         Text(
-            text = fileName ?: "Open File",
+            text = "Open File",
             fontSize = ResponsiveFont.heading3(windowInfo),
             fontFamily = FontFamily(Font(R.font.alata)),
             textDecoration = TextDecoration.Underline,

@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,8 +40,6 @@ class TutorialDetailViewModel @Inject constructor(
                             loading = false,
                             tutorialName = resp.activityName,
                             tutorialDescription = resp.activityDescription,
-                            unlockDate = resp.unlockDate,
-                            deadlineDate = resp.deadlineDate,
                             videoUrl = resp.videoUrl
                         ) }
                     },
@@ -60,7 +57,5 @@ data class TutorialDetailUIState(
     val errorMessage: String? = null,
     val tutorialName: String = "",
     val tutorialDescription: String = "",
-    val unlockDate: LocalDateTime? = null,
-    val deadlineDate: LocalDateTime? = null,
     val videoUrl: String = ""
 )

@@ -13,7 +13,6 @@ data class CourseResponse(
     @Json(name = "course_id") val courseId: String,
     @Json(name = "course_code") val courseCode: String,
     @Json(name = "course_name") val courseName: String,
-    @Json(name = "teacher_id") val teacherId: String,
     @Json(name = "course_description") val description: String,
     @Json(name = "start_date") val startDate: String,
     @Json(name = "end_date") val endDate: String,
@@ -28,7 +27,6 @@ data class CourseResponse(
         if (courseId!=other.courseId) return false
         if (courseCode!=other.courseCode) return false
         if (courseName!=other.courseName) return false
-        if (teacherId!=other.teacherId) return false
         if (description!=other.description) return false
         if (startDate!=other.startDate) return false
         if (endDate!=other.endDate) return false
@@ -41,7 +39,6 @@ data class CourseResponse(
         var result = courseId.hashCode()
         result = 31 * result + courseCode.hashCode()
         result = 31 * result + courseName.hashCode()
-        result = 31 * result + teacherId.hashCode()
         result = 31 * result + description.hashCode()
         result = 31 * result + startDate.hashCode()
         result = 31 * result + endDate.hashCode()

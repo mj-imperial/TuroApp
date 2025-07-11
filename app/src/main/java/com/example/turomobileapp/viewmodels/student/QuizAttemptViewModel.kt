@@ -36,6 +36,7 @@ class QuizAttemptViewModel @Inject constructor(
 ): ViewModel(){
 
     private val _quizId: String = checkNotNull(savedStateHandle["quizId"])
+    private val _moduleId: String = checkNotNull(savedStateHandle["moduleId"])
 
     private val _uiState = MutableStateFlow(QuizAttemptUIState())
     val uiState: StateFlow<QuizAttemptUIState> = _uiState.asStateFlow()
@@ -62,6 +63,7 @@ class QuizAttemptViewModel @Inject constructor(
                                 quizName = quiz.quizName,
                                 quizType = quiz.quizTypeName,
                                 timeLimit = quiz.timeLimit,
+                                questionSize = quiz.numberOfQuestions,
                                 totalPoints = quiz.overallPoints,
                                 loadingMetadata = false
                             )
@@ -147,8 +149,10 @@ class QuizAttemptViewModel @Inject constructor(
     }
 
     fun onSubmitClicked(){
+        if (_uiState.value.hasSubmitted) return
+
         viewModelScope.launch {
-            _uiState.update { it.copy(loadingSubmit = true, errorMessage = null) }
+            _uiState.update { it.copy(loadingSubmit = true, errorMessage = null, hasSubmitted = true) }
 
             _events.send(QuizAttemptEvent.SubmitQuiz)
 
@@ -158,7 +162,7 @@ class QuizAttemptViewModel @Inject constructor(
                     is Answer.OptionAnswer -> AnswerUploadRequest(
                         questionId = answer.questionId,
                         optionId = answer.optionId,
-                        isCorrect = answer.isCorrect
+                        isCorrect = if (answer.isCorrect) 1 else 0
                     )
                     is Answer.TextAnswer -> {
                         val match = answer.response.options.firstOrNull { opt ->
@@ -168,19 +172,19 @@ class QuizAttemptViewModel @Inject constructor(
                         AnswerUploadRequest(
                             questionId = answer.response.questionId,
                             optionId = match?.optionId ?: "",
-                            isCorrect = match?.isCorrect ?: false
+                            isCorrect = if(match?.isCorrect == true) 1 else 0
                         )
                     }
                     null -> AnswerUploadRequest(
                         questionId = question.questionId,
                         optionId = "",
-                        isCorrect = false
+                        isCorrect = 0
                     )
                 }
             }
 
             val score = answersList.sumOf { answer ->
-                if (answer.isCorrect) {
+                if (answer.isCorrect == 1) {
                     uiState.value.content
                         .first { q -> q.questionId == answer.questionId }
                         .score
@@ -195,15 +199,14 @@ class QuizAttemptViewModel @Inject constructor(
                 0.0
             }
 
-            val points: Int = score * 10
-
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
             assessmentResultRepository.saveAssessmentResult(
+                moduleId = _moduleId,
                 studentId = studentId,
                 activityId =  _quizId,
-                scorePercentage =  scorePercentage,
-                earnedPoints =  points,
+                scorePercentage = scorePercentage,
+                earnedPoints = score,
                 answers = answersList
             ).collect { result ->
                 handleResult(
@@ -234,10 +237,12 @@ data class QuizAttemptUIState(
     val quizType: String = "",
     val totalPoints: Int = 0,
     val timeLimit: Int = 0,
+    val questionSize: Int = 0,
     val content: List<QuizContentResponse> = emptyList(),
     val currentIndex: Int = 0,
     val timeRemaining: Int = 0,
-    val answers: Map<Int, Answer> = emptyMap()
+    val answers: Map<Int, Answer> = emptyMap(),
+    val hasSubmitted: Boolean = false
 ){
     val loading: Boolean get() = loadingMetadata || loadingContent
 }

@@ -17,7 +17,7 @@ interface LectureApiService {
         @Body lecture: LectureUploadRequest
     ): Response<ActivityActionResponse>
 
-    @GET("get_lecture.php")
+    @GET("get-lecture")
     suspend fun getLecture(
         @Query("activity_id") lectureId: String,
     ): Response<LectureResponse>

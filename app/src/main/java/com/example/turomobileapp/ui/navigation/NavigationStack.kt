@@ -17,7 +17,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
 import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.ui.screens.authentication.ChangePasswordScreen
 import com.example.turomobileapp.ui.screens.authentication.LoginScreen
@@ -35,6 +34,7 @@ import com.example.turomobileapp.ui.screens.shared.ReplyScreen
 import com.example.turomobileapp.ui.screens.student.CourseDetailScreen
 import com.example.turomobileapp.ui.screens.student.LeaderboardScreen
 import com.example.turomobileapp.ui.screens.student.LectureDetailScreen
+import com.example.turomobileapp.ui.screens.student.LongQuizListScreen
 import com.example.turomobileapp.ui.screens.student.QuizAttemptScreen
 import com.example.turomobileapp.ui.screens.student.QuizDetailScreen
 import com.example.turomobileapp.ui.screens.student.QuizResultScreen
@@ -68,6 +68,7 @@ import com.example.turomobileapp.viewmodels.shared.InboxViewModel
 import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.AssessmentResultViewModel
 import com.example.turomobileapp.viewmodels.student.LectureDetailViewModel
+import com.example.turomobileapp.viewmodels.student.LongQuizListViewModel
 import com.example.turomobileapp.viewmodels.student.QuizAttemptViewModel
 import com.example.turomobileapp.viewmodels.student.QuizDetailViewModel
 import com.example.turomobileapp.viewmodels.student.StudentCourseAnalyticsViewModel
@@ -178,10 +179,7 @@ fun NavGraphBuilder.commonNavGraph(
         }
     }
     composable(
-        route = Screen.Calendar.route,
-        deepLinks = listOf(
-            navDeepLink { uriPattern = "turo://calendar_screen" }
-        )
+        route = Screen.Calendar.route
     ) {
         CalendarScreen(navController, sessionManager)
     }
@@ -343,11 +341,12 @@ fun NavGraphBuilder.studentNavGraph(
                     navController = navController,
                     sessionManager = sessionManager,
                     onClickTakeQuiz = { quiz ->
-                        navController.navigate(Screen.StudentQuizAttempt.createRoute(quiz.quizId))
+                        navController.navigate(Screen.StudentQuizAttempt.createRoute(moduleId, quiz.quizId))
                     },
                     activityId = activityId,
                     courseId = courseId,
-                    activityFlowViewModel = activityFlowViewModel
+                    activityFlowViewModel = activityFlowViewModel,
+                    moduleId = moduleId
                 )
             }
         }
@@ -355,34 +354,36 @@ fun NavGraphBuilder.studentNavGraph(
     composable(
         route = Screen.StudentQuizAttempt.route,
         arguments = listOf(
+            navArgument("moduleId") { type = NavType.StringType },
             navArgument("quizId") { type = NavType.StringType }
         )
     ) { backStackEntry ->
         val quizId = backStackEntry.arguments!!.getString("quizId")!!
+        val moduleId = backStackEntry.arguments?.getString("moduleId")!!
         val viewModel: QuizAttemptViewModel = hiltViewModel(backStackEntry)
 
         QuizAttemptScreen(
             navController = navController,
             sessionManager = sessionManager,
             viewModel = viewModel,
-            quizId = quizId
+            quizId = quizId,
+            moduleId = moduleId
         )
     }
     composable(
         route = Screen.StudentQuizResult.route,
         arguments = listOf(
-            navArgument("quizId")    { type = NavType.StringType },
+            navArgument("moduleId") { type = NavType.StringType },
+            navArgument("quizId") { type = NavType.StringType },
             navArgument("fromSubmit"){ type = NavType.BoolType    }
-        ),
-        deepLinks = listOf(
-            navDeepLink { uriPattern = "turo://quiz_result_screen/{quizId}/{fromSubmit}" }
         )
     ) { backStackEntry ->
         val quizId = backStackEntry.arguments!!.getString("quizId")!!
+        val moduleId = backStackEntry.arguments?.getString("moduleId")!!
         val fromSubmit = backStackEntry.arguments?.getBoolean("fromSubmit") ?: false
 
         val viewModel: AssessmentResultViewModel = hiltViewModel()
-        QuizResultScreen(navController, sessionManager, viewModel, fromSubmit, quizId)
+        QuizResultScreen(navController, sessionManager, viewModel, fromSubmit, quizId, moduleId)
     }
 
     composable(Screen.Leaderboard.route) {
@@ -422,6 +423,15 @@ fun NavGraphBuilder.studentNavGraph(
         }
         val viewModel: StudentCourseAnalyticsViewModel = hiltViewModel(parentEntry)
         StudentCourseIndividualModuleScreen(navController, sessionManager, viewModel, moduleId)
+    }
+    composable(
+        route = Screen.StudentLongQuiz.route,
+        arguments = listOf(
+            navArgument("courseId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel: LongQuizListViewModel = hiltViewModel()
+        LongQuizListScreen()
     }
 }
 

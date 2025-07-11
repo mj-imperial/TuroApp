@@ -68,6 +68,7 @@ import java.time.format.DateTimeFormatter
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+//TODO add date_taken in attempt history
 fun QuizDetailScreen(
     navController: NavController,
     sessionManager: SessionManager,
@@ -75,7 +76,8 @@ fun QuizDetailScreen(
     viewModel: QuizDetailViewModel,
     activityId: String,
     courseId: String,
-    activityFlowViewModel: ActivityFlowViewModel
+    activityFlowViewModel: ActivityFlowViewModel,
+    moduleId: String
 ){
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
@@ -163,7 +165,7 @@ fun QuizDetailScreen(
                             description = quiz?.quizDescription,
                             onTakeQuizClick = { quiz?.let { onClickTakeQuiz(it) } },
                             onViewStatistics = {
-                                navController.navigate(Screen.StudentQuizResult.createRoute(quiz?.quizId ?: "", false))
+                                navController.navigate(Screen.StudentQuizResult.createRoute(moduleId, quiz?.quizId ?: "", false))
                             },
                             scoresList = scoresList,
                             attemptNumber = quiz?.numberOfAttempts ?: 0,

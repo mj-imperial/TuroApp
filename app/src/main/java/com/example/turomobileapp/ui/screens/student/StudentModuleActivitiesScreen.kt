@@ -223,7 +223,7 @@ fun LazyListScope.activitySectionContent(
             windowInfo = windowInfo,
             activityLogo = painter,
             isUnlocked = it.isUnlocked,
-            onNavigateActivity = { if (it.isUnlocked && !it.isLockedDate) onNavigateToActivity(it) },
+            onNavigateActivity = { onNavigateToActivity(it) },
             activityName = it.activityName,
             colors = colors,
             unlockDate = it.unlockDate,

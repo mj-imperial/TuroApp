@@ -16,7 +16,7 @@ interface TutorialApiService {
         @Body tutorial: TutorialUploadRequest
     ): Response<ActivityActionResponse>
 
-    @GET("get_tutorial.php")
+    @GET("get-tutorial")
     suspend fun getTutorial(
         @Query("activity_id") tutorialId: String
     ): Response<TutorialResponse>

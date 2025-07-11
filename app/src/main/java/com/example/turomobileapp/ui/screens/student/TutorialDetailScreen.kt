@@ -62,8 +62,6 @@ import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayer
 import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayerHostState
 import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubePlayerState
 import io.github.ilyapavlovskii.multiplatform.youtubeplayer.YouTubeVideoId
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -128,22 +126,6 @@ fun TutorialDetailScreen(
                                 height = windowInfo.screenHeight * 0.17f,
                                 windowInfo = windowInfo,
                                 tutorialName = uiState.tutorialName
-                            )
-
-                            HorizontalDivider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 15.dp),
-                                thickness =  1.dp,
-                                color = LoginText
-                            )
-                        }
-
-                        item {
-                            TutorialHeader(
-                                windowInfo = windowInfo,
-                                unlockDate = uiState.unlockDate,
-                                deadlineDate = uiState.deadlineDate
                             )
 
                             HorizontalDivider(
@@ -232,32 +214,6 @@ fun TutorialTitle(
             text = tutorialName,
             fontSize = ResponsiveFont.title(windowInfo),
             fontFamily = FontFamily(Font(R.font.alata))
-        )
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun TutorialHeader(
-    windowInfo: WindowInfo,
-    unlockDate: LocalDateTime?,
-    deadlineDate: LocalDateTime?,
-){
-    val dateFormatterOut = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a")
-    val dueDateFormatted = deadlineDate?.format(dateFormatterOut) ?: "—"
-    val unlockDateFormatted = unlockDate?.format(dateFormatterOut) ?: "—"
-
-    val textList = mapOf(
-        "Unlocks At" to unlockDateFormatted,
-        "Deadline Date At" to dueDateFormatted
-    )
-
-    textList.forEach { (name, value) ->
-        Text(
-            text = "$name: $value",
-            fontSize = ResponsiveFont.heading3(windowInfo),
-            fontFamily = FontFamily(Font(R.font.alata)),
-            modifier = Modifier.padding(vertical = 10.dp)
         )
     }
 }

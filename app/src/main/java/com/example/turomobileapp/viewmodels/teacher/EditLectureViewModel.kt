@@ -50,13 +50,7 @@ class EditLectureViewModel @Inject constructor(
                                 loading = false,
                                 lectureTitle = lecture.lectureName,
                                 lectureDescription = lecture.lectureDescription.orEmpty(),
-                                unlockDate = lecture.unlockDate,
-                                deadlineDate = lecture.deadlineDate,
-                                originalContentTypeName = lecture.contentTypeName,
-                                contentTypeName = lecture.contentTypeName,
                                 fileUrl = lecture.fileUrl,
-                                fileName = lecture.fileName,
-                                fileMimeType = lecture.fileMimeType,
                             )
                         }
                     },

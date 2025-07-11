@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.AssessmentResultResponse
+import com.example.turomobileapp.models.AssessmentScoreResponse
 import com.example.turomobileapp.models.ModuleActivityResponse
 import com.example.turomobileapp.models.ModuleResponseStudent
 import com.example.turomobileapp.repositories.AssessmentResultRepository
@@ -36,37 +36,6 @@ class ViewAllModulesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ViewAllModulesUIState())
     val uiState: StateFlow<ViewAllModulesUIState> = _uiState.asStateFlow()
 
-    init {
-        getCurrentModule()
-    }
-
-    fun getCurrentModule(){
-        viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
-
-            val studentId: String = sessionManager.userId.filterNotNull().first()
-
-            moduleRepository.getCurrentModule(studentId, _courseId).collect { result ->
-                handleResult(
-                    result = result,
-                    onSuccess = { resp ->
-                        _uiState.update { it.copy(
-                            loading = false,
-                            moduleId = resp.moduleId,
-                            moduleName = resp.moduleName,
-                            modulePicture = resp.modulePicture,
-                            moduleDescription = resp.moduleDescription,
-                            moduleProgress = resp.moduleProgress
-                        ) }
-                    },
-                    onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
-                    }
-                )
-            }
-        }
-    }
-
     fun getModules(){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
@@ -87,6 +56,14 @@ class ViewAllModulesViewModel @Inject constructor(
         }
     }
 
+    fun updateModuleName(moduleName: String){
+        _uiState.update { it.copy(moduleName = moduleName) }
+    }
+
+    fun clearModuleName(){
+        _uiState.update { it.copy(moduleName = "") }
+    }
+
     fun getActivitiesInModule(moduleId: String){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
@@ -99,7 +76,7 @@ class ViewAllModulesViewModel @Inject constructor(
                             val quizOrder = listOf("PRACTICE", "SHORT")
                             val lectures = resp.filter { it.activityType == "LECTURE" }
                             val tutorials = resp.filter { it.activityType == "TUTORIAL" }
-                            val quizzes = resp.filter { it.activityType == "QUIZ" && it.quizTypeName != "SCREENING_EXAM" && it.quizTypeName != "LONG"}
+                            val quizzes = resp.filter { it.activityType == "QUIZ" }
 
                             val studentId: String = sessionManager.userId.filterNotNull().first()
 
@@ -109,7 +86,7 @@ class ViewAllModulesViewModel @Inject constructor(
                                 }
 
                                 val hasAnswered = attempts.isNotEmpty()
-                                val passed = attempts.any { it.scorePercentage >= 75 }
+                                val passed = attempts.any { it.scorePercentage >= 70 }
 
                                 quiz.copy(
                                     hasAnswered = hasAnswered,
@@ -142,18 +119,10 @@ class ViewAllModulesViewModel @Inject constructor(
         }
     }
 
-    fun updateModuleName(moduleName: String){
-        _uiState.update { it.copy(moduleName = moduleName) }
-    }
+    suspend fun getAssessmentResults(studentId: String, activityId: String): List<AssessmentScoreResponse> {
+        var resultList: List<AssessmentScoreResponse> = emptyList()
 
-    fun clearModuleName(){
-        _uiState.update { it.copy(moduleName = "") }
-    }
-
-    suspend fun getAssessmentResults(studentId: String, activityId: String): List<AssessmentResultResponse> {
-        var resultList: List<AssessmentResultResponse> = emptyList()
-
-        assessmentResultRepository.getAssessmentResultsForQuizAndStudent(studentId, activityId).collect { result ->
+        assessmentResultRepository.getScoresForStudentAndQuiz(studentId, activityId).collect { result ->
             handleResult(
                 result = result,
                 onSuccess = { resultList = it },
@@ -172,41 +141,5 @@ data class ViewAllModulesUIState(
     val errorMessage: String? = null,
     val modules: List<ModuleResponseStudent> = emptyList(),
     val activities: List<ModuleActivityResponse> = emptyList(),
-    val moduleName: String = "",
-    val moduleId: String = "",
-    val modulePicture: ByteArray = byteArrayOf(),
-    val moduleDescription: String = "",
-    val moduleProgress: Double = 0.0
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this===other) return true
-        if (javaClass!=other?.javaClass) return false
-
-        other as ViewAllModulesUIState
-
-        if (loading!=other.loading) return false
-        if (moduleProgress!=other.moduleProgress) return false
-        if (errorMessage!=other.errorMessage) return false
-        if (modules!=other.modules) return false
-        if (activities!=other.activities) return false
-        if (moduleName!=other.moduleName) return false
-        if (moduleId!=other.moduleId) return false
-        if (!modulePicture.contentEquals(other.modulePicture)) return false
-        if (moduleDescription!=other.moduleDescription) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = loading.hashCode()
-        result = 31 * result + moduleProgress.hashCode()
-        result = 31 * result + (errorMessage?.hashCode() ?: 0)
-        result = 31 * result + modules.hashCode()
-        result = 31 * result + activities.hashCode()
-        result = 31 * result + moduleName.hashCode()
-        result = 31 * result + moduleId.hashCode()
-        result = 31 * result + modulePicture.contentHashCode()
-        result = 31 * result + moduleDescription.hashCode()
-        return result
-    }
-}
+    val moduleName: String = ""
+)

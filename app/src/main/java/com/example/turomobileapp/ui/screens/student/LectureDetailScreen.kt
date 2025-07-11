@@ -53,8 +53,6 @@ import com.example.turomobileapp.ui.theme.headingText
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.ActivityFlowViewModel
 import com.example.turomobileapp.viewmodels.student.LectureDetailViewModel
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -129,22 +127,6 @@ fun LectureDetailScreen(
                         }
 
                         item {
-                            LectureHeader(
-                                windowInfo = windowInfo,
-                                unlockDate = uiState.unlockDateTime,
-                                deadlineDate = uiState.deadlineDateTime
-                            )
-
-                            HorizontalDivider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 15.dp),
-                                thickness =  1.dp,
-                                color = LoginText
-                            )
-                        }
-
-                        item {
                             Column(
                                 modifier = Modifier.fillMaxWidth().padding(10.dp),
                                 verticalArrangement = Arrangement.Top,
@@ -161,14 +143,10 @@ fun LectureDetailScreen(
 
                                 Spacer(modifier = Modifier.height(20.dp))
 
-                                when(uiState.contentTypeName){
-                                    "PDF/DOCS" -> BlobFileViewer(
-                                        windowInfo = windowInfo,
-                                        fileBytes = uiState.fileUrl,
-                                        fileName = uiState.fileName,
-                                        mimeType = uiState.fileMimeType,
-                                    )
-                                }
+                                BlobFileViewer(
+                                    windowInfo = windowInfo,
+                                    fileBytes = uiState.fileUrl
+                                )
                             }
 
                             HorizontalDivider(
@@ -242,32 +220,6 @@ fun LectureTitle(
             fontSize = ResponsiveFont.title(windowInfo),
             fontFamily = FontFamily(Font(R.font.alata)),
             color = headingText
-        )
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun LectureHeader(
-    windowInfo: WindowInfo,
-    unlockDate: LocalDateTime?,
-    deadlineDate: LocalDateTime?,
-){
-    val dateFormatterOut = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a")
-    val dueDateFormatted = deadlineDate?.format(dateFormatterOut) ?: "—"
-    val unlockDateFormatted = unlockDate?.format(dateFormatterOut) ?: "—"
-
-    val textList = mapOf(
-        "Unlocks At" to unlockDateFormatted,
-        "Deadline Date At" to dueDateFormatted
-    )
-
-    textList.forEach { (name, value) ->
-        Text(
-            text = "$name: $value",
-            fontSize = ResponsiveFont.heading3(windowInfo),
-            fontFamily = FontFamily(Font(R.font.alata)),
-            modifier = Modifier.padding(vertical = 10.dp)
         )
     }
 }

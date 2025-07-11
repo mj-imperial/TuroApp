@@ -6,8 +6,7 @@ import java.time.LocalDateTime
 
 @JsonClass(generateAdapter = true)
 data class AssessmentResultsResponse(
-    @Json(name = "success") val success: Boolean,
-    @Json(name = "results") val results: List<AssessmentResultResponse>
+    @Json(name = "data") val results: List<AssessmentResultResponse>
 )
 
 @JsonClass(generateAdapter = true)
@@ -17,7 +16,6 @@ data class AssessmentResultResponse(
     @Json(name = "score_percentage") val scorePercentage: Double,
     @Json(name = "date_taken") val dateTaken: String,
     @Json(name = "attempt_number") val attemptNumber: Int,
-    @Json(name = "tier_name") val tierName: String?,
     @Json(name = "earned_points") val earnedPoints: Int,
     @Json(name = "answers") val answers: List<AnswerUploadRequest>,
     @Json(name = "is_kept") val isKeptInt: Int
@@ -27,7 +25,6 @@ data class AssessmentResultResponse(
 
 @JsonClass(generateAdapter = true)
 data class AssessmentScoresResponse(
-    @Json(name = "success") val success: Boolean,
     @Json(name = "scores") val scores: List<AssessmentScoreResponse>
 )
 
@@ -35,12 +32,12 @@ data class AssessmentScoresResponse(
 data class AssessmentScoreResponse(
     @Json(name = "result_id") val resultId: String,
     @Json(name = "attempt_number") val attemptNumber: Int,
-    @Json(name = "score_percentage") val scorePercentage: Double
+    @Json(name = "score_percentage") val scorePercentage: Double,
+    @Json(name = "date_taken") val dateTaken: LocalDateTime? = null
 )
 
 @JsonClass(generateAdapter = true)
 data class AssessmentResultUploadResponse(
-    @Json(name = "success") val success: Boolean,
     @Json(name = "message") val message: String,
 )
 
@@ -50,20 +47,18 @@ data class AssessmentResultUploadRequest(
     @Json(name = "activity_id") val activityId: String,
     @Json(name = "score_percentage") val scorePercentage: Double,
     @Json(name = "earned_points") val earnedPoints: Int,
-    @Json(name = "answers") val answers: List<AnswerUploadRequest>,
-    @Json(name= "tier_level_id") val tierLevelId: Int? = null
+    @Json(name = "answers") val answers: List<AnswerUploadRequest>
 )
 
 @JsonClass(generateAdapter = true)
 data class AnswerUploadRequest(
     @Json(name = "question_id") val questionId: String,
     @Json(name = "option_id") val optionId: String,
-    @Json(name = "is_correct") val isCorrect: Boolean
+    @Json(name = "is_correct") val isCorrect: Int
 )
 
 @JsonClass(generateAdapter = true)
 data class QuizContentResponses(
-    @Json(name = "success") val success: Boolean,
     @Json(name = "questions") val questions: List<QuizContentResponse>
 )
 
@@ -148,4 +143,14 @@ data class CreateQuizOptions(
     @Json(name = "option_id") val optionId: String? = null,
     @Json(name = "option_text") val optionText: String = "",
     @Json(name = "is_correct") val isCorrect: Boolean = false
+)
+
+@JsonClass(generateAdapter = true)
+data class LongQuizzesListResponse(
+    @Json(name = "data") val longQuizzes: List<LongQuizListResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class LongQuizListResponse(
+    @Json(name = "name") val name: String
 )

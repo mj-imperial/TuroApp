@@ -92,8 +92,6 @@ class EditTutorialViewModel @Inject constructor(
                             originalTutorialName = tutorial.activityName,
                             tutorialName = tutorial.activityName,
                             originalTutorialDescription = tutorial.activityDescription,
-                            unlockDate = tutorial.unlockDate,
-                            deadlineDate = tutorial.deadlineDate,
                             originalYoutubeLink = tutorial.videoUrl,
                             youtubeLink = tutorial.videoUrl
                         ) }
@@ -115,8 +113,6 @@ class EditTutorialViewModel @Inject constructor(
             val request = TutorialResponse(
                 activityName = state.tutorialName,
                 activityDescription = state.originalTutorialDescription,
-                unlockDate = state.unlockDate,
-                deadlineDate = state.deadlineDate,
                 videoUrl = state.youtubeLink
             )
 

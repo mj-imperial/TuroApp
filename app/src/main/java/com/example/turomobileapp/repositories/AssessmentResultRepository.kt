@@ -13,15 +13,18 @@ import javax.inject.Inject
 
 class AssessmentResultRepository @Inject constructor(private val assessmentResultApiService: AssessmentResultApiService) {
 
-    fun saveAssessmentResult(studentId: String, activityId: String, scorePercentage: Double, earnedPoints: Int, answers: List<AnswerUploadRequest>): Flow<Result<AssessmentResultUploadResponse>> =
+    fun saveAssessmentResult(moduleId: String, studentId: String, activityId: String, scorePercentage: Double, earnedPoints: Int, answers: List<AnswerUploadRequest>): Flow<Result<AssessmentResultUploadResponse>> =
         handleApiResponse(
-            call = { assessmentResultApiService.saveAssessmentResult(AssessmentResultUploadRequest(
-                studentId = studentId,
-                activityId = activityId,
-                scorePercentage = scorePercentage,
-                earnedPoints = earnedPoints,
-                answers = answers,
-            )) },
+            call = { assessmentResultApiService.saveAssessmentResult(
+                moduleId = moduleId,
+                AssessmentResultUploadRequest(
+                    studentId = studentId,
+                    activityId = activityId,
+                    scorePercentage = scorePercentage,
+                    earnedPoints = earnedPoints,
+                    answers = answers
+                )
+            ) },
             errorMessage = "Failed to save assessment result"
         )
 

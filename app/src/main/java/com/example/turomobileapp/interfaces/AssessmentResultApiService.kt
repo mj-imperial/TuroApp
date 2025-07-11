@@ -11,18 +11,19 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface AssessmentResultApiService {
-    @POST("save_assessment_result.php")
+    @POST("save-assessment-result")
     suspend fun saveAssessmentResult(
+        @Query("module_id") moduleId: String,
         @Body request: AssessmentResultUploadRequest
     ): Response<AssessmentResultUploadResponse>
 
-    @GET("get_assessment_result_for_student_and_quiz.php")
+    @GET("get-assessment-result-for-student-and-quiz")
     suspend fun getAssessmentResultsForActivityAndStudent(
         @Query("student_id") studentId: String,
         @Query("activity_id") activityId: String
     ): Response<AssessmentResultsResponse>
 
-    @GET("get_scores_for_student_and_quiz.php")
+    @GET("get-scores-for-student-and-quiz")
     suspend fun getScoresForStudentAndQuiz(
         @Query("student_id") studentId: String,
         @Query("activity_id") activityId: String

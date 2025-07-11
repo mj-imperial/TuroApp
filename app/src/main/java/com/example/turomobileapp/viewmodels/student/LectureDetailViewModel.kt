@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,12 +40,7 @@ class LectureDetailViewModel @Inject constructor(
                             loading = false,
                             lectureTitle = resp.lectureName,
                             lectureDescription = resp.lectureDescription.toString(),
-                            unlockDateTime = resp.unlockDate,
-                            deadlineDateTime = resp.deadlineDate,
-                            contentTypeName = resp.contentTypeName,
-                            fileUrl = resp.fileUrl,
-                            fileMimeType = resp.fileMimeType,
-                            fileName = resp.fileName
+                            fileUrl = resp.fileUrl
                         ) }
                     },
                     onFailure = { err ->
@@ -63,12 +57,7 @@ data class LectureDetailUIState(
     val errorMessage: String? = null,
     val lectureTitle: String = "",
     val lectureDescription: String = "",
-    val unlockDateTime: LocalDateTime? = null,
-    val deadlineDateTime: LocalDateTime? = null,
-    val contentTypeName: String = "",
     val fileUrl: ByteArray? = byteArrayOf(),
-    val fileMimeType: String? = null,
-    val fileName: String? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this===other) return true
@@ -80,12 +69,7 @@ data class LectureDetailUIState(
         if (errorMessage!=other.errorMessage) return false
         if (lectureTitle!=other.lectureTitle) return false
         if (lectureDescription!=other.lectureDescription) return false
-        if (unlockDateTime!=other.unlockDateTime) return false
-        if (deadlineDateTime!=other.deadlineDateTime) return false
-        if (contentTypeName!=other.contentTypeName) return false
         if (!fileUrl.contentEquals(other.fileUrl)) return false
-        if (fileMimeType!=other.fileMimeType) return false
-        if (fileName!=other.fileName) return false
 
         return true
     }
@@ -95,12 +79,7 @@ data class LectureDetailUIState(
         result = 31 * result + (errorMessage?.hashCode() ?: 0)
         result = 31 * result + lectureTitle.hashCode()
         result = 31 * result + lectureDescription.hashCode()
-        result = 31 * result + (unlockDateTime?.hashCode() ?: 0)
-        result = 31 * result + (deadlineDateTime?.hashCode() ?: 0)
-        result = 31 * result + contentTypeName.hashCode()
         result = 31 * result + (fileUrl?.contentHashCode() ?: 0)
-        result = 31 * result + (fileMimeType?.hashCode() ?: 0)
-        result = 31 * result + (fileName?.hashCode() ?: 0)
         return result
     }
 }
