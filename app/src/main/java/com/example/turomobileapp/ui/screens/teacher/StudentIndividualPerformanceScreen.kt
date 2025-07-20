@@ -3,7 +3,6 @@ package com.example.turomobileapp.ui.screens.teacher
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,21 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,11 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
 import com.example.turomobileapp.models.QuizScore
-import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
-import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.theme.headingText
 import com.example.turomobileapp.ui.theme.quiz1
 import com.example.turomobileapp.ui.theme.quiz2
@@ -60,73 +49,7 @@ fun StudentIndividualPerformanceScreen(
     viewModel: StudentPerformanceViewModel,
     studentId: String
 ){
-    val windowInfo = rememberWindowInfo()
-    val pullRefreshState = rememberPullToRefreshState()
 
-    val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.getIndividualStudentProgress(studentId)
-    }
-
-    AppScaffold(
-        navController = navController,
-        canNavigateBack = true,
-        navigateUp = {
-            viewModel.clearCurrentStudentInfo()
-            navController.navigateUp()
-        },
-        windowInfo = windowInfo,
-        sessionManager = sessionManager,
-        content = {
-            if (uiState.loading){
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                    CircularProgressIndicator()
-                }
-            }else{
-                PullToRefreshBox(
-                    isRefreshing = uiState.loading,
-                    state = pullRefreshState,
-                    onRefresh = {
-                        viewModel.getIndividualStudentProgress(studentId)
-                    },
-                ) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(it)
-                            .padding(15.dp)
-                    ) {
-                        item {
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            uiState.currentStudentInfo?.let { student ->
-                                IndividualPerformanceBox(
-                                    windowInfo = windowInfo,
-                                    studentPic = student.profilePic,
-                                    studentName = student.studentName,
-                                    completedAssessments = student.completedAssessments,
-                                    averageGrade = student.averageGrade,
-                                    points = student.points,
-                                    rank = student.rank
-                                )
-
-                                Spacer(modifier = Modifier.height(20.dp))
-                            }
-                        }
-
-                        items(uiState.currentStudentScores) {
-                            ScoresList(
-                                windowInfo = windowInfo,
-                                moduleName = it.moduleName,
-                                activityList = it.quizScores
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    )
 }
 
 @Composable

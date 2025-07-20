@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -29,7 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.turomobileapp.R
-import com.example.turomobileapp.models.StudentLeaderboardResponse
+import com.example.turomobileapp.models.LeaderboardEntry
 import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
@@ -39,9 +40,10 @@ import com.example.turomobileapp.ui.theme.TextBlack
 
 @Composable
 fun FirstPlaceRow(
-    student: StudentLeaderboardResponse,
+    student: LeaderboardEntry,
     windowInfo: WindowInfo,
-    height: Dp
+    height: Dp,
+    currentUserName: String
 ) {
     val avatarSize = height * 0.8f
     val badgeSize  = avatarSize / 3
@@ -63,13 +65,27 @@ fun FirstPlaceRow(
         Box(
             modifier = Modifier.size(avatarSize)
         ) {
-            BlobImage(
-                byteArray = student.profilePic,
-                modifier = Modifier
-                    .size(avatarSize)
-                    .clip(CircleShape)
-                    .border(width = 2.dp, color = borderColor, shape = CircleShape)
-            )
+            if (student.studentImage != null){
+                BlobImage(
+                    byteArray = student.studentImage,
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(width = 2.dp, color = borderColor, shape = CircleShape)
+                )
+            }else{
+                AsyncImage(
+                    model = R.drawable.default_account,
+                    placeholder = painterResource(R.drawable.default_account),
+                    error = painterResource(R.drawable.error_pic),
+                    contentDescription = "Profile Picture",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(width = 2.dp, color = borderColor, shape = CircleShape)
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -92,15 +108,17 @@ fun FirstPlaceRow(
         Spacer(modifier = Modifier.width(12.dp))
 
         Column {
+            val isYou = student.studentName == currentUserName
+            val displayName = if (isYou) "${student.studentName} (YOU)" else student.studentName
             Text(
-                text = "${student.firstName} ${student.lastName}",
+                text = displayName,
                 fontSize = ResponsiveFont.title(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = TextBlack
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${student.averageScore}%",
+                text = "${student.studentPoints}",
                 fontSize = ResponsiveFont.heading3(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = TextBlack
@@ -111,9 +129,10 @@ fun FirstPlaceRow(
 
 @Composable
 fun SecondPlaceRow(
-    student: StudentLeaderboardResponse,
+    student: LeaderboardEntry,
     windowInfo: WindowInfo,
-    height: Dp
+    height: Dp,
+    currentUserName: String
 ) {
     val avatarSize = height * 0.8f
     val badgeSize = avatarSize / 3
@@ -135,13 +154,27 @@ fun SecondPlaceRow(
         Box(
             modifier = Modifier.size(avatarSize)
         ) {
-            BlobImage(
-                byteArray = student.profilePic,
-                modifier = Modifier
-                    .size(avatarSize)
-                    .clip(CircleShape)
-                    .border(width = 2.dp, color = borderColor, shape = CircleShape)
-            )
+            if (student.studentImage != null){
+                BlobImage(
+                    byteArray = student.studentImage,
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(width = 2.dp, color = borderColor, shape = CircleShape)
+                )
+            }else{
+                AsyncImage(
+                    model = R.drawable.default_account,
+                    placeholder = painterResource(R.drawable.default_account),
+                    error = painterResource(R.drawable.error_pic),
+                    contentDescription = "Profile Picture",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(width = 2.dp, color = borderColor, shape = CircleShape)
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -163,15 +196,17 @@ fun SecondPlaceRow(
         Spacer(modifier = Modifier.width(10.dp))
 
         Column {
+            val isYou = student.studentName == currentUserName
+            val displayName = if (isYou) "${student.studentName} (YOU)" else student.studentName
             Text(
-                text = "${student.firstName} ${student.lastName}",
+                text = displayName,
                 fontSize = ResponsiveFont.heading1(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
-                text = "${student.averageScore}%",
+                text = "${student.studentPoints}",
                 fontSize = ResponsiveFont.body(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.DarkGray
@@ -182,9 +217,10 @@ fun SecondPlaceRow(
 
 @Composable
 fun ThirdPlaceRow(
-    student: StudentLeaderboardResponse,
+    student: LeaderboardEntry,
     windowInfo: WindowInfo,
-    height: Dp
+    height: Dp,
+    currentUserName: String
 ) {
     val avatarSize = height * 0.8f
     val badgeSize  = avatarSize / 3
@@ -206,13 +242,27 @@ fun ThirdPlaceRow(
         Box(
             modifier = Modifier.size(avatarSize)
         ) {
-            BlobImage(
-                byteArray = student.profilePic,
-                modifier = Modifier
-                    .size(avatarSize)
-                    .clip(CircleShape)
-                    .border(width = 2.dp, color = borderColor, shape = CircleShape)
-            )
+            if (student.studentImage != null){
+                BlobImage(
+                    byteArray = student.studentImage,
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(width = 2.dp, color = borderColor, shape = CircleShape)
+                )
+            }else{
+                AsyncImage(
+                    model = R.drawable.default_account,
+                    placeholder = painterResource(R.drawable.default_account),
+                    error = painterResource(R.drawable.error_pic),
+                    contentDescription = "Profile Picture",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(width = 2.dp, color = borderColor, shape = CircleShape)
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -234,15 +284,17 @@ fun ThirdPlaceRow(
         Spacer(modifier = Modifier.width(8.dp))
 
         Column {
+            val isYou = student.studentName == currentUserName
+            val displayName = if (isYou) "${student.studentName} (YOU)" else student.studentName
             Text(
-                text = "${student.firstName} ${student.lastName}",
-                fontSize = ResponsiveFont.heading3(windowInfo),
+                text = displayName,
+                fontSize = ResponsiveFont.heading2(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "${student.averageScore}%",
+                text = "${student.studentPoints}",
                 fontSize = ResponsiveFont.body(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.DarkGray
@@ -253,10 +305,11 @@ fun ThirdPlaceRow(
 
 @Composable
 fun RegularPlaceRow(
-    student: StudentLeaderboardResponse,
+    student: LeaderboardEntry,
     position: Int,
     windowInfo: WindowInfo,
-    height: Dp
+    height: Dp,
+    currentUserName: String
 ) {
     val avatarSize = height * 0.8f
     val badgeSize  = avatarSize / 3
@@ -278,15 +331,27 @@ fun RegularPlaceRow(
         Box(
             modifier = Modifier.size(avatarSize)
         ) {
-            AsyncImage(
-                model = student.profilePic,
-                contentDescription = "Avatar of ${student.firstName}",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(avatarSize)
-                    .clip(CircleShape)
-                    .border(width = 2.dp, color = borderColor, shape = CircleShape)
-            )
+            if (student.studentImage != null){
+                BlobImage(
+                    byteArray = student.studentImage,
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(width = 2.dp, color = borderColor, shape = CircleShape)
+                )
+            }else{
+                AsyncImage(
+                    model = R.drawable.default_account,
+                    placeholder = painterResource(R.drawable.default_account),
+                    error = painterResource(R.drawable.error_pic),
+                    contentDescription = "Profile Picture",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(width = 2.dp, color = borderColor, shape = CircleShape)
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -308,15 +373,17 @@ fun RegularPlaceRow(
         Spacer(modifier = Modifier.width(8.dp))
 
         Column {
+            val isYou = student.studentName == currentUserName
+            val displayName = if (isYou) "${student.studentName} (YOU)" else student.studentName
             Text(
-                text = "${student.firstName} ${student.lastName}",
+                text = displayName,
                 fontSize = ResponsiveFont.heading3(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "${student.averageScore}%",
+                text = "${student.studentPoints}",
                 fontSize = ResponsiveFont.body(windowInfo),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.DarkGray

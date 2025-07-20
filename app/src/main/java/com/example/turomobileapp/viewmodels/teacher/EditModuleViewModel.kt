@@ -1,29 +1,33 @@
 package com.example.turomobileapp.viewmodels.teacher
 
 import android.content.Context
-import android.net.Uri
-import android.util.Base64
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.ModuleUpdateRequest
 import com.example.turomobileapp.repositories.ModuleRepository
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.notifications.TuroNotificationService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class EditModuleViewModel @Inject constructor(
     private val moduleRepository: ModuleRepository,
     savedStateHandle: SavedStateHandle,
-    private val notificationService: TuroNotificationService
+    private val notificationService: TuroNotificationService,
+    @ApplicationContext private val context: Context
 ): ViewModel(){
 
     private val _moduleId: String = checkNotNull(savedStateHandle["moduleId"])
@@ -44,31 +48,23 @@ class EditModuleViewModel @Inject constructor(
         _uiState.update { it.copy(moduleDescription = newModuleDescription) }
     }
 
-    fun updateSelectedImage(uri: Uri, context: Context) {
-        viewModelScope.launch {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val byteArray = inputStream?.readBytes() ?: byteArrayOf()
-            inputStream?.close()
-
-            _uiState.update { it.copy(modulePicture = byteArray) }
-        }
+    fun updateImageBytes(image: ByteArray) {
+        _uiState.update { it.copy(moduleImage = image) }
     }
 
     fun getModule(){
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
-            moduleRepository.getModule(_moduleId, _courseId).collect { result ->
+            moduleRepository.getModule(_moduleId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { module ->
                         _uiState.update { it.copy(
                             loading = false,
-                            originalModuleName = module.moduleName,
-                            moduleName = module.moduleName,
-                            originalModuleDescription = module.moduleDescription,
                             moduleDescription = module.moduleDescription,
-                            modulePicture = module.modulePicture
+                            moduleName = module.moduleName,
+                            moduleImage = module.modulePicture
                         ) }
                     },
                     onFailure = { err ->
@@ -83,15 +79,18 @@ class EditModuleViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
-            val encodedImage = Base64.encodeToString(_uiState.value.modulePicture, Base64.NO_WRAP)
+            val state = _uiState.value
+            val moduleIdPart = _moduleId.toRequestBody("text/plain".toMediaTypeOrNull())
+            val namePart = state.moduleName.toRequestBody("text/plain".toMediaTypeOrNull())
+            val descPart = (state.moduleDescription ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
 
-            val request = ModuleUpdateRequest(
-                moduleName = _uiState.value.moduleName,
-                moduleDescription = _uiState.value.moduleDescription,
-                modulePicture = encodedImage,
-            )
+            val imagePart = state.moduleImage?.let { imageBytes ->
+                val file = createTempImageFile(context, imageBytes)
+                val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("image_blob", file.name, requestFile)
+            }
 
-            moduleRepository.updateModule(_moduleId, request).collect { result ->
+            moduleRepository.updateModule(moduleIdPart, namePart, descPart, imagePart).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = {
@@ -114,16 +113,20 @@ class EditModuleViewModel @Inject constructor(
     fun clearEditStatus() {
         _uiState.update { it.copy(editModuleStatus = null) }
     }
+
+    private fun createTempImageFile(context: Context, imageBytes: ByteArray): File {
+        val file = File.createTempFile("module_image", ".jpg", context.cacheDir)
+        file.writeBytes(imageBytes)
+        return file
+    }
 }
 
 data class EditModuleUIState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
-    val originalModuleName: String = "",
     val moduleName: String = "",
-    val originalModuleDescription: String = "",
-    val moduleDescription: String = "",
-    val modulePicture: ByteArray = byteArrayOf(),
+    val moduleDescription: String? = null,
+    val moduleImage: ByteArray? = null,
     val editModuleStatus: Result<Unit>? = null
 ) {
     override fun equals(other: Any?): Boolean {
@@ -134,11 +137,9 @@ data class EditModuleUIState(
 
         if (loading!=other.loading) return false
         if (errorMessage!=other.errorMessage) return false
-        if (originalModuleName!=other.originalModuleName) return false
         if (moduleName!=other.moduleName) return false
-        if (originalModuleDescription!=other.originalModuleDescription) return false
         if (moduleDescription!=other.moduleDescription) return false
-        if (!modulePicture.contentEquals(other.modulePicture)) return false
+        if (!moduleImage.contentEquals(other.moduleImage)) return false
         if (editModuleStatus!=other.editModuleStatus) return false
 
         return true
@@ -147,11 +148,9 @@ data class EditModuleUIState(
     override fun hashCode(): Int {
         var result = loading.hashCode()
         result = 31 * result + (errorMessage?.hashCode() ?: 0)
-        result = 31 * result + originalModuleName.hashCode()
         result = 31 * result + moduleName.hashCode()
-        result = 31 * result + originalModuleDescription.hashCode()
-        result = 31 * result + moduleDescription.hashCode()
-        result = 31 * result + modulePicture.contentHashCode()
+        result = 31 * result + (moduleDescription?.hashCode() ?: 0)
+        result = 31 * result + (moduleImage?.contentHashCode() ?: 0)
         result = 31 * result + (editModuleStatus?.hashCode() ?: 0)
         return result
     }

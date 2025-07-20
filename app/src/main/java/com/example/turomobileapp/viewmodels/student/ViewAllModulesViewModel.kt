@@ -9,6 +9,7 @@ import com.example.turomobileapp.models.ModuleActivityResponse
 import com.example.turomobileapp.models.ModuleResponseStudent
 import com.example.turomobileapp.repositories.AssessmentResultRepository
 import com.example.turomobileapp.repositories.ModuleRepository
+import com.example.turomobileapp.repositories.UserRepository
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.utils.unlockModuleQuizzesInOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewAllModulesViewModel @Inject constructor(
     private val moduleRepository: ModuleRepository,
+    private val userRepository: UserRepository,
     private val assessmentResultRepository: AssessmentResultRepository,
     private val sessionManager: SessionManager,
     savedStateHandle: SavedStateHandle
@@ -35,6 +37,26 @@ class ViewAllModulesViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ViewAllModulesUIState())
     val uiState: StateFlow<ViewAllModulesUIState> = _uiState.asStateFlow()
+
+    fun checkIfStudentIsCatchUp(){
+        viewModelScope.launch {
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
+
+            val studentId: String = sessionManager.userId.filterNotNull().first()
+
+            userRepository.checkIfStudentIsCatchUp(studentId).collect { result ->
+                handleResult(
+                    result = result,
+                    onSuccess = { resp ->
+                        _uiState.update { it.copy(isCatchUp = resp.isCatchUp, loading = false) }
+                    },
+                    onFailure = { err ->
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
+                    }
+                )
+            }
+        }
+    }
 
     fun getModules(){
         viewModelScope.launch {
@@ -141,5 +163,6 @@ data class ViewAllModulesUIState(
     val errorMessage: String? = null,
     val modules: List<ModuleResponseStudent> = emptyList(),
     val activities: List<ModuleActivityResponse> = emptyList(),
-    val moduleName: String = ""
+    val moduleName: String = "",
+    val isCatchUp: Boolean = false
 )

@@ -5,13 +5,20 @@ import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.CourseApiService
 import com.example.turomobileapp.models.CoursePicture
 import com.example.turomobileapp.models.CourseResponse
+import com.example.turomobileapp.models.TeacherCourseResponse
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class CourseRepository @Inject constructor(private val courseApiService: CourseApiService) {
-    fun getCoursesForUser(): Flow<Result<List<CourseResponse>>> =
+    fun getCoursesForStudent(): Flow<Result<List<CourseResponse>>> =
         requestAndMap(
-            call = { courseApiService.getCoursesForUser() },
+            call = { courseApiService.getCoursesForStudent() },
+            mapper = { dto -> dto.courses }
+        )
+
+    fun getCoursesForTeacher(teacherId: String): Flow<Result<List<TeacherCourseResponse>>> =
+        requestAndMap(
+            call = { courseApiService.getCoursesForTeacher(teacherId) },
             mapper = { dto -> dto.courses }
         )
 

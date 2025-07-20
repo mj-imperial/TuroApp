@@ -80,24 +80,6 @@ class StudentPerformanceViewModel @Inject constructor(
         )) }
     }
 
-    fun getIndividualStudentProgress(studentId: String){
-        viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, errorMessage = null) }
-
-            studentProgressRepository.getIndividualStudentCourseProgress(studentId, _courseId).collect { result ->
-                handleResult(
-                    result = result,
-                    onSuccess = { resp ->
-                        _uiState.update { it.copy(loading = false, currentStudentScores = resp) }
-                    },
-                    onFailure = { err ->
-                        _uiState.update { it.copy(loading = false, errorMessage = err) }
-                    }
-                )
-            }
-        }
-    }
-
     fun clearCurrentStudentInfo() {
         _uiState.update { it.copy(currentStudentInfo = null) }
     }

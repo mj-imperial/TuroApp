@@ -35,8 +35,38 @@ sealed class Screen(val route: String) {
     //student
     object Leaderboard: Screen("leaderboard_screen")
     object Shop: Screen("shop_screen")
-    object StudentScreening: Screen("student_screening")
-    object StudentLongQuiz: Screen("student_long_quiz/{courseId}")
+    object StudentScreeningList: Screen("student_screening_list/{courseId}"){
+        fun createRoute(courseId: String) = "student_screening_list/$courseId"
+    }
+    object ScreeningExamDetail: Screen("screening_exam_detail_screen/{screeningExamId}"){
+        fun createRoute(screeningExamId: String) = "screening_exam_detail_screen/$screeningExamId"
+    }
+    object ScreeningExamAttempt: Screen("screening_exam_attempt/{screeningExamId}"){
+        fun createRoute(screeningExamId: String) = "screening_exam_attempt/$screeningExamId"
+    }
+    object ScreeningExamResult: Screen("screening_exam_result/{screeningExamId}"){
+        fun createRoute(screeningExamId: String) = "screening_exam_result/$screeningExamId"
+    }
+    object ScreeningLearningResources : Screen("screening_learning_resources/{screeningExamId}/{conceptId}/{topicId?}") {
+        fun createRoute(screeningExamId: String, conceptId: String, topicId: String? = null): String {
+            return if (topicId != null)
+                "screening_learning_resources/$screeningExamId/$conceptId/$topicId"
+            else
+                "screening_learning_resources/$screeningExamId/$conceptId"
+        }
+    }
+    object StudentLongQuizList: Screen("student_long_quiz_list/{courseId}"){
+        fun createRoute(courseId: String) = "student_long_quiz_list/$courseId"
+    }
+    object StudentLongQuizDetail: Screen("student_long_quiz_detail/{courseId}/{longQuizId}"){
+        fun createRoute(courseId: String, longQuizId: String) = "student_long_quiz_detail/$courseId/$longQuizId"
+    }
+    object StudentLongQuizAttempt: Screen("student_long_quiz_attempt/{courseId}/{longQuizId}"){
+        fun createRoute(courseId: String, longQuizId: String) = "student_long_quiz_attempt/$courseId/$longQuizId"
+    }
+    object StudentLongQuizResult: Screen("student_long_quiz_result_screen/{courseId}/{longQuizId}/{fromSubmit}"){
+        fun createRoute(courseId: String, longQuizId: String, fromSubmit: Boolean) = "student_long_quiz_result_screen/$courseId/$longQuizId/$fromSubmit"
+    }
     object StudentCourseDetail: Screen("course_detail/{courseId}") {
         fun createRoute(courseId: String) = "course_detail/$courseId"
     }
@@ -56,25 +86,19 @@ sealed class Screen(val route: String) {
     object StudentQuizResult: Screen("quiz_result_screen/{moduleId}/{quizId}/{fromSubmit}"){
         fun createRoute(moduleId: String, quizId: String, fromSubmit: Boolean) = "quiz_result_screen/$moduleId/$quizId/$fromSubmit"
     }
-    object ScreeningExamDetail: Screen("screening_exam_detail_screen/{activityId}"){
-        fun createRoute(activityId: String) = "screening_exam_detail_screen/$activityId"
-    }
     object StudentCourseAnalytics: Screen("student_course_analytics/{courseId}"){
         fun createRoute(courseId: String) = "student_course_analytics/$courseId"
     }
-    object StudentCourseIndividualAnalytics: Screen("student_course_individual_analytics/{courseId}/{moduleId}"){
-        fun createRoute(courseId: String, moduleId: String) = "student_course_individual_analytics/$courseId/$moduleId"
-    }
 
     //teacher
-    object TeacherCourseDetail: Screen("course_detail/{courseId}") {
-        fun createRoute(courseId: String) = "course_detail/$courseId"
+    object TeacherCourseDetail: Screen("course_detail/{courseId}/{sectionId}") {
+        fun createRoute(courseId: String, sectionId: String) = "course_detail/$courseId/$sectionId"
     }
-    object TeacherActivityModules: Screen("teacher_activity_modules/{courseId}"){
-        fun createRoute(courseId: String) = "teacher_activity_modules/$courseId"
+    object TeacherActivityModules: Screen("teacher_activity_modules/{courseId}/{sectionId}"){
+        fun createRoute(courseId: String, sectionId: String) = "teacher_activity_modules/$courseId/$sectionId"
     }
-    object TeacherCreateEditActivitiesInModule: Screen("teacher_create_edit_activity_in_module/{moduleId}"){
-        fun createRoute(moduleId: String) = "teacher_create_edit_activity_in_module/$moduleId"
+    object TeacherCreateEditActivitiesInModule: Screen("teacher_create_edit_activity_in_module/{moduleId}/{sectionId}"){
+        fun createRoute(moduleId: String, sectionId: String) = "teacher_create_edit_activity_in_module/$moduleId/$sectionId"
     }
     object TeacherCreateModule: Screen("teacher_createModule/{courseId}"){
         fun createRoute(courseId: String) = "teacher_createModule/$courseId"
@@ -87,25 +111,35 @@ sealed class Screen(val route: String) {
     object TeacherPerformanceIndividual: Screen("teacher_performance_individual/{courseId}/{studentId}"){
         fun createRoute(courseId: String, studentId: String) = "teacher_performance_individual/$courseId/$studentId"
     }
-    object TeacherCreateQuiz: Screen("teacher_create_quiz/{moduleId}"){
-        fun createRoute(moduleId: String) = "teacher_create_quiz/$moduleId"
+    object TeacherCreateQuiz: Screen("teacher_create_quiz/{sectionId}/{moduleId}"){
+        fun createRoute(sectionId: String, moduleId: String) = "teacher_create_quiz/$sectionId/$moduleId"
     }
-    object TeacherCreateTutorial: Screen("teacher_create_tutorial/{moduleId}"){
-        fun createRoute(moduleId: String) = "teacher_create_tutorial/$moduleId"
+    object TeacherCreateTutorial: Screen("teacher_create_tutorial/{sectionId}/{moduleId}"){
+        fun createRoute(sectionId: String, moduleId: String) = "teacher_create_tutorial/$sectionId/$moduleId"
     }
-    object TeacherCreateLecture: Screen("teacher_create_lecture/{moduleId}"){
-        fun createRoute(moduleId: String) = "teacher_create_lecture/$moduleId"
+    object TeacherCreateLecture: Screen("teacher_create_lecture/{sectionId}/{moduleId}"){
+        fun createRoute(sectionId: String, moduleId: String) = "teacher_create_lecture/$sectionId/$moduleId"
     }
-    object TeacherEditModule: Screen("teacher_edit_module/{courseId}/{moduleId}"){
-        fun createRoute(courseId: String, moduleId: String) = "teacher_edit_module/$courseId/$moduleId"
+    object TeacherEditModule: Screen("teacher_edit_module/{courseId}/{moduleId}/{sectionId}"){
+        fun createRoute(courseId: String, moduleId: String, sectionId: String) = "teacher_edit_module/$courseId/$moduleId/$sectionId"
     }
-    object TeacherEditTutorial: Screen("teacher_edit_tutorial/{moduleId}/{activityId}"){
-        fun createRoute(moduleId: String, activityId: String) = "teacher_edit_tutorial/$moduleId/$activityId"
+    object TeacherEditTutorial: Screen("teacher_edit_tutorial/{sectionId}/{moduleId}/{activityId}"){
+        fun createRoute(sectionId: String, moduleId: String, activityId: String) = "teacher_edit_tutorial/$sectionId/$moduleId/$activityId"
     }
-    object TeacherEditLecture: Screen("teacher_edit_lecture/{moduleId}/{activityId}"){
-        fun createRoute(moduleId: String, activityId: String) = "teacher_edit_lecture/$moduleId/$activityId"
+    object TeacherEditLecture: Screen("teacher_edit_lecture/{sectionId}/{moduleId}/{activityId}"){
+        fun createRoute(sectionId: String, moduleId: String, activityId: String) = "teacher_edit_lecture/$sectionId/$moduleId/$activityId"
     }
-    object TeacherEditQuiz: Screen("teacher_edit_quiz/{moduleId}/{activityId}"){
-        fun createRoute(activityId: String, moduleId: String) = "teacher_edit_quiz/$moduleId/$activityId"
+    object TeacherEditQuiz: Screen("teacher_edit_quiz/{sectionId}/{moduleId}/{activityId}"){
+        fun createRoute(sectionId: String, moduleId: String, activityId: String) = "teacher_edit_quiz/$sectionId/$moduleId/$activityId"
+    }
+    object TeacherViewAllModules: Screen("teacher_view_all_modules/{courseId}/{sectionId}"){
+        fun createRoute(courseId: String, sectionId: String) = "teacher_view_all_modules/$courseId/$sectionId"
+    }
+    object TeacherViewAllActivities: Screen("teacher_view_all_activities/{courseId}/{sectionId}/{moduleId}"){
+        fun createRoute(courseId: String, sectionId: String, moduleId: String) = "teacher_view_all_activities/$courseId/$sectionId/$moduleId"
+    }
+    object TeacherActivityDetail : Screen("teacher_activity_detail/{courseId}/{sectionId}/{activityId}/{activityType}/{moduleId}") {
+        fun createRoute(courseId: String, sectionId: String, activityId: String, activityType: String, moduleId: String) =
+            "teacher_activity_detail/$courseId/$sectionId/$activityId/$activityType/$moduleId"
     }
 }

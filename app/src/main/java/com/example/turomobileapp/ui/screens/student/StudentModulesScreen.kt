@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.BlobImage
@@ -128,7 +129,7 @@ fun StudentModulesScreen(
 fun ModuleItem(
     windowInfo: WindowInfo,
     moduleName: String,
-    modulePicture: ByteArray,
+    modulePicture: ByteArray?,
     progress: Double,
     onClickModule: () -> Unit
 ){
@@ -149,13 +150,23 @@ fun ModuleItem(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ){
-            BlobImage(
-                byteArray = modulePicture,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .aspectRatio(1f),
-                alpha = 1f
-            )
+            if (modulePicture == null){
+                AsyncImage(
+                    model = "https://wallpapers.com/images/featured/math-background-jbcyizvw0ckuvcro.jpg",
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    alpha = 1f
+                )
+            }else{
+                BlobImage(
+                    byteArray = modulePicture,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .aspectRatio(1f),
+                    alpha = 1f
+                )
+            }
 
             Column(
                 modifier = Modifier

@@ -5,20 +5,53 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class InboxItems(
-    @Json(name = "success") val success: Boolean,
-    @Json(name = "inboxes") val inboxes: List<InboxItem>
+    @Json(name = "messages") val messages: Messages
 )
 
 @JsonClass(generateAdapter = true)
-data class InboxItem(
-    @Json(name = "inbox_id") val inboxId: String,
-    @Json(name = "latest_message_id") val latestMessageId: String?,
-    @Json(name = "last_message_subject") val lastMessageSubject: String?,
-    @Json(name = "last_message_preview") val lastMessagePreview: String,
-    @Json(name = "inbox_timestamp") val lastMessageTimestamp: Long,
-    @Json(name = "unread_count") val unreadCount: Int,
-    @Json(name = "participants") val participants: List<UserInfo>
+data class Messages(
+    @Json(name = "incoming") val incoming: List<MessageItem>,
+    @Json(name = "sent") val sent: List<MessageItem>
 )
+
+@JsonClass(generateAdapter = true)
+data class MessageItem(
+    @Json(name = "sender_id") val senderId: String,
+    @Json(name = "sender_name") val senderName: String,
+    @Json(name = "image_blob") val imageBlob: ByteArray,
+    @Json(name = "subject") val subject: String?,
+    @Json(name = "message") val message: String,
+    @Json(name = "date") val date: String,
+    @Json(name = "unread") val unread: Boolean
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as MessageItem
+
+        if (unread!=other.unread) return false
+        if (senderId!=other.senderId) return false
+        if (senderName!=other.senderName) return false
+        if (!imageBlob.contentEquals(other.imageBlob)) return false
+        if (subject!=other.subject) return false
+        if (message!=other.message) return false
+        if (date!=other.date) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = unread.hashCode()
+        result = 31 * result + senderId.hashCode()
+        result = 31 * result + senderName.hashCode()
+        result = 31 * result + imageBlob.contentHashCode()
+        result = 31 * result + subject.hashCode()
+        result = 31 * result + message.hashCode()
+        result = 31 * result + date.hashCode()
+        return result
+    }
+}
 
 @JsonClass(generateAdapter = true)
 data class UserInfo(
@@ -57,7 +90,6 @@ data class CreateMessageRequest(
 
 @JsonClass(generateAdapter = true)
 data class MessageActionResponse(
-    @Json(name = "success") val success: Boolean,
     @Json(name = "message") val message: String
 )
 

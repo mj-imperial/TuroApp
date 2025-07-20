@@ -39,16 +39,14 @@ class TeacherProfileViewModel @Inject constructor(
 
             val teacherId: String = sessionManager.userId.filterNotNull().first()
 
-            courseRepository.getCoursesForUser().collect { result ->
+            courseRepository.getCoursesForTeacher(teacherId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { resp ->
-                        resp.forEach {
-                            _uiState.update { it.copy(
-                                loading = false,
-                                coursesTaught = resp.associate { course -> course.courseCode to course.courseName }
-                            ) }
-                        }
+                        _uiState.update { it.copy(
+                            loading = false,
+                            sectionsTaught = resp.map { it.sectionName }
+                        ) }
                     },
                     onFailure = { err ->
                         _uiState.update { it.copy(loading = false, errorMessage = err) }
@@ -66,7 +64,7 @@ data class TeacherProfileUIState(
     val email: String = "",
     val role: String = "",
     val profilePic: ByteArray? = null,
-    val coursesTaught: Map<String, String> = emptyMap()
+    val sectionsTaught: List<String> = emptyList()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this===other) return true
@@ -80,7 +78,7 @@ data class TeacherProfileUIState(
         if (email!=other.email) return false
         if (role!=other.role) return false
         if (!profilePic.contentEquals(other.profilePic)) return false
-        if (coursesTaught!=other.coursesTaught) return false
+        if (sectionsTaught!=other.sectionsTaught) return false
 
         return true
     }
@@ -92,7 +90,7 @@ data class TeacherProfileUIState(
         result = 31 * result + email.hashCode()
         result = 31 * result + role.hashCode()
         result = 31 * result + (profilePic?.contentHashCode() ?: 0)
-        result = 31 * result + coursesTaught.hashCode()
+        result = 31 * result + sectionsTaught.hashCode()
         return result
     }
 }

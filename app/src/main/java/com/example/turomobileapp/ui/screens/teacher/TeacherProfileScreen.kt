@@ -1,7 +1,6 @@
 package com.example.turomobileapp.ui.screens.teacher
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -81,9 +80,9 @@ fun TeacherProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     val userInfo = listOf(
-        ProfileCardItems(R.string.Name, R.drawable.fullname_icon, uiState.teacherName),
-        ProfileCardItems(R.string.Email, R.drawable.mail_icon, uiState.email),
-        ProfileCardItems(R.string.Role, R.drawable.role_icon, uiState.role)
+        ProfileCardItems("NAME", R.drawable.fullname_icon, uiState.teacherName),
+        ProfileCardItems("EMAIL", R.drawable.mail_icon, uiState.email),
+        ProfileCardItems("ROLE", R.drawable.role_icon, uiState.role),
     )
 
     AppScaffold(
@@ -166,10 +165,7 @@ fun TeacherProfileScreen(
                             }
                         }
 
-                        items(uiState.coursesTaught.entries.toList()) { entry ->
-                            val courseId = entry.key
-                            val courseName = entry.value
-
+                        items(uiState.sectionsTaught) { entry ->
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -189,7 +185,7 @@ fun TeacherProfileScreen(
                                     Spacer(modifier = Modifier.width(25.dp))
 
                                     Text(
-                                        text = "$courseId : $courseName"
+                                        text = entry
                                     )
                                 }
 
@@ -237,7 +233,7 @@ fun TeacherProfileScreen(
 
 @Composable
 private fun ProfileField(
-    @StringRes nameRes: Int,
+    nameRes: String,
     @DrawableRes iconRes: Int,
     value: String
 ) {
@@ -249,14 +245,14 @@ private fun ProfileField(
     ) {
         Icon(
             painter = painterResource(iconRes),
-            contentDescription = stringResource(nameRes),
+            contentDescription = null,
             tint = Color.Black,
             modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(25.dp))
         Column {
             Text(
-                text = stringResource(nameRes),
+                text = nameRes,
                 fontSize = ResponsiveFont.heading3(rememberWindowInfo()),
                 fontFamily = FontFamily(Font(R.font.alata)),
                 color = Color.Black

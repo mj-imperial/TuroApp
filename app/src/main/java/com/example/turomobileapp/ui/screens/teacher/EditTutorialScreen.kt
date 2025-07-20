@@ -65,7 +65,8 @@ fun EditTutorialScreen(
     navController: NavController,
     sessionManager: SessionManager,
     viewModel: EditTutorialViewModel,
-    moduleId: String
+    moduleId: String,
+    sectionId: String
 ){
     val windowInfo = rememberWindowInfo()
     val context = LocalContext.current
@@ -78,7 +79,7 @@ fun EditTutorialScreen(
     LaunchedEffect(uiState.editTutorialStatus) {
         if (uiState.editTutorialStatus is Result.Success){
             Toast.makeText(context, "Tutorial successfully updated.",Toast.LENGTH_SHORT).show()
-            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
+            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId, sectionId))
             viewModel.clearTutorialStatus()
         }else if(uiState.editTutorialStatus is Result.Failure){
             val msg = uiState.errorMessage

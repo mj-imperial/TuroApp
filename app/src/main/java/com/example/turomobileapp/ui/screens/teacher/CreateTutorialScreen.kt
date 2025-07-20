@@ -65,7 +65,8 @@ fun CreateTutorialScreen(
     navController: NavController,
     sessionManager: SessionManager,
     moduleId: String,
-    viewModel: CreateTutorialViewModel
+    viewModel: CreateTutorialViewModel,
+    sectionId: String
 ){
     val windowInfo = rememberWindowInfo()
     val context = LocalContext.current
@@ -80,7 +81,7 @@ fun CreateTutorialScreen(
     LaunchedEffect(uiState.tutorialUploadResult) {
         if (uiState.tutorialUploadResult is Result.Success) {
             Toast.makeText(context, "Tutorial successfully created.",Toast.LENGTH_SHORT).show()
-            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
+            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId, sectionId))
             viewModel.clearTutorialUploadResult()
         }else if(uiState.tutorialUploadResult is Result.Failure){
             val msg = uiState.errorMessage

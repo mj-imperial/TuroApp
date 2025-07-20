@@ -88,11 +88,15 @@ class QuizAttemptViewModel @Inject constructor(
                 handleResult(
                     result = result,
                     onSuccess = { content ->
-                        _uiState.update { it.copy(
-                            loadingContent = false,
-                            content = content,
-                            currentIndex = 0,
-                        ) }
+                        val shuffled = content.shuffled().take(_uiState.value.questionSize)
+                        _uiState.update {
+                            it.copy(
+                                loadingContent = false,
+                                content = content,
+                                shuffledQuestions = shuffled,
+                                currentIndex = 0,
+                            )
+                        }
                     },
                     onFailure = { err ->
                         _uiState.update { it.copy(loadingContent = false, errorMessage = err) }
@@ -120,7 +124,7 @@ class QuizAttemptViewModel @Inject constructor(
     }
 
     fun onOptionSelected(option: QuestionResponse) {
-        val question = uiState.value.content[uiState.value.currentIndex]
+        val question = uiState.value.shuffledQuestions[uiState.value.currentIndex]
         _uiState.update { st ->
             st.copy(
                 answers = st.answers + (st.currentIndex to Answer.OptionAnswer(
@@ -133,7 +137,7 @@ class QuizAttemptViewModel @Inject constructor(
     }
 
     fun onShortAnswerEntered(text: String) {
-        val question = uiState.value.content[uiState.value.currentIndex]
+        val question = uiState.value.shuffledQuestions[uiState.value.currentIndex]
         _uiState.update { state ->
             state.copy(
                 answers = state.answers + (state.currentIndex to Answer.TextAnswer(question, text))
@@ -143,12 +147,12 @@ class QuizAttemptViewModel @Inject constructor(
 
     fun onNextClicked() {
         _uiState.update {
-            val next = (it.currentIndex + 1).coerceAtMost(it.content.size - 1)
+            val next = (it.currentIndex + 1).coerceAtMost(it.shuffledQuestions.size - 1)
             it.copy(currentIndex = next)
         }
     }
 
-    fun onSubmitClicked(){
+    fun onSubmitClicked() {
         if (_uiState.value.hasSubmitted) return
 
         viewModelScope.launch {
@@ -156,7 +160,9 @@ class QuizAttemptViewModel @Inject constructor(
 
             _events.send(QuizAttemptEvent.SubmitQuiz)
 
-            val answersList = uiState.value.content.mapIndexed { index, question ->
+            val selectedQuestions = uiState.value.shuffledQuestions
+
+            val answersList = selectedQuestions.mapIndexed { index, question ->
                 val answer = uiState.value.answers[index]
                 when (answer) {
                     is Answer.OptionAnswer -> AnswerUploadRequest(
@@ -165,14 +171,14 @@ class QuizAttemptViewModel @Inject constructor(
                         isCorrect = if (answer.isCorrect) 1 else 0
                     )
                     is Answer.TextAnswer -> {
-                        val match = answer.response.options.firstOrNull { opt ->
+                        val match = question.options.firstOrNull { opt ->
                             opt.optionText.trim().uppercase() == answer.text.trim().uppercase()
                         }
 
                         AnswerUploadRequest(
-                            questionId = answer.response.questionId,
+                            questionId = question.questionId,
                             optionId = match?.optionId ?: "",
-                            isCorrect = if(match?.isCorrect == true) 1 else 0
+                            isCorrect = if (match?.isCorrect == true) 1 else 0
                         )
                     }
                     null -> AnswerUploadRequest(
@@ -185,26 +191,21 @@ class QuizAttemptViewModel @Inject constructor(
 
             val score = answersList.sumOf { answer ->
                 if (answer.isCorrect == 1) {
-                    uiState.value.content
-                        .first { q -> q.questionId == answer.questionId }
-                        .score
-                } else {
-                    0
-                }
+                    selectedQuestions.first { q -> q.questionId == answer.questionId }.score
+                } else 0
             }
-            val maxScore = uiState.value.content.sumOf { it.score }
+
+            val maxScore = selectedQuestions.sumOf { it.score }
             val scorePercentage: Double = if (maxScore > 0) {
                 (score.toDouble() / maxScore.toDouble()) * 100.0
-            } else {
-                0.0
-            }
+            } else 0.0
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
             assessmentResultRepository.saveAssessmentResult(
                 moduleId = _moduleId,
                 studentId = studentId,
-                activityId =  _quizId,
+                activityId = _quizId,
                 scorePercentage = scorePercentage,
                 earnedPoints = score,
                 answers = answersList
@@ -221,7 +222,7 @@ class QuizAttemptViewModel @Inject constructor(
                     },
                     onFailure = { err ->
                         _events.trySend(QuizAttemptEvent.SubmitError(err.toString()))
-                    },
+                    }
                 )
             }
         }
@@ -239,6 +240,7 @@ data class QuizAttemptUIState(
     val timeLimit: Int = 0,
     val questionSize: Int = 0,
     val content: List<QuizContentResponse> = emptyList(),
+    val shuffledQuestions: List<QuizContentResponse> = emptyList(),
     val currentIndex: Int = 0,
     val timeRemaining: Int = 0,
     val answers: Map<Int, Answer> = emptyMap(),

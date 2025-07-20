@@ -1,6 +1,8 @@
 package com.example.turomobileapp.ui.screens.student
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +40,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -45,12 +48,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.turomobileapp.R
-import com.example.turomobileapp.models.StudentAchievementResponse
-import com.example.turomobileapp.models.StudentBadgeResponse
-import com.example.turomobileapp.models.StudentLeaderboardResponse
-import com.example.turomobileapp.objects.CelebrationPrefs
+import com.example.turomobileapp.models.LeaderboardEntry
 import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.CustomDropDownMenu
 import com.example.turomobileapp.ui.components.DropdownMenuItem
@@ -63,13 +62,8 @@ import com.example.turomobileapp.ui.theme.MainWhite
 import com.example.turomobileapp.ui.theme.TextBlack
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.GamificationViewModel
-import kotlinx.coroutines.delay
-import nl.dionsegijn.konfetti.compose.KonfettiView
-import nl.dionsegijn.konfetti.core.Angle
-import nl.dionsegijn.konfetti.core.Party
-import nl.dionsegijn.konfetti.core.Position
-import nl.dionsegijn.konfetti.core.emitter.Emitter
-import java.util.concurrent.TimeUnit
+import com.example.turomobileapp.viewmodels.student.StudentAchievementResponseCompose
+import com.example.turomobileapp.viewmodels.student.StudentBadgeResponseCompose
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +77,10 @@ fun LeaderboardScreen(
     val pullRefreshState = rememberPullToRefreshState()
 
     var currentMenu by remember { mutableStateOf<String>("Leaderboard") }
+
+    LaunchedEffect(Unit) {
+        viewModel.getGamificationElements()
+    }
 
     val menuList = listOf(
         DropdownMenuItem(
@@ -108,10 +106,6 @@ fun LeaderboardScreen(
         )
     )
 
-    val sortedStudents = remember(uiState.progresses) {
-        uiState.progresses.sortedByDescending { it.averageScore }
-    }
-
     AppScaffold(
         navController = navController,
         canNavigateBack = true,
@@ -128,9 +122,7 @@ fun LeaderboardScreen(
                     isRefreshing = uiState.loading,
                     state = pullRefreshState,
                     onRefresh = {
-                        viewModel.getLeaderboard()
-                        viewModel.getBadgesForStudent()
-                        viewModel.getAchievementsForStudent()
+                        viewModel.getGamificationElements()
                     },
                 ) {
                     Column(
@@ -141,22 +133,23 @@ fun LeaderboardScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         CustomDropDownMenu(
-                            menuText = currentMenu,dropdownMenuItems = menuList
+                            menuText = currentMenu, dropdownMenuItems = menuList
                         )
 
-                        when(currentMenu){
+                        when (currentMenu) {
                             "Leaderboard" -> LeaderboardCard(
-                                students = sortedStudents,
+                                students = uiState.leaderboards.sortedBy { it.studentRanking },
                                 windowInfo = windowInfo,
-                                loading = uiState.loading
+                                loading = uiState.loading,
+                                currentUserName = uiState.currentUserName
                             )
                             "Badges" -> BadgesCard(
-                                studentBadges = uiState.studentBadges,
+                                studentBadges = uiState.badgesRetrieved,
                                 windowInfo = windowInfo
                             )
                             "Achievements" -> AchievementsCard(
-                                windowInfo = windowInfo,
-                                achievements = uiState.studentAchievements
+                                achievements = uiState.achievementsRetrieved,
+                                windowInfo = windowInfo
                             )
                         }
                     }
@@ -168,9 +161,10 @@ fun LeaderboardScreen(
 
 @Composable
 fun LeaderboardCard(
-    students: List<StudentLeaderboardResponse>,
+    students: List<LeaderboardEntry>,
     windowInfo: WindowInfo,
-    loading: Boolean
+    loading: Boolean,
+    currentUserName: String
 ) {
     if (loading) {
         Box(
@@ -189,10 +183,10 @@ fun LeaderboardCard(
         ) {
             itemsIndexed(students) { index, student ->
                 when (index) {
-                    0 -> FirstPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.16f)
-                    1 -> SecondPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.14f)
-                    2 -> ThirdPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.12f)
-                    else -> RegularPlaceRow(student, index + 1, windowInfo, windowInfo.screenHeight * 0.10f)
+                    0 -> FirstPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.16f, currentUserName)
+                    1 -> SecondPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.14f, currentUserName)
+                    2 -> ThirdPlaceRow(student, windowInfo, windowInfo.screenHeight * 0.12f, currentUserName)
+                    else -> RegularPlaceRow(student, index + 1, windowInfo, windowInfo.screenHeight * 0.10f, currentUserName)
                 }
             }
         }
@@ -201,57 +195,14 @@ fun LeaderboardCard(
 
 @Composable
 fun BadgesCard(
-    studentBadges: List<StudentBadgeResponse>,
+    studentBadges: List<StudentBadgeResponseCompose>,
     windowInfo: WindowInfo
 ){
-    val context = LocalContext.current
     val iconSize = windowInfo.screenHeight * 0.09f
     val unlockedBadges = studentBadges.filter { it.isUnlocked }
     val lockedBadges = studentBadges.filter { !it.isUnlocked }
 
-    var showConfetti by remember { mutableStateOf(false) }
-    var celebratedIds by remember { mutableStateOf<Set<String>?>(null) }
-
-    val confettiEmitter = remember { Party(
-        speed = 1f,
-        maxSpeed = 10f,
-        damping = 0.9f,
-        spread = 360,
-        angle = Angle.BOTTOM,
-        colors = listOf(0xfce18a, 0xff726d, 0xf4306d, 0xb48def),
-        emitter = Emitter(duration = 1, TimeUnit.SECONDS).perSecond(100),
-        position = Position.Relative(0.5, 0.0)
-    ) }
-
-    LaunchedEffect(Unit) {
-        celebratedIds = CelebrationPrefs.getCelebratedBadges(context)
-    }
-
-    LaunchedEffect(celebratedIds, unlockedBadges) {
-        if (celebratedIds == null) return@LaunchedEffect
-
-        val newlyUnlocked = unlockedBadges
-            .filter { it.studentTotalPoints == it.pointsRequired && it.badgeId !in celebratedIds!! }
-            .map { it.badgeId }
-            .toSet()
-
-        if (newlyUnlocked.isNotEmpty()) {
-            showConfetti = true
-            CelebrationPrefs.appendCelebratedBadges(context, newlyUnlocked)
-            celebratedIds = celebratedIds!! + newlyUnlocked
-            delay(2000)
-            showConfetti = false
-        }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
-        if (showConfetti) {
-            KonfettiView(
-                modifier = Modifier.fillMaxSize(),
-                parties = listOf(confettiEmitter)
-            )
-        }
-
         LazyColumn {
             item {
                 Text(
@@ -301,12 +252,15 @@ fun BadgesCard(
     }
 }
 
+
 @Composable
 fun IndividualBadgeCard(
-    badge: StudentBadgeResponse,
+    badge: StudentBadgeResponseCompose,
     iconSize: Dp,
     windowInfo: WindowInfo
 ){
+    val context = LocalContext.current
+    val drawableId = getDrawableIdByName(context, badge.badgeImage)
     val alpha = if (badge.isUnlocked) 1f else 0.7f
     val unlocked = badge.isUnlocked
 
@@ -326,8 +280,8 @@ fun IndividualBadgeCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = badge.badgeImage,
+            Image(
+                painter = painterResource(id = drawableId),
                 contentDescription = "Badge ${badge.badgeName}",
                 modifier = Modifier
                     .size(iconSize)
@@ -360,75 +314,21 @@ fun IndividualBadgeCard(
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text =
-                        if (unlocked) "POINTS NEEDED: ${badge.pointsRequired}"
-                        else "POINTS NEEDED: ${badge.studentTotalPoints}/${badge.pointsRequired}",
-                    fontSize = ResponsiveFont.body(windowInfo),
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    color = if (unlocked) TextBlack else LoginText
-                )
             }
         }
     }
 }
 
-//TODO place progress
 @Composable
 fun AchievementsCard(
     windowInfo: WindowInfo,
-    achievements: List<StudentAchievementResponse>
+    achievements: List<StudentAchievementResponseCompose>
 ){
-    val context = LocalContext.current
-    val iconSize = windowInfo.screenHeight * 0.06f
-
+    val iconSize = windowInfo.screenHeight * 0.09f
     val unlockedAchievements = achievements.filter { it.isUnlocked }
     val lockedAchievements = achievements.filter { !it.isUnlocked }
 
-    var showConfetti by remember { mutableStateOf(false) }
-    var celebratedIds by remember { mutableStateOf<Set<String>?>(null) }
-
-    val confettiEmitter = remember { Party(
-        speed = 1f,
-        maxSpeed = 10f,
-        damping = 0.9f,
-        spread = 360,
-        angle = Angle.BOTTOM,
-        colors = listOf(0xfce18a, 0xff726d, 0xf4306d, 0xb48def),
-        emitter = Emitter(duration = 1, TimeUnit.SECONDS).perSecond(100),
-        position = Position.Relative(0.5, 0.0)
-    ) }
-
-    LaunchedEffect(Unit) {
-        celebratedIds = CelebrationPrefs.getCelebratedAchievements(context)
-    }
-
-    LaunchedEffect(celebratedIds, unlockedAchievements) {
-        if (celebratedIds == null) return@LaunchedEffect
-
-        val newlyUnlocked = unlockedAchievements
-            .filter { it.achievementId !in celebratedIds!! }
-            .map { it.achievementId }
-            .toSet()
-
-        if (newlyUnlocked.isNotEmpty()) {
-            showConfetti = true
-            CelebrationPrefs.appendCelebratedAchievements(context, newlyUnlocked)
-            celebratedIds = celebratedIds!! + newlyUnlocked
-            delay(2000)
-            showConfetti = false
-        }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
-        if (showConfetti) {
-            KonfettiView(
-                modifier = Modifier.fillMaxSize(),
-                parties = listOf(confettiEmitter)
-            )
-        }
-
         LazyColumn {
             item {
                 Text(
@@ -452,7 +352,6 @@ fun AchievementsCard(
                     iconSize = iconSize,
                     windowInfo = windowInfo
                 )
-                Spacer(modifier = Modifier.height(40.dp))
             }
 
             item {
@@ -479,10 +378,12 @@ fun AchievementsCard(
 
 @Composable
 fun IndividualAchievementCard(
-    achievement: StudentAchievementResponse,
+    achievement: StudentAchievementResponseCompose,
     iconSize: Dp,
     windowInfo: WindowInfo
 ){
+    val context = LocalContext.current
+    val drawableId = getDrawableIdByName(context, achievement.achievementImage)
     val alpha = if (achievement.isUnlocked) 1f else 0.7f
     val unlocked = achievement.isUnlocked
 
@@ -502,14 +403,14 @@ fun IndividualAchievementCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = achievement.achievementImage,
-                contentDescription = "Badge ${achievement.achievementName}",
+            Image(
+                painter = painterResource(id = drawableId),
+                contentDescription = "Achievement ${achievement.achievementName}",
                 modifier = Modifier
                     .size(iconSize)
                     .clip(CircleShape)
                     .border(width = 2.dp, color = MainOrange, shape = CircleShape),
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -519,7 +420,7 @@ fun IndividualAchievementCard(
             ) {
                 Text(
                     text = achievement.achievementName,
-                    fontSize = ResponsiveFont.heading3(windowInfo),
+                    fontSize = ResponsiveFont.heading1(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontWeight = FontWeight.Bold,
                     color = if (unlocked) TextBlack else LoginText
@@ -529,14 +430,16 @@ fun IndividualAchievementCard(
 
                 Text(
                     text = achievement.achievementDescription,
-                    fontSize = ResponsiveFont.caption(windowInfo),
+                    fontSize = ResponsiveFont.heading3(windowInfo),
                     fontFamily = FontFamily(Font(R.font.alata)),
                     maxLines = 2,
                     color = if (unlocked) TextBlack else LoginText
                 )
-
-                Spacer(modifier = Modifier.height(6.dp))
             }
         }
     }
+}
+
+fun getDrawableIdByName(context: Context, imageName: String): Int {
+    return context.resources.getIdentifier(imageName, "drawable", context.packageName)
 }

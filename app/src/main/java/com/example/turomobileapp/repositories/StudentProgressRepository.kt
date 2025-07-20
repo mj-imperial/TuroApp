@@ -3,10 +3,9 @@ package com.example.turomobileapp.repositories
 import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.helperfunctions.requestAndMap
 import com.example.turomobileapp.interfaces.StudentProgressApiService
+import com.example.turomobileapp.models.StudentAnalyticsResponse
 import com.example.turomobileapp.models.StudentLeaderboardResponse
 import com.example.turomobileapp.models.StudentPerformanceListResponses
-import com.example.turomobileapp.models.StudentPerformanceModuleList
-import com.example.turomobileapp.models.StudentPerformanceResponse
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -24,15 +23,9 @@ class  StudentProgressRepository @Inject constructor(private val studentProgress
             errorMessage = "Failed to get course $courseId progress"
         )
 
-    fun getIndividualStudentCourseProgress(studentId: String, courseId: String): Flow<Result<List<StudentPerformanceModuleList>>> =
-        requestAndMap(
-            call = { studentProgressApiService.getIndividualStudentCourseProgress(studentId, courseId) },
-            mapper = { dto -> dto.modules }
-        )
-
-    fun getIndividualStudentPerformanceList(studentId: String, courseId: String): Flow<Result<StudentPerformanceResponse>> =
+    fun getStudentAnalysis(studentId: String, courseId: String): Flow<Result<StudentAnalyticsResponse>> =
         handleApiResponse(
-            call = { studentProgressApiService.getIndividualStudentPerformanceList(studentId, courseId) },
-            errorMessage = "Failed to get individual student performance list for $studentId"
+            call = { studentProgressApiService.getStudentAnalysis(studentId, courseId) },
+            errorMessage = "Failed to get student progress"
         )
 }

@@ -1,5 +1,6 @@
 package com.example.turomobileapp.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +25,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -55,19 +55,18 @@ fun TopNavigationBar(
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.bookicon_icon),
-                    tint = Color.White,
-                    contentDescription = "Book Icon",
+                Image(
+                    painter = painterResource(R.drawable.turo_icon),
+                    contentDescription = "App logo",
                     modifier = Modifier.size(iconSize)
                 )
                 Spacer(Modifier.width(8.dp))
 
                 Column(
                     horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Top
+                    verticalArrangement = Arrangement.Center
                 ){
                     Text(
                         text = stringResource(R.string.TURO),

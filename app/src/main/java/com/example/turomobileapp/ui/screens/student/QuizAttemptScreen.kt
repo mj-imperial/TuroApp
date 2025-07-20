@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -57,8 +58,6 @@ import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.CapsuleButton
 import com.example.turomobileapp.ui.components.CapsuleTextField
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
-import com.example.turomobileapp.ui.components.PopupMinimal
-import com.example.turomobileapp.ui.components.PopupWithImage
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
@@ -88,7 +87,7 @@ fun QuizAttemptScreen(
 ) {
     val ctx = LocalContext.current
     BackHandler {
-        Toast.makeText(ctx,"You can’t go back during the quiz",Toast.LENGTH_SHORT).show()
+        Toast.makeText(ctx,"You can’t go back during the exam",Toast.LENGTH_SHORT).show()
     }
 
     val windowInfo = rememberWindowInfo()
@@ -204,8 +203,11 @@ fun QuizAttemptScreen(
                     verticalArrangement = Arrangement.SpaceAround,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    val content = uiState.content.shuffled().take(uiState.questionSize)
-                    val question = content[uiState.currentIndex]
+                    val question = uiState.shuffledQuestions.getOrNull(uiState.currentIndex)
+                    if (question == null) {
+                        Text("Invalid question index.")
+                        return@AppScaffold
+                    }
                     val options = question.options
 
                     QuizAttemptHeader(
@@ -347,7 +349,7 @@ fun QuestionBox(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Q$questionNumber of ${uiState.content.size}",
+                    text = "Q$questionNumber of ${uiState.shuffledQuestions.size}",
                     fontSize = ResponsiveFont.heading2(windowInfo),
                     fontFamily = FontFamily(Font(R.font.albert_sans_thin)),
                     fontWeight = FontWeight.Bold,
@@ -369,6 +371,7 @@ fun QuestionBox(
                             byteArray = questionImage,
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .height(200.dp)
                                 .padding(vertical = 10.dp)
                         )
                     }
@@ -435,7 +438,7 @@ fun QuestionBox(
             .fillMaxWidth()
     ) {
 
-        if (uiState.currentIndex < uiState.content.size - 1){
+        if (uiState.currentIndex < uiState.shuffledQuestions.size - 1){
             CapsuleButton(
                 text = {
                     Text(
@@ -460,17 +463,27 @@ fun QuestionBox(
                     text = "SUBMIT",
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontSize = ResponsiveFont.heading2(windowInfo),
-                    color = TextBlack
+                    color = TextBlack,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             },
             onClick = onOpenAlertDialog,
             modifier = Modifier
-                .width(windowInfo.screenWidth * 0.35f)
-                .padding(bottom = 10.dp),
+                .width(windowInfo.screenWidth * 0.45f)
+                .height(52.dp)
+                .padding(bottom = 10.dp)
+                .background(
+                    brush = Brush.horizontalGradient(listOf(Color.White, courseInfo2)),
+                    shape = RoundedCornerShape(5.dp)
+                )
+                .shadow(4.dp, RoundedCornerShape(5.dp)),
             roundedCornerShape = 5.dp,
-            buttonElevation = ButtonDefaults.buttonElevation(5.dp),
-            contentPadding = PaddingValues(5.dp),
-            buttonColors = ButtonDefaults.buttonColors(courseInfo2),
+            buttonElevation = ButtonDefaults.buttonElevation(6.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+            buttonColors = ButtonDefaults.buttonColors(
+                containerColor = courseInfo2,
+                contentColor = TextBlack
+            ),
             enabled = !uiState.hasSubmitted && !uiState.loadingSubmit
         )
     }

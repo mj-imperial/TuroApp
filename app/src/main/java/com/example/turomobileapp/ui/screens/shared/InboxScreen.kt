@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -67,62 +66,49 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+//TODO only delete sent
 @RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InboxScreen(
     navController: NavController,
     sessionManager: SessionManager,
     viewModel: InboxViewModel
-){
+) {
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
+    var showSent by remember { mutableStateOf(false) }
     var inboxToDelete by remember { mutableStateOf<String?>(null) }
     var openDeleteDialog by remember { mutableStateOf(false) }
 
-    if (openDeleteDialog){
+    val messageList = if (showSent) uiState.inboxList?.sent else uiState.inboxList?.incoming
+
+    if (openDeleteDialog) {
         PopupAlertWithActions(
             onDismissRequest = {
                 openDeleteDialog = false
                 inboxToDelete = null
             },
             onConfirmation = {
-                viewModel.deleteInbox(inboxToDelete.toString())
+                inboxToDelete?.let { viewModel.deleteInbox(it) }
                 openDeleteDialog = false
                 inboxToDelete = null
             },
             icon = painterResource(R.drawable.delete_vector_icon),
             title = {
-                Text(
-                    text = "Delete Message?",
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.title(windowInfo)
-                )
+                Text("Delete Message?", fontFamily = FontFamily(Font(R.font.alata)), fontSize = ResponsiveFont.title(windowInfo))
             },
             dialogText = {
-                Text(
-                    text = "Are you sure you want to delete?\n You can't reverse this action.",
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo)
-                )
+                Text("Are you sure you want to delete?\nYou can't reverse this action.",
+                    fontFamily = FontFamily(Font(R.font.alata)), fontSize = ResponsiveFont.heading3(windowInfo))
             },
             confirmText = {
-                Text(
-                    text = "Yes",
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo),
-                    color = green
-                )
+                Text("Yes", fontFamily = FontFamily(Font(R.font.alata)), fontSize = ResponsiveFont.heading3(windowInfo), color = green)
             },
             dismissText = {
-                Text(
-                    text = "No",
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading3(windowInfo),
-                    color = LoginText
-                )
+                Text("No", fontFamily = FontFamily(Font(R.font.alata)), fontSize = ResponsiveFont.heading3(windowInfo), color = LoginText)
             }
         )
     }
@@ -134,63 +120,103 @@ fun InboxScreen(
         windowInfo = windowInfo,
         sessionManager = sessionManager,
         content = {
-            if (uiState.loading){
+            if (uiState.loading) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-            }else{
+            } else {
                 PullToRefreshBox(
                     isRefreshing = uiState.loading,
                     state = pullRefreshState,
-                    onRefresh = {
-                        viewModel.getInboxes()
-                    },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
+                    onRefresh = { viewModel.getInboxes() },
+                    modifier = Modifier.fillMaxSize().padding(it)
                 ) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        items(uiState.inboxList) { inbox ->
-                            InboxItem(
-                                windowInfo = windowInfo,
-                                subjectPreview = inbox.lastMessageSubject.toString(),
-                                messagePreview = inbox.lastMessagePreview,
-                                timestamp = inbox.lastMessageTimestamp,
-                                latestParticipant = inbox.participants.lastOrNull() ?: UserInfo("?", "Unknown", null),
-                                isRead = inbox.unreadCount == 0,
-                                onNavigateToInboxItem = {
-                                    viewModel.markMessageAsRead(inbox.latestMessageId.toString())
-                                    navController.navigate(Screen.InboxDetail.createRoute(inbox.inboxId))
-                                },
-                                onDeleteMessage = {
-                                    inboxToDelete = inbox.inboxId
-                                    openDeleteDialog = true
-                                }
+                    Column(modifier = Modifier.fillMaxSize().padding(10.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "INBOX",
+                                modifier = Modifier
+                                    .background(
+                                        if (!showSent) MainOrange else Color.Transparent,
+                                        RoundedCornerShape(5.dp)
+                                    )
+                                    .clickable { showSent = false }
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                color = if (!showSent) Color.White else Color.Black,
+                                fontFamily = FontFamily(Font(R.font.alata))
                             )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "SENT",
+                                modifier = Modifier
+                                    .background(
+                                        if (showSent) MainOrange else Color.Transparent,
+                                        RoundedCornerShape(5.dp)
+                                    )
+                                    .clickable { showSent = true }
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                color = if (showSent) Color.White else Color.Black,
+                                fontFamily = FontFamily(Font(R.font.alata))
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            messageList?.let {
+                                items(it.size) { index ->
+                                    val message = it[index]
+                                    InboxItem(
+                                        windowInfo = windowInfo,
+                                        subjectPreview = message.subject ?: "Blank Subject",
+                                        messagePreview = message.message,
+                                        timestamp = try {
+                                            message.date.toLong()
+                                        } catch (e: Exception) {
+                                            0L
+                                        },
+                                        latestParticipant = UserInfo(
+                                            userId = message.senderId,
+                                            name = message.senderName,
+                                            profileImage = message.imageBlob
+                                        ),
+                                        isRead = !message.unread,
+                                        onNavigateToInboxItem = {
+                                            viewModel.markMessageAsRead(message.message)
+                                            // TODO: Navigate to detail screen
+                                        },
+                                        onDeleteMessage = {
+                                            if (showSent) {
+                                                inboxToDelete = message.message
+                                                openDeleteDialog = true
+                                            }
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
 
                     ExtendedFloatingActionButton(
                         onClick = { navController.navigate(Screen.CreateMessage.route) },
-                        icon = { Icon(Icons.Filled.Edit, "Edit.", tint = MainWhite) },
+                        icon = { Icon(Icons.Filled.Edit, "Edit", tint = MainWhite) },
                         text = { Text("Create Message", fontFamily = FontFamily(Font(R.font.alata))) },
                         containerColor = MainOrange,
                         contentColor = MainWhite,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(16.dp)
+                            .padding(end = 16.dp, bottom = 16.dp)
                     )
                 }
             }
-        },
+        }
     )
 }
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -214,7 +240,7 @@ fun InboxItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
+            .padding(15.dp)
             .clickable(onClick = onNavigateToInboxItem),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MainWhite),
@@ -230,7 +256,7 @@ fun InboxItem(
                 BlobImage(
                     byteArray = latestParticipant.profileImage,
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(60.dp)
                         .clip(CircleShape)
                 )
 
@@ -241,7 +267,7 @@ fun InboxItem(
                         Text(
                             text = latestParticipant.name,
                             fontFamily = FontFamily(Font(R.font.alata)),
-                            fontSize = ResponsiveFont.heading1(windowInfo),
+                            fontSize = ResponsiveFont.heading3(windowInfo),
                         )
                     }
 
@@ -250,7 +276,7 @@ fun InboxItem(
                     Text(
                         text = subjectPreview,
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading2(windowInfo),
+                        fontSize = ResponsiveFont.heading3(windowInfo),
                         color = Color.Black
                     )
 
@@ -259,7 +285,7 @@ fun InboxItem(
                     Text(
                         text = messagePreview,
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
+                        fontSize = ResponsiveFont.body(windowInfo),
                         color = LoginText,
                         maxLines = 1
                     )
@@ -269,7 +295,7 @@ fun InboxItem(
                     Text(
                         text = formattedTime,
                         fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.body(windowInfo),
+                        fontSize = ResponsiveFont.caption(windowInfo),
                         color = LoginText
                     )
                 }

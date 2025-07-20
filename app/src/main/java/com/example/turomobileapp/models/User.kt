@@ -62,3 +62,10 @@ data class ApiResponse(
     @Json(name = "success") val success: Boolean,
     @Json(name = "message")val message: String
 )
+
+@JsonClass(generateAdapter = true)
+data class CatchUpClassResponse(
+    @Json(name = "is_catch_up") val isCatchUpInt: Int
+){
+    val isCatchUp: Boolean get() = isCatchUpInt != 0
+}

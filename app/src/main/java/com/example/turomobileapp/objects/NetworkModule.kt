@@ -10,6 +10,7 @@ import com.example.turomobileapp.interfaces.BadgesApiService
 import com.example.turomobileapp.interfaces.CalendarApiService
 import com.example.turomobileapp.interfaces.CourseApiService
 import com.example.turomobileapp.interfaces.EnrollmentApiService
+import com.example.turomobileapp.interfaces.GamificationApiService
 import com.example.turomobileapp.interfaces.LectureApiService
 import com.example.turomobileapp.interfaces.MessageApiService
 import com.example.turomobileapp.interfaces.ModuleApiService
@@ -163,4 +164,9 @@ object NetworkModule{
     @Singleton
     fun provideUserApiService(retrofit: Retrofit): UserApiService =
         retrofit.create(UserApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGamificationApiService(retrofit: Retrofit): GamificationApiService =
+        retrofit.create(GamificationApiService::class.java)
 }

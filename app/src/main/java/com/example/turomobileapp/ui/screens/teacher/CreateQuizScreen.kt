@@ -98,7 +98,8 @@ fun CreateQuizScreen(
     navController: NavController,
     sessionManager: SessionManager,
     viewModel: CreateQuizViewModel,
-    moduleId: String
+    moduleId: String,
+    sectionId: String
 ){
 
     val windowInfo = rememberWindowInfo()
@@ -112,7 +113,7 @@ fun CreateQuizScreen(
 
     LaunchedEffect(uiState.createQuizStatus) {
         if (uiState.createQuizStatus is Result.Success) {
-            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
+            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId, sectionId))
             viewModel.clearCreateQuizStatus()
         }
     }

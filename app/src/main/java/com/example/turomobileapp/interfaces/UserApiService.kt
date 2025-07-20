@@ -1,6 +1,7 @@
 package com.example.turomobileapp.interfaces
 
 import com.example.turomobileapp.models.ApiResponse
+import com.example.turomobileapp.models.CatchUpClassResponse
 import com.example.turomobileapp.models.StudentProfileProgress
 import com.example.turomobileapp.models.UserResponse
 import okhttp3.ResponseBody
@@ -63,4 +64,9 @@ interface UserApiService {
     suspend fun getStudentProfileProgress(
         @Query("student_id") studentId: String
     ): Response<StudentProfileProgress>
+
+    @GET("check-if-student-is-catch-up")
+    suspend fun checkIfStudentIsCatchUp(
+        @Query("student_id") studentId: String,
+    ): Response<CatchUpClassResponse>
 }

@@ -99,7 +99,7 @@ fun LoginScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 Image(
-                    painter = painterResource(R.drawable.book_open),
+                    painter = painterResource(R.drawable.turo_icon),
                     contentDescription = "App logo",
                     modifier = Modifier.size(
                         when (windowInfo.screenWidthInfo) {

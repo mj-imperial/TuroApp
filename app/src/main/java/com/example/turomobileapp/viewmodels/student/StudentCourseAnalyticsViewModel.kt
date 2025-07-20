@@ -4,8 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.StudentPerformanceModuleList
-import com.example.turomobileapp.models.StudentPerformanceResponse
+import com.example.turomobileapp.models.LongQuiz
+import com.example.turomobileapp.models.ModuleQuiz
+import com.example.turomobileapp.models.ScreeningResult
 import com.example.turomobileapp.repositories.StudentProgressRepository
 import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,69 +32,63 @@ class StudentCourseAnalyticsViewModel @Inject constructor(
     val uiState: StateFlow<StudentCourseAnalyticsUIState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            launch { getOverviewInfo() }
-            launch { getStudentScoreList() }
-        }
+        getStudentAnalysis()
     }
 
-    fun getOverviewInfo(){
+    fun getStudentAnalysis(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loadingOverview = true, errorMessage = null) }
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
-            studentProgressRepository.getIndividualStudentPerformanceList(studentId, _courseId).collect { result ->
+            studentProgressRepository.getStudentAnalysis(studentId, _courseId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { resp ->
-                        _uiState.update { it.copy(loadingOverview = false, overviewInfo = resp) }
+                        _uiState.update { it.copy(
+                            loading = false,
+                            section = resp.section,
+                            points = resp.points,
+                            courseName = resp.courseName,
+                            overallGrade = resp.overallGrade,
+                            moduleNames = resp.shortQuiz.module.sortedBy { it.moduleName }.map { it.moduleName },
+                            practiceQuizzes = QuizModuleGroup(
+                                average = resp.practiceQuiz.average,
+                                modules = resp.practiceQuiz.module
+                            ),
+                            shortQuizzes = QuizModuleGroup(
+                                average = resp.shortQuiz.average,
+                                modules = resp.shortQuiz.module
+                            ),
+                            longQuizzes = resp.longQuiz,
+                            screeningExam = listOf(resp.screening)
+                        ) }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loadingOverview = false, errorMessage = err) }
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
                     }
                 )
             }
         }
-    }
-
-    fun getStudentScoreList(){
-        viewModelScope.launch {
-            _uiState.update { it.copy(loadingModuleScores = true, errorMessage = null) }
-
-            val studentId: String = sessionManager.userId.filterNotNull().first()
-
-            studentProgressRepository.getIndividualStudentCourseProgress(studentId, _courseId).collect { result ->
-                handleResult(
-                    result = result,
-                    onSuccess = { resp ->
-                        _uiState.update { it.copy(loadingModuleScores = false, modulesScores = resp) }
-                    },
-                    onFailure = { err ->
-                        _uiState.update { it.copy(loadingModuleScores = false, errorMessage = err) }
-                    }
-                )
-            }
-        }
-    }
-
-    fun updateModuleInfo(moduleId: String){
-        _uiState.update { it.copy(currentStudentModule = _uiState.value.modulesScores.find { module -> module.moduleId == moduleId }) }
-    }
-
-    fun clearModuleInfo(){
-        _uiState.update { it.copy(currentStudentModule = null) }
     }
 }
 
 data class StudentCourseAnalyticsUIState(
-    val loadingModuleScores: Boolean = false,
-    val loadingOverview: Boolean = false,
+    val loading: Boolean = false,
     val errorMessage: String? = null,
-    val overviewInfo: StudentPerformanceResponse? = null,
-    val modulesScores: List<StudentPerformanceModuleList> = emptyList(),
-    val currentStudentModule: StudentPerformanceModuleList? = null
-){
-    val loading: Boolean get() = loadingModuleScores || loadingOverview
-}
+    val section: String = "",
+    val points: Int = 0,
+    val courseName: String = "",
+    val overallGrade: Double = 0.0,
+    val moduleNames: List<String> = emptyList(),
+    val practiceQuizzes: QuizModuleGroup? = null,
+    val shortQuizzes: QuizModuleGroup? = null,
+    val longQuizzes: LongQuiz? = null,
+    val screeningExam: List<ScreeningResult> = emptyList()
+)
+
+data class QuizModuleGroup(
+    val average: Double,
+    val modules: List<ModuleQuiz>
+)
 

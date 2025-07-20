@@ -1,6 +1,7 @@
 package com.example.turomobileapp.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -10,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.turomobileapp.ui.navigation.Screen
@@ -45,9 +47,9 @@ fun AppScaffold(
     val loginViewModel: LoginViewModel = hiltViewModel()
 
     val barHeight = when(windowInfo.screenHeightInfo) {
-        WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.10f
-        WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.08f
-        WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.06f
+        WindowInfo.WindowType.Compact  -> windowInfo.screenHeight * 0.10f + 18.dp
+        WindowInfo.WindowType.Medium   -> windowInfo.screenHeight * 0.08f + 18.dp
+        WindowInfo.WindowType.Expanded -> windowInfo.screenHeight * 0.06f + 18.dp
     }
 
     ModalNavigationDrawer(
@@ -69,6 +71,8 @@ fun AppScaffold(
             )
         }) {
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize(),
             floatingActionButton = {
                 if (hasFloatingActionButton) CustomFloatingActionButton(items)
             },

@@ -143,3 +143,45 @@ data class QuizScore(
     @Json(name = "lowest_score_percentage") val lowestScorePercentage: Double,
     @Json(name = "latest_score_percentage") val latestScorePercentage: Double
 )
+
+@JsonClass(generateAdapter = true)
+data class StudentAnalyticsResponse(
+    @Json(name = "section") val section: String,
+    @Json(name = "course") val courseName: String,
+    @Json(name = "overall_grade") val overallGrade: Double,
+    @Json(name = "points") val points: Int,
+    @Json(name = "practice_quiz") val practiceQuiz: QuizWithModules,
+    @Json(name = "short_quiz") val shortQuiz: QuizWithModules,
+    @Json(name = "long_quiz") val longQuiz: LongQuiz,
+    @Json(name = "screening") val screening: ScreeningResult
+)
+
+@JsonClass(generateAdapter = true)
+data class QuizWithModules(
+    @Json(name = "average") val average: Double,
+    @Json(name = "module") val module: List<ModuleQuiz>
+)
+
+@JsonClass(generateAdapter = true)
+data class ModuleQuiz(
+    @Json(name = "module_name") val moduleName: String,
+    @Json(name = "quiz") val quiz: List<QuizItem>
+)
+
+@JsonClass(generateAdapter = true)
+data class QuizItem(
+    @Json(name = "quiz_name") val quizName: String,
+    @Json(name = "percentage") val percentage: Double
+)
+
+@JsonClass(generateAdapter = true)
+data class LongQuiz(
+    @Json(name = "average") val average: Double,
+    @Json(name = "quiz") val quiz: List<QuizItem>
+)
+
+@JsonClass(generateAdapter = true)
+data class ScreeningResult(
+    @Json(name = "screening_name") val screeningName: String,
+    @Json(name = "percentage") val percentage: Double
+)

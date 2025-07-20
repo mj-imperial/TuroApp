@@ -68,7 +68,8 @@ fun EditModuleScreen(
     navController: NavController,
     sessionManager: SessionManager,
     viewModel: EditModuleViewModel,
-    courseId: String
+    courseId: String,
+    sectionId: String
 ){
     val windowInfo = rememberWindowInfo()
     val context = LocalContext.current
@@ -81,7 +82,7 @@ fun EditModuleScreen(
     LaunchedEffect(uiState.editModuleStatus) {
         if (uiState.editModuleStatus is Result.Success){
             Toast.makeText(context, "Module successfully updated.",Toast.LENGTH_SHORT).show()
-            navController.navigate(Screen.TeacherActivityModules.createRoute(courseId))
+            navController.navigate(Screen.TeacherActivityModules.createRoute(courseId, sectionId))
             viewModel.clearEditStatus()
         }else if(uiState.editModuleStatus is Result.Failure){
             val msg = uiState.errorMessage
@@ -99,7 +100,14 @@ fun EditModuleScreen(
                 it,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
-            viewModel.updateSelectedImage(it, context)
+
+            val inputStream = contentResolver.openInputStream(it)
+            val byteArray = inputStream?.readBytes()
+            inputStream?.close()
+
+            byteArray?.let { imageBytes ->
+                viewModel.updateImageBytes(imageBytes)
+            }
         }
     }
 
@@ -231,7 +239,7 @@ fun EditModuleScreen(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     CapsuleTextField(
-                        value = uiState.moduleDescription,
+                        value = uiState.moduleDescription ?: "",
                         onValueChange = {
                             viewModel.updateModuleDescription(it)
                         },
@@ -282,27 +290,27 @@ fun EditModuleScreen(
                             Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            when{
-                                uiState.modulePicture.isNotEmpty() -> {
+                            uiState.moduleImage?.let {
+                                if (it.isEmpty()){
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Image(
+                                            painter = painterResource(R.drawable.insert_image),
+                                            contentDescription = "Pick an Image",
+                                            modifier = Modifier.size(50.dp)
+                                        )
+                                        Spacer(Modifier.height(8.dp))
+                                        Text(
+                                            text = "Tap to select Image",
+                                            fontFamily = FontFamily(Font(R.font.alata)),
+                                            fontSize = ResponsiveFont.heading2(windowInfo)
+                                        )
+                                    }
+                                }else{
                                     BlobImage(
-                                        byteArray = uiState.modulePicture,
+                                        byteArray = uiState.moduleImage,
                                         modifier = Modifier.fillMaxSize(),
-                                    )
-                                }
-
-                                else -> Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Image(
-                                        painter = painterResource(R.drawable.insert_image),
-                                        contentDescription = "Pick an Image",
-                                        modifier = Modifier.size(50.dp)
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    Text(
-                                        text = "Tap to select Image",
-                                        fontFamily = FontFamily(Font(R.font.alata)),
-                                        fontSize = ResponsiveFont.heading2(windowInfo)
                                     )
                                 }
                             }

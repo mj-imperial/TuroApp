@@ -44,8 +44,9 @@
     <string name="ScreeningExam">SCREENING EXAM</string>
     <string name="LongQuizExam">LONG QUIZ EXAM</string>
     <string name="TeacherModules">CREATE MODULES</string>
-    <string name="TeacherActivity">CREATE / EDIT ACTIVITIES</string>
+    <string name="TeacherActivity">CREATE/EDIT ACTIVITIES</string>
     <string name="TeacherPerformance">VIEW PERFORMANCE</string>
     <string name="CreateLongQuiz">CREATE/EDIT LONG QUIZ</string>\
     <string name="CreateScreeningExam">CREATE/EDIT SCREENING EXAM</string>
+    <string name="TeacherViewAllModules">VIEW ALL MODULES</string>
 </resources>

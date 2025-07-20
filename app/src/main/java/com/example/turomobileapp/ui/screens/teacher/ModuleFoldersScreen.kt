@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.components.AppScaffold
@@ -63,13 +64,15 @@ import com.example.turomobileapp.ui.theme.green
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.teacher.ModuleListActivityActionsViewModel
 
+//TODO add picture instead of icon
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModuleFoldersScreen(
     navController: NavController,
     sessionManager: SessionManager,
     viewModel: ModuleListActivityActionsViewModel,
-    courseId: String
+    courseId: String,
+    sectionId: String
 ){
     val context = LocalContext.current
     val windowInfo = rememberWindowInfo()
@@ -188,13 +191,11 @@ fun ModuleFoldersScreen(
                                     moduleName = module.moduleName,
                                     onFolderClick = {
                                         navController.navigate(
-                                            Screen.TeacherCreateEditActivitiesInModule.createRoute(
-                                                module.moduleId
-                                            )
+                                            Screen.TeacherCreateEditActivitiesInModule.createRoute(module.moduleId, sectionId)
                                         )
                                     },
                                     onClickEdit = {
-                                        navController.navigate(Screen.TeacherEditModule.createRoute(courseId,module.moduleId))
+                                        navController.navigate(Screen.TeacherEditModule.createRoute(courseId,module.moduleId, sectionId))
                                     },
                                     onDeleteClick = {
                                         selectedToDeleteId = module.moduleId
@@ -212,7 +213,7 @@ fun ModuleFoldersScreen(
 @Composable
 fun ModuleFolders(
     windowInfo: WindowInfo,
-    modulePicture: ByteArray,
+    modulePicture: ByteArray?,
     moduleName: String,
     onFolderClick: () -> Unit,
     onClickEdit: () -> Unit,
@@ -231,10 +232,18 @@ fun ModuleFolders(
                 .fillMaxSize()
                 .aspectRatio(1f)
         ) {
-            BlobImage(
-                byteArray = modulePicture,
-                modifier = Modifier.fillMaxSize()
-            )
+            if (modulePicture == null){
+                AsyncImage(
+                    model = "https://wallpapers.com/images/featured/math-background-jbcyizvw0ckuvcro.jpg",
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }else{
+                BlobImage(
+                    byteArray = modulePicture,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
 
             Row(
                 modifier = Modifier

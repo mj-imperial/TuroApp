@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -84,7 +86,14 @@ fun CreateModuleScreen(
                 it,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
-            viewModel.updateSelectedImage(it, context)
+
+            val inputStream = contentResolver.openInputStream(it)
+            val byteArray = inputStream?.readBytes()
+            inputStream?.close()
+
+            byteArray?.let { imageBytes ->
+                viewModel.updateImageBytes(imageBytes)
+            }
         }
     }
 
@@ -173,7 +182,8 @@ fun CreateModuleScreen(
                     modifier = Modifier
                         .padding(innerPadding)
                         .padding(20.dp)
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -265,27 +275,27 @@ fun CreateModuleScreen(
                             Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            when{
-                                uiState.moduleImage.isNotEmpty() -> {
+                            uiState.moduleImage?.let {
+                                if (it.isEmpty()){
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Image(
+                                            painter = painterResource(R.drawable.insert_image),
+                                            contentDescription = "Pick an Image",
+                                            modifier = Modifier.size(50.dp)
+                                        )
+                                        Spacer(Modifier.height(8.dp))
+                                        Text(
+                                            text = "Tap to select Image",
+                                            fontFamily = FontFamily(Font(R.font.alata)),
+                                            fontSize = ResponsiveFont.heading2(windowInfo)
+                                        )
+                                    }
+                                }else{
                                     BlobImage(
                                         byteArray = uiState.moduleImage,
                                         modifier = Modifier.fillMaxSize(),
-                                    )
-                                }
-
-                                else -> Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Image(
-                                        painter = painterResource(R.drawable.insert_image),
-                                        contentDescription = "Pick an Image",
-                                        modifier = Modifier.size(50.dp)
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    Text(
-                                        text = "Tap to select Image",
-                                        fontFamily = FontFamily(Font(R.font.alata)),
-                                        fontSize = ResponsiveFont.heading2(windowInfo)
                                     )
                                 }
                             }

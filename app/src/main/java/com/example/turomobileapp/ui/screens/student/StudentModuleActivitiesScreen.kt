@@ -168,18 +168,16 @@ fun StudentModuleActivitiesScreen(
                             subtitle = "Learn how to solve problems and hone your skills.",
                             activities = tutorialQuizzes,
                             image1 = R.drawable.practicequiz_icon,
-                            image2 = null,
                             windowInfo = windowInfo,
                             onNavigateToActivity = onNavigateToActivity,
                             colors = listOf(practice1, practice2)
                         )
-                        
+
                         activitySectionContent(
                             title = "SHORT QUIZZES",
                             subtitle = "Test your skills. You can do as many attempts as placed.",
                             activities = shortQuizzes,
                             image1 = R.drawable.quiz_detail_icon,
-                            image2 = null,
                             windowInfo = windowInfo,
                             onNavigateToActivity = onNavigateToActivity,
                             colors = listOf(shortquiz1, shortquiz2)

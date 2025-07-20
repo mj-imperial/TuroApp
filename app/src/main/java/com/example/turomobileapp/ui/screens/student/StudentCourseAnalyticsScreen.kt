@@ -1,30 +1,20 @@
 package com.example.turomobileapp.ui.screens.student
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -33,30 +23,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
+import com.example.turomobileapp.models.ModuleQuiz
+import com.example.turomobileapp.models.QuizItem
 import com.example.turomobileapp.ui.components.AppScaffold
-import com.example.turomobileapp.ui.components.CircularScoreProgressBar
 import com.example.turomobileapp.ui.components.ResponsiveFont
 import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
-import com.example.turomobileapp.ui.navigation.Screen
-import com.example.turomobileapp.ui.theme.courseInfo1
-import com.example.turomobileapp.ui.theme.courseInfo2
+import com.example.turomobileapp.ui.theme.MainWhite
+import com.example.turomobileapp.ui.theme.analysis1
+import com.example.turomobileapp.ui.theme.headerQuizColor
+import com.example.turomobileapp.ui.theme.headerQuizColor1
 import com.example.turomobileapp.ui.theme.headingText
-import com.example.turomobileapp.ui.theme.moduleStudent
-import com.example.turomobileapp.ui.theme.pquiz1
-import com.example.turomobileapp.ui.theme.pquiz2
-import com.example.turomobileapp.ui.theme.quiz1
-import com.example.turomobileapp.ui.theme.quiz2
+import com.example.turomobileapp.ui.theme.lonquizgrades
+import com.example.turomobileapp.ui.theme.moduleColor
+import com.example.turomobileapp.ui.theme.scorequizcolor
+import com.example.turomobileapp.ui.theme.screeningExamgrades
+import com.example.turomobileapp.ui.theme.screeninglonganalysis
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.StudentCourseAnalyticsViewModel
 import java.text.DecimalFormat
@@ -93,69 +83,132 @@ fun StudentCourseAnalyticsScreen(
                     isRefreshing = uiState.loading,
                     state = pullRefreshState,
                     onRefresh = {
-                        viewModel.getOverviewInfo()
-                        viewModel.getStudentScoreList()
+                        viewModel.getStudentAnalysis()
                     },
+                    modifier = Modifier.padding(it).padding(15.dp)
                 ) {
-                    LazyColumn(
+                    Column(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(it)
+                            .fillMaxWidth()
                             .padding(15.dp)
                     ) {
-                        item {
-                            Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = uiState.section,
+                            fontSize = ResponsiveFont.heading3(windowInfo),
+                            fontFamily = FontFamily(Font(R.font.alata)),
+                            fontWeight = FontWeight.Bold,
+                            color = headingText
+                        )
 
-                            IndividualPerformanceBox(
-                                windowInfo = windowInfo,
-                                overallNumberOfAssessments = uiState.overviewInfo!!.overallNumberOfAssessments,
-                                completedAssessments = uiState.overviewInfo!!.completedAssessments,
-                                averageGrade = uiState.overviewInfo!!.averageScore,
-                                points = uiState.overviewInfo!!.totalPoints
-                            )
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                            Spacer(modifier = Modifier.height(10.dp))
-                        }
+                        LazyColumn(
+                            modifier = Modifier
+                                .background(headerQuizColor1, RoundedCornerShape(5.dp))
+                                .padding(10.dp)
+                                .fillMaxWidth()
+                        ) {
+                            item {
+                                CourseRow(
+                                    windowInfo = windowInfo,
+                                    headingName = uiState.courseName,
+                                    overallGrade = uiState.overallGrade,
+                                    decimalFormat = decimalFormat
+                                )
+                            }
 
-                        item {
-                            IndividualCourseModuleInfo(
-                                windowInfo = windowInfo,
-                                lowestModuleName = uiState.overviewInfo!!.lowestScoringModuleName,
-                                lowestModuleAvg = uiState.overviewInfo!!.lowestScoringModuleAverage,
-                                highestModuleName = uiState.overviewInfo!!.highestScoringModuleName,
-                                highestModuleAvg = uiState.overviewInfo!!.highestScoringModuleAverage
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                        }
+                            items(uiState.moduleNames) { module ->
+                                ModuleBlock(
+                                    windowInfo = windowInfo,
+                                    moduleName = module,
+                                    decimalFormat = decimalFormat,
+                                    practiceQuizAverage = uiState.practiceQuizzes?.takeIf { it.modules.any { mod -> mod.moduleName==module } }?.average,
+                                    practiceQuizzesByModule = uiState.practiceQuizzes?.takeIf { it.modules.any { mod -> mod.moduleName==module } }?.modules,
+                                    shortQuizAverage = uiState.shortQuizzes?.takeIf { it.modules.any { mod -> mod.moduleName==module } }?.average,
+                                    shortQuizzesByModule = uiState.shortQuizzes?.takeIf { it.modules.any { mod -> mod.moduleName==module } }?.modules,
+                                )
+                            }
 
-                        item {
-                            IndividualCourseAssessmentInfo(
-                                windowInfo = windowInfo,
-                                lowestAssessmentName = uiState.overviewInfo!!.lowestAssessmentQuizName,
-                                lowestAssessmentAvg = uiState.overviewInfo!!.lowestAssessmentScorePercentage,
-                                highestAssessmentName = uiState.overviewInfo!!.highestAssessmentQuizName,
-                                highestAssessmentAvg = uiState.overviewInfo!!.highestAssessmentScorePercentage
-                            )
-                        }
+                            item {
+                                Row(
+                                    modifier = Modifier
+                                        .background(screeninglonganalysis, RoundedCornerShape(2.dp))
+                                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Long Quizzes",
+                                        fontSize = ResponsiveFont.body(windowInfo),
+                                        fontFamily = FontFamily(Font(R.font.alata)),
+                                        color = headingText
+                                    )
 
-                        item {
-                            Text(
-                                text = "MODULES",
-                                fontFamily = FontFamily(Font(R.font.alata)),
-                                fontSize = ResponsiveFont.heading2(windowInfo),
-                                color = headingText
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                        }
+                                    Text(
+                                        text = uiState.longQuizzes?.average?.toDouble()?.let {
+                                            if (it.isNaN()) {
+                                                "0.0%"
+                                            } else {
+                                                "${decimalFormat.format(it)}%"
+                                            }
+                                        } ?: "0.0%",
+                                        fontSize = ResponsiveFont.body(windowInfo),
+                                        fontFamily = FontFamily(Font(R.font.alata)),
+                                        color = headingText
+                                    )
+                                }
+                            }
 
-                        items(uiState.modulesScores) {
-                            ModuleRow(
-                                windowInfo = windowInfo,
-                                moduleName = it.moduleName,
-                                onClickModule = {
-                                    navController.navigate(Screen.StudentCourseIndividualAnalytics.createRoute(courseId, it.moduleId))
-                                },
-                            )
+                            uiState.longQuizzes?.let { it1 ->
+                                items(it1.quiz) {
+                                    LongQuizRow(
+                                        windowInfo = windowInfo,
+                                        quiz = it
+                                    )
+                                }
+                            }
+
+                            items(uiState.screeningExam) {
+                                Row(
+                                    modifier = Modifier
+                                        .background(screeningExamgrades, RoundedCornerShape(2.dp))
+                                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = it.screeningName,
+                                        fontSize = ResponsiveFont.body(windowInfo),
+                                        fontFamily = FontFamily(Font(R.font.alata)),
+                                        fontWeight = FontWeight.Bold,
+                                        color = headingText,
+                                    )
+
+                                    Text(
+                                        text = it.percentage.toDouble().let {
+                                            if (it.isNaN()) {
+                                                "0.0%"
+                                            } else {
+                                                "${decimalFormat.format(it)}%"
+                                            }
+                                        },
+                                        fontSize = ResponsiveFont.body(windowInfo),
+                                        fontFamily = FontFamily(Font(R.font.alata)),
+                                        fontWeight = FontWeight.Bold,
+                                        color = headingText
+                                    )
+                                }
+                            }
+
+                            item {
+                                PointsRow(
+                                    windowInfo = windowInfo,
+                                    headingName = "POINTS GATHERED",
+                                    points = uiState.points,
+                                )
+                            }
                         }
                     }
                 }
@@ -165,475 +218,231 @@ fun StudentCourseAnalyticsScreen(
 }
 
 @Composable
-fun IndividualPerformanceBox(
+fun CourseRow(
     windowInfo: WindowInfo,
-    overallNumberOfAssessments: Int,
-    completedAssessments: Int,
-    averageGrade: Double,
+    headingName: String?,
+    overallGrade: Double,
+    decimalFormat: DecimalFormat
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = analysis1, shape = RoundedCornerShape(14.dp))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = headingName ?: "",
+            fontSize = ResponsiveFont.heading2(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontWeight = FontWeight.Bold,
+            color = MainWhite,
+            modifier = Modifier.align(Alignment.CenterStart)
+        )
+        Text(
+            text = "${decimalFormat.format(overallGrade)}%",
+            fontSize = ResponsiveFont.heading2(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        )
+    }
+}
+
+
+@Composable
+fun PointsRow(
+    windowInfo: WindowInfo,
+    headingName: String?,
     points: Int,
 ){
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 15.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(Color.White),
-        elevation = CardDefaults.cardElevation(2.dp)
+            .background(color = analysis1, shape = RoundedCornerShape(14.dp))
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            quiz1.copy(alpha = 0.4f), quiz2.copy(alpha = 0.4f)
-                        )
-                    )
-                )
-                .padding(20.dp),
-        ) {
-            Text(
-                text = "OVERALL INFORMATION",
-                fontFamily = FontFamily(Font(R.font.alata)),
-                fontSize = ResponsiveFont.heading1(windowInfo),
-                color = headingText,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Column(
-                    modifier = Modifier.weight(3f)
-                ) {
-                    Text(
-                        text = "DONE: $completedAssessments/$overallNumberOfAssessments",
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        color = headingText
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = "GRADE: $averageGrade%",
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        color = headingText
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = "POINTS: $points pts",
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        color = headingText
-                    )
-                }
-
-                Column(
-                    modifier = Modifier.weight(2f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.summary_student),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .aspectRatio(1f)
-                    )
-                }
-            }
-        }
+        Text(
+            text = headingName ?: "",
+            fontSize = ResponsiveFont.heading2(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontWeight = FontWeight.Bold,
+            color = MainWhite,
+            modifier = Modifier.align(Alignment.CenterStart)
+        )
+        Text(
+            text = points.toString(),
+            fontSize = ResponsiveFont.heading2(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        )
     }
 }
 
 @Composable
-fun IndividualCourseModuleInfo(
-    windowInfo: WindowInfo,
-    lowestModuleName: String,
-    lowestModuleAvg: Double,
-    highestModuleName: String,
-    highestModuleAvg: Double
-){
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(15.dp),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(Color.Transparent),
-        elevation = CardDefaults.cardElevation(0.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(courseInfo1, courseInfo2)
-                    )
-                )
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.modulestat),
-                    contentDescription = null,
-                    modifier = Modifier.size(50.dp)
-                )
-
-                Spacer(modifier = Modifier.width(15.dp))
-
-                Text(
-                    text = "MODULE STATISTICS",
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading1(windowInfo),
-                    color = headingText
-                )
-            }
-
-            Spacer(modifier = Modifier.width(30.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Highest AVG.",
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        color = headingText,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Lowest AVG.",
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        color = headingText,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(50.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = highestModuleName,
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.body(windowInfo),
-                        color = headingText,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = lowestModuleName,
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.body(windowInfo),
-                        color = headingText,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(40.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularScoreProgressBar(
-                        scorePercentage = highestModuleAvg,
-                        diameter = 80.dp,
-                        fontSize = ResponsiveFont.heading2(windowInfo)
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularScoreProgressBar(
-                        scorePercentage = lowestModuleAvg,
-                        diameter = 80.dp,
-                        fontSize = ResponsiveFont.heading2(windowInfo)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun IndividualCourseAssessmentInfo(
-    windowInfo: WindowInfo,
-    lowestAssessmentName: String,
-    lowestAssessmentAvg: Double,
-    highestAssessmentName: String,
-    highestAssessmentAvg: Double
-){
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(15.dp),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(Color.Transparent),
-        elevation = CardDefaults.cardElevation(0.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(pquiz1, pquiz2)
-                    )
-                )
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.modulestat),
-                    contentDescription = null,
-                    modifier = Modifier.size(50.dp)
-                )
-
-                Spacer(modifier = Modifier.width(15.dp))
-
-                Text(
-                    text = "ASSESSMENT STATISTICS",
-                    fontFamily = FontFamily(Font(R.font.alata)),
-                    fontSize = ResponsiveFont.heading1(windowInfo),
-                    color = headingText
-                )
-            }
-
-            Spacer(modifier = Modifier.width(30.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Highest AVG.",
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        color = headingText,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Lowest AVG.",
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.heading3(windowInfo),
-                        color = headingText,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(40.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = highestAssessmentName,
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.body(windowInfo),
-                        color = headingText,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = lowestAssessmentName,
-                        fontFamily = FontFamily(Font(R.font.alata)),
-                        fontSize = ResponsiveFont.body(windowInfo),
-                        color = headingText,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(40.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularScoreProgressBar(
-                        scorePercentage = highestAssessmentAvg,
-                        diameter = 80.dp,
-                        fontSize = ResponsiveFont.heading2(windowInfo)
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularScoreProgressBar(
-                        scorePercentage = lowestAssessmentAvg,
-                        diameter = 80.dp,
-                        fontSize = ResponsiveFont.heading2(windowInfo)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ModuleRow(
+fun ModuleBlock(
     windowInfo: WindowInfo,
     moduleName: String,
-    onClickModule: () -> Unit
+    decimalFormat: DecimalFormat,
+    practiceQuizAverage: Double?,
+    practiceQuizzesByModule: List<ModuleQuiz>?,
+    shortQuizAverage: Double?,
+    shortQuizzesByModule: List<ModuleQuiz>?
 ){
-    Card(
+    Text(
+        text = moduleName,
+        fontSize = ResponsiveFont.heading3(windowInfo),
+        fontFamily = FontFamily(Font(R.font.alata)),
+        fontWeight = FontWeight.Bold,
+        color = headingText,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 3.dp, vertical = 8.dp)
-            .clickable(onClick = onClickModule),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(Color.Transparent),
-        elevation = CardDefaults.cardElevation(0.dp)
+            .background(moduleColor, RoundedCornerShape(2.dp))
+            .padding(top = 20.dp, bottom = 4.dp)
+    )
+
+
+    Row(
+        modifier = Modifier
+            .background(headerQuizColor, RoundedCornerShape(2.dp))
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(moduleStudent)
-                .padding(horizontal = 8.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-             Image(
-                 painter = painterResource(R.drawable.folder_icon),
-                 contentDescription = null,
-                 contentScale = ContentScale.Crop,
-                 modifier = Modifier.size(40.dp)
-             )
+        Text(
+            text = "Practices",
+            fontSize = ResponsiveFont.body(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            color = headingText
+        )
 
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Text(
-                text = moduleName,
-                fontFamily = FontFamily(Font(R.font.alata)),
-                fontSize = ResponsiveFont.heading2(windowInfo),
-                color = headingText,
-                maxLines = 1
-            )
-
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = onClickModule) {
-                    Icon(
-                        painter = painterResource(R.drawable.rightarrow_icon),
-                        contentDescription = null,
-                        tint = headingText,
-                        modifier = Modifier.size(20.dp)
-                    )
+        Text(
+            text = practiceQuizAverage?.toDouble()?.let {
+                if (it.isNaN()) {
+                    "0.0%"
+                } else {
+                    "${decimalFormat.format(it)}%"
                 }
+            } ?: "0.0%",
+            fontSize = ResponsiveFont.body(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            color = headingText
+        )
+    }
+
+    practiceQuizzesByModule?.let { quizzes ->
+        val quiz = quizzes.filter { it.moduleName == moduleName }
+        quiz.forEach {
+            it.quiz.forEach {
+                QuizRow(
+                    windowInfo = windowInfo,
+                    quiz = it
+                )
             }
         }
+    }
+
+    Row(
+        modifier = Modifier
+            .background(headerQuizColor, RoundedCornerShape(2.dp))
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "Short Quizzes",
+            fontSize = ResponsiveFont.body(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            color = headingText
+        )
+
+        Text(
+            text = shortQuizAverage?.toDouble()?.let {
+                if (it.isNaN()) {
+                    "0.0%"
+                } else {
+                    "${decimalFormat.format(it)}%"
+                }
+            } ?: "0.0%",
+            fontSize = ResponsiveFont.body(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            color = headingText
+        )
+    }
+
+    shortQuizzesByModule?.let { quizzes ->
+        val quiz = quizzes.filter { it.moduleName == moduleName }
+        quiz.forEach {
+            it.quiz.forEach {
+                QuizRow(
+                    windowInfo = windowInfo,
+                    quiz = it
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun QuizRow(
+    windowInfo: WindowInfo,
+    quiz: QuizItem
+) {
+    Row(
+        modifier = Modifier
+            .background(scorequizcolor, RoundedCornerShape(2.dp))
+            .padding(start = 32.dp, top = 4.dp, bottom = 4.dp) // more indent
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "- ${quiz.quizName}",
+            fontSize = ResponsiveFont.heading3(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            color = headingText,
+            fontStyle = FontStyle.Italic
+        )
+        Text(
+            text = "${quiz.percentage.toInt()}%",
+            fontSize = ResponsiveFont.heading3(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            color = headingText,
+            fontStyle = FontStyle.Italic
+        )
+    }
+}
+
+@Composable
+fun LongQuizRow(
+    windowInfo: WindowInfo,
+    quiz: QuizItem
+){
+    Row(
+        modifier = Modifier
+            .background(lonquizgrades, RoundedCornerShape(2.dp))
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "- ${quiz.quizName}",
+            fontSize = ResponsiveFont.body(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontWeight = FontWeight.Thin,
+            color = headingText,
+            fontStyle = FontStyle.Italic
+        )
+        Text(
+            text = "${quiz.percentage.toInt()}%",
+            fontSize = ResponsiveFont.body(windowInfo),
+            fontFamily = FontFamily(Font(R.font.alata)),
+            fontWeight = FontWeight.Thin,
+            color = headingText,
+            fontStyle = FontStyle.Italic
+        )
     }
 }

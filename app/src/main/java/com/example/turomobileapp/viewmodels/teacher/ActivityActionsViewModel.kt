@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.ModuleActivityResponse
+import com.example.turomobileapp.models.ActivityItem
 import com.example.turomobileapp.repositories.ActivityRepository
 import com.example.turomobileapp.repositories.ModuleRepository
 import com.example.turomobileapp.repositories.Result
@@ -26,6 +26,7 @@ class ActivityActionsViewModel @Inject constructor(
 ): ViewModel(){
 
     private val _moduleId: String = checkNotNull(savedStateHandle["moduleId"])
+    private val _sectionId: String = checkNotNull(savedStateHandle["sectionId"])
 
     private val _uiState = MutableStateFlow(ActivityActionsUIState())
     val uiState: StateFlow<ActivityActionsUIState> = _uiState.asStateFlow()
@@ -38,7 +39,7 @@ class ActivityActionsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
-            moduleRepository.getActivitiesForModule(_moduleId).collect { result ->
+            moduleRepository.getActivitiesInModuleForTeacher(_moduleId, _sectionId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { activities ->
@@ -83,6 +84,6 @@ class ActivityActionsViewModel @Inject constructor(
 data class ActivityActionsUIState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
-    val activities: List<ModuleActivityResponse> = emptyList(),
+    val activities: List<ActivityItem> = emptyList(),
     val deleteStatusResult: Result<Unit>? = null
 )

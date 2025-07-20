@@ -24,7 +24,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -47,6 +50,8 @@ import com.example.turomobileapp.ui.components.WindowInfo
 import com.example.turomobileapp.ui.components.rememberWindowInfo
 import com.example.turomobileapp.ui.navigation.Screen
 import com.example.turomobileapp.ui.theme.TextBlack
+import com.example.turomobileapp.ui.theme.longquiz1
+import com.example.turomobileapp.ui.theme.longquiz2
 import com.example.turomobileapp.ui.theme.practice1
 import com.example.turomobileapp.ui.theme.practice2
 import com.example.turomobileapp.ui.theme.screeningExam1
@@ -56,7 +61,7 @@ import com.example.turomobileapp.ui.theme.shortquiz2
 import com.example.turomobileapp.viewmodels.SessionManager
 import com.example.turomobileapp.viewmodels.student.ViewAllModulesViewModel
 
-//TODO check if student is catch-up
+//TODO check if student is catch-up, if catch up then screening only
 @SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,8 +74,13 @@ fun CourseDetailScreen(
     val windowInfo = rememberWindowInfo()
     val width = windowInfo.screenWidth
     val height = windowInfo.screenHeight
+    val pullRefreshState = rememberPullToRefreshState()
 
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.checkIfStudentIsCatchUp()
+    }
 
     AppScaffold(
         navController = navController,
@@ -84,20 +94,28 @@ fun CourseDetailScreen(
                     CircularProgressIndicator()
                 }
             }else{
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
-                        .verticalScroll(rememberScrollState()),
+                PullToRefreshBox(
+                    isRefreshing = uiState.loading,
+                    state = pullRefreshState,
+                    onRefresh = {
+                        viewModel.checkIfStudentIsCatchUp()
+                    },
                 ) {
-
-                    CourseActivities(
-                        windowInfo = windowInfo,
-                        height = height,
-                        navController = navController,
-                        width = width,
-                        courseId = courseId
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        CourseActivities(
+                            windowInfo = windowInfo,
+                            height = height,
+                            navController = navController,
+                            width = width,
+                            courseId = courseId,
+                            isCatchUp = uiState.isCatchUp
+                        )
+                    }
                 }
             }
         }
@@ -111,38 +129,45 @@ fun CourseActivities(
     width: Dp,
     height: Dp,
     courseId: String,
+    isCatchUp: Boolean
 ){
     val cardWidth = width * 0.7f
     val columnHeight = height * 0.5f
     val cardHeight = columnHeight * 0.2f
     val iconSize = cardWidth * 0.4f
 
-    val activitiesList = listOf(
+    val allActivities = listOf(
         Activities(
             name = R.string.ViewModules,
             icon = R.drawable.shortquiz_icon,
             route = Screen.StudentModules.createRoute(courseId),
-            colors = listOf(shortquiz1,shortquiz2)
+            colors = listOf(shortquiz1, shortquiz2)
         ),
         Activities(
             name = R.string.Analytics,
             icon = R.drawable.practicequiz_icon,
             route = Screen.StudentCourseAnalytics.createRoute(courseId),
-            colors = listOf(practice1,practice2)
+            colors = listOf(practice1, practice2)
         ),
         Activities(
             name = R.string.ScreeningExam,
             icon = R.drawable.screeningexam_icon,
-            route = Screen.StudentScreening.route,
-            colors = listOf(screeningExam1,screeningExam2)
+            route = Screen.StudentScreeningList.createRoute(courseId),
+            colors = listOf(screeningExam1, screeningExam2)
         ),
         Activities(
             name = R.string.LongQuizExam,
             icon = R.drawable.longquiz_icon,
-            route = Screen.StudentLongQuiz.route,
-            colors = listOf(screeningExam1,screeningExam2)
+            route = Screen.StudentLongQuizList.createRoute(courseId),
+            colors = listOf(longquiz1, longquiz2)
         )
     )
+
+    val activitiesList = if (!isCatchUp) {
+        allActivities.filter { it.name == R.string.ScreeningExam }
+    } else {
+        allActivities
+    }
 
     Column(
         modifier = Modifier

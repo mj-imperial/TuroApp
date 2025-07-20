@@ -151,16 +151,17 @@ fun QuizResultScreen(
     val orderedResults = remember(uiState.results) {
         uiState.results.sortedBy { it.attemptNumber }
     }
-    var selectedAttempt by rememberSaveable(orderedResults) {
-        mutableIntStateOf(orderedResults.last().attemptNumber)
+    val defaultAttempt = orderedResults.lastOrNull()?.attemptNumber ?: 1
+    var selectedAttempt by rememberSaveable(defaultAttempt) {
+        mutableIntStateOf(defaultAttempt)
     }
     val scoreList = remember(orderedResults) {
         orderedResults.map { it.scorePercentage }
     }
-    val keptScore: Double = remember(orderedResults) {
-        orderedResults.first { it.isKept }.scorePercentage
+    val selectedResult = remember(orderedResults) {
+        orderedResults.firstOrNull { it.isKept } ?: orderedResults.lastOrNull()
     }
-    val selectedResult = orderedResults.first { it.isKept }
+    val keptScore: Double = selectedResult?.scorePercentage ?: 0.0
 
     var openAlertDialog by remember { mutableStateOf(fromSubmit) }
     if (openAlertDialog){
@@ -170,7 +171,7 @@ fun QuizResultScreen(
             height = windowInfo.screenHeight * 0.2f,
             padding = 15.dp,
             roundedCornerShape = 10.dp,
-            dialogText = "You got ${selectedResult.earnedPoints} pts. for scoring ${selectedResult.scorePercentage}% on your latest attempt.",
+            dialogText = "You got ${selectedResult?.earnedPoints} pts. for scoring ${selectedResult?.scorePercentage}% on your latest attempt.",
             fontFamily = FontFamily(Font(R.font.alata)),
             fontSize = ResponsiveFont.heading3(windowInfo),
             textColor = TextBlack
@@ -202,7 +203,7 @@ fun QuizResultScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "You haven’t attempted this quiz yet.",
+                        text = "You haven’t attempted this exam yet.",
                         fontSize = ResponsiveFont.heading1(windowInfo),
                         fontFamily = FontFamily(Font(R.font.alata)),
                         color = headingText
@@ -249,19 +250,21 @@ fun QuizResultScreen(
                                 scoreList = scoreList,
                                 windowInfo = windowInfo,
                                 selectedAttempt = selectedAttempt,
-                                earnedPoints = selectedResult.earnedPoints,
+                                earnedPoints = selectedResult?.earnedPoints ?: 0,
                                 keptScore = keptScore
                             )
                         }
 
-                        item {
-                            QuizResultQuestions(
-                                windowInfo = windowInfo,
-                                showAnswers = uiState.quiz!!.hasAnswersShown,
-                                resultShown = selectedResult,
-                                numOfQuestion = uiState.quiz!!.numberOfQuestions,
-                                content = uiState.content
-                            )
+                        if (selectedResult != null) {
+                            item {
+                                QuizResultQuestions(
+                                    windowInfo = windowInfo,
+                                    showAnswers = uiState.quiz!!.hasAnswersShown,
+                                    resultShown = selectedResult,
+                                    numOfQuestion = uiState.quiz!!.numberOfQuestions,
+                                    content = uiState.content
+                                )
+                            }
                         }
 
                         item {
@@ -350,8 +353,9 @@ fun QuizResultHeader(
                     fontSize = ResponsiveFont.heading2(windowInfo),
                 )
                 Spacer(Modifier.height(5.dp))
+                //TODO check logic
                 Text(
-                    text = "POINTS: $earnedPoints",
+                    text = "POINTS: ${earnedPoints * 100}",
                     fontFamily = FontFamily(Font(R.font.alata)),
                     fontSize = ResponsiveFont.heading3(windowInfo),
                     fontWeight = FontWeight.Medium
@@ -388,7 +392,7 @@ fun QuizResultQuestions(
     ) {
         if (!showAnswers){
             Text(
-                text = "The result of the quiz is protected and is not visible to students.",
+                text = "The result of the exam is protected and is not visible to students.",
                 fontSize = ResponsiveFont.body(windowInfo),
                 minLines = 1,
                 fontFamily = FontFamily(Font(R.font.alata)),

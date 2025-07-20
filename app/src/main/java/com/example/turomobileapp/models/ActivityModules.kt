@@ -9,48 +9,32 @@ import kotlinx.parcelize.Parcelize
 import java.time.LocalDateTime
 
 @JsonClass(generateAdapter = true)
-data class ModuleUploadRequest(
-    @Json(name = "module_name") val moduleName: String,
-    @Json(name = "module_description") val moduleDescription: String,
-    @Json(name = "module_image") val moduleImage: String?
-)
-
-@JsonClass(generateAdapter = true)
 data class ModuleResultResponse(
-    @Json(name = "success") val success: Boolean,
     @Json(name = "message") val message: String,
 )
 
 @JsonClass(generateAdapter = true)
-data class ModulesResponse(
-    @Json(name = "success") val success: Boolean,
-    @Json(name = "modules") val modules: List<ModuleResponse>
+data class TeacherModulesResponse(
+    @Json(name = "section_id") val sectionId: String,
+    @Json(name = "section_name") val sectionName: String,
+    @Json(name = "data") val modules: List<TeacherModuleResponse>
 )
 
 @JsonClass(generateAdapter = true)
-data class ModuleUpdateRequest(
-    @Json(name = "module_name") val moduleName: String,
-    @Json(name = "module_description") val moduleDescription: String,
-    @Json(name = "module_image") val modulePicture: String?
-)
-
-@JsonClass(generateAdapter = true)
-data class ModuleResponse(
+data class TeacherModuleResponse(
     @Json(name = "module_id") val moduleId: String,
     @Json(name = "module_name") val moduleName: String,
-    @Json(name = "module_picture") val modulePicture: ByteArray,
-    @Json(name = "module_description") val moduleDescription: String,
+    @Json(name = "image_blob") val modulePicture: ByteArray?
 ) {
     override fun equals(other: Any?): Boolean {
         if (this===other) return true
         if (javaClass!=other?.javaClass) return false
 
-        other as ModuleResponse
+        other as TeacherModuleResponse
 
         if (moduleId!=other.moduleId) return false
         if (moduleName!=other.moduleName) return false
         if (!modulePicture.contentEquals(other.modulePicture)) return false
-        if (moduleDescription!=other.moduleDescription) return false
 
         return true
     }
@@ -58,8 +42,37 @@ data class ModuleResponse(
     override fun hashCode(): Int {
         var result = moduleId.hashCode()
         result = 31 * result + moduleName.hashCode()
-        result = 31 * result + modulePicture.contentHashCode()
-        result = 31 * result + moduleDescription.hashCode()
+        result = 31 * result + (modulePicture?.contentHashCode() ?: 0)
+        return result
+    }
+}
+
+@JsonClass(generateAdapter = true)
+data class TeacherGetModuleResponse(
+    @Json(name = "module_id") val moduleId: String,
+    @Json(name = "module_name") val moduleName: String,
+    @Json(name = "module_description") val moduleDescription: String? = null,
+    @Json(name = "image_blob") val modulePicture: ByteArray? = null
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this===other) return true
+        if (javaClass!=other?.javaClass) return false
+
+        other as TeacherGetModuleResponse
+
+        if (moduleId!=other.moduleId) return false
+        if (moduleName!=other.moduleName) return false
+        if (moduleDescription!=other.moduleDescription) return false
+        if (!modulePicture.contentEquals(other.modulePicture)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = moduleId.hashCode()
+        result = 31 * result + moduleName.hashCode()
+        result = 31 * result + (moduleDescription?.hashCode() ?: 0)
+        result = 31 * result + (modulePicture?.contentHashCode() ?: 0)
         return result
     }
 }
@@ -73,8 +86,8 @@ data class ModulesResponseStudent(
 data class ModuleResponseStudent(
     @Json(name = "module_id") val moduleId: String,
     @Json(name = "module_name") val moduleName: String,
-    @Json(name = "module_picture") val modulePicture: ByteArray,
-    @Json(name = "module_description") val moduleDescription: String,
+    @Json(name = "module_picture") val modulePicture: ByteArray?,
+    @Json(name = "module_description") val moduleDescription: String?,
     @Json(name = "progress") val moduleProgress: Double
 ){
     override fun equals(other: Any?): Boolean {
@@ -102,6 +115,25 @@ data class ModuleResponseStudent(
     }
 
 }
+
+@JsonClass(generateAdapter = true)
+data class ActivitySectionResponse(
+    @Json(name = "section_id") val sectionId: String,
+    @Json(name = "section_name") val sectionName: String,
+    @Json(name = "data") val data: List<ActivityItem>
+)
+
+@JsonClass(generateAdapter = true)
+data class ActivityItem(
+    @Json(name = "module_id") val moduleId: String,
+    @Json(name = "activity_id") val activityId: String,
+    @Json(name = "activity_type") val activityType: String,
+    @Json(name = "activity_name") val activityName: String,
+    @Json(name = "quiz_type_name") val quizTypeName: String?,
+    @Json(name = "activity_description") val activityDescription: String,
+    @Json(name = "unlock_date") val unlockDate: String,
+    @Json(name = "deadline_date") val deadlineDate: String
+)
 
 @JsonClass(generateAdapter = true)
 data class ModuleActivitiesResponse(
@@ -232,4 +264,38 @@ data class QuizResponse(
 ) : Parcelable{
     val hasAnswersShown: Boolean get() = hasAnswersShownInt != 0
 }
+
+@JsonClass(generateAdapter = true)
+data class LongQuizzesListResponse(
+    @Json(name = "data") val longQuizzes: List<LongQuizListResponse>
+)
+
+@JsonClass(generateAdapter = true)
+data class LongQuizListResponse(
+    @Json(name = "course_id") val courseId: String,
+    @Json(name = "long_quiz_id") val longQuizId: String,
+    @Json(name = "long_quiz_name") val longQuizName: String,
+    @Json(name = "unlock_date") val unlockDate: LocalDateTime,
+    @Json(name = "deadline_date") val deadlineDate: LocalDateTime
+)
+
+@JsonClass(generateAdapter = true)
+data class LongQuizResponse(
+    @Json(name = "long_quiz_id") val longQuizId: String,
+    @Json(name = "long_quiz_name") val longQuizName: String,
+    @Json(name = "long_quiz_instructions") val longQuizInstructions: String,
+    @Json(name = "unlock_date") val unlockDate: LocalDateTime,
+    @Json(name = "deadline_date") val deadlineDate: LocalDateTime,
+    @Json(name = "number_of_attempts") val numberOfAttempts: Int,
+    @Json(name = "time_limit") val timeLimit: Int,
+    @Json(name = "number_of_questions") val numberOfQuestions: Int,
+    @Json(name = "overall_points") val overallPoints: Int,
+    @Json(name = "has_answers_shown") val hasAnswersShownInt: Int
+){
+    val hasAnswersShown: Boolean get() = hasAnswersShownInt != 0
+}
+
+
+
+
 

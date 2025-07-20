@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.turomobileapp.R
-import com.example.turomobileapp.models.ModuleActivityResponse
+import com.example.turomobileapp.models.ActivityItem
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.ButtonItems
@@ -75,17 +75,18 @@ fun CreateEditActivitiesInModuleScreen(
     navController: NavController,
     sessionManager: SessionManager,
     viewModel: ActivityActionsViewModel,
-    moduleId: String
+    moduleId: String,
+    sectionId: String
 ){
     val context = LocalContext.current
     val windowInfo = rememberWindowInfo()
     val uiState by viewModel.uiState.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
-    val activitiesSortedByDate: List<ModuleActivityResponse> = uiState.activities
-        .mapNotNull { activity ->
+    val activitiesSortedByDate: List<ActivityItem> = uiState.activities
+        .map { activity ->
             val parsedDate = activity.unlockDate
-            parsedDate?.let { activity to it }
+            parsedDate.let { activity to it }
         }
         .sortedBy { it.second }
         .map { it.first }
@@ -123,21 +124,21 @@ fun CreateEditActivitiesInModuleScreen(
             icon = painterResource(R.drawable.tutorial_floating_icon),
             title = "Create Tutorial",
             onClick = {
-                navController.navigate(Screen.TeacherCreateTutorial.createRoute(moduleId))
+                navController.navigate(Screen.TeacherCreateTutorial.createRoute(sectionId, moduleId))
             }
         ),
         ButtonItems(
             icon = painterResource(R.drawable.lecture_icon),
             title = "Create Lecture",
             onClick = {
-                navController.navigate(Screen.TeacherCreateLecture.createRoute(moduleId))
+                navController.navigate(Screen.TeacherCreateLecture.createRoute(sectionId, moduleId))
             }
         ),
         ButtonItems(
             icon = painterResource(R.drawable.quiz_icon),
             title = "Create Quiz",
             onClick = {
-                navController.navigate(Screen.TeacherCreateQuiz.createRoute(moduleId))
+                navController.navigate(Screen.TeacherCreateQuiz.createRoute(sectionId, moduleId))
             }
         )
     )
@@ -191,7 +192,7 @@ fun CreateEditActivitiesInModuleScreen(
                                 activities = lectures,
                                 activityType = "LECTURE",
                                 onEdit = {
-                                    navController.navigate(Screen.TeacherEditLecture.createRoute(moduleId, it.activityId))
+                                    navController.navigate(Screen.TeacherEditLecture.createRoute(sectionId,moduleId, it.activityId))
                                 },
                                 onDeleteClick = { activityId ->
                                     selectedToDeleteId = activityId
@@ -202,7 +203,7 @@ fun CreateEditActivitiesInModuleScreen(
                                 activities = tutorials,
                                 activityType = "TUTORIAL",
                                 onEdit = {
-                                    navController.navigate(Screen.TeacherEditTutorial.createRoute(moduleId, it.activityId))
+                                    navController.navigate(Screen.TeacherEditTutorial.createRoute(sectionId, moduleId, it.activityId))
                                 },
                                 onDeleteClick = { activityId ->
                                     selectedToDeleteId = activityId
@@ -213,7 +214,7 @@ fun CreateEditActivitiesInModuleScreen(
                                 activities = quizzes,
                                 activityType = "QUIZ",
                                 onEdit = {
-                                    navController.navigate(Screen.TeacherEditQuiz.createRoute(it.activityId, moduleId))
+                                    navController.navigate(Screen.TeacherEditQuiz.createRoute(sectionId, moduleId, it.activityId))
                                 },
                                 onDeleteClick = { activityId ->
                                     selectedToDeleteId = activityId
@@ -272,9 +273,9 @@ fun CreateEditActivitiesInModuleScreen(
 @Composable
 fun ActivityGrid(
     windowInfo: WindowInfo,
-    activities: List<ModuleActivityResponse>,
+    activities: List<ActivityItem>,
     activityType: String,
-    onEdit: (ModuleActivityResponse) -> Unit,
+    onEdit: (ActivityItem) -> Unit,
     onDeleteClick: (String) -> Unit
 ) {
     if (activities.isEmpty()) {

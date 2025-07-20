@@ -3,7 +3,7 @@ package com.example.turomobileapp.viewmodels.shared
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.InboxItem
+import com.example.turomobileapp.models.Messages
 import com.example.turomobileapp.repositories.MessageRepository
 import com.example.turomobileapp.repositories.Result
 import com.example.turomobileapp.viewmodels.SessionManager
@@ -71,7 +71,7 @@ class InboxViewModel @Inject constructor(
         }
     }
 
-    fun markMessageAsRead(messageId: String){
+    fun markMessageAsRead(messageId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, errorMessage = null) }
 
@@ -82,16 +82,29 @@ class InboxViewModel @Inject constructor(
                     result = result,
                     onSuccess = {
                         _uiState.update { state ->
-                            val updatedList = state.inboxList.map { inbox ->
-                                if (inbox.latestMessageId == messageId) {
-                                    inbox.copy(unreadCount = 0)
-                                } else inbox
+                            val currentMessages = state.inboxList
+
+                            if (currentMessages != null) {
+                                val updatedIncoming = currentMessages.incoming.map { msg ->
+                                    if (msg.message == messageId) msg.copy(unread = false) else msg
+                                }
+                                val updatedSent = currentMessages.sent.map { msg ->
+                                    if (msg.message == messageId) msg.copy(unread = false) else msg
+                                }
+
+                                val updatedMessages = currentMessages.copy(
+                                    incoming = updatedIncoming,
+                                    sent = updatedSent
+                                )
+
+                                state.copy(
+                                    loading = false,
+                                    inboxList = updatedMessages,
+                                    markMessageStatus = Result.Success(Unit)
+                                )
+                            } else {
+                                state.copy(loading = false)
                             }
-                            state.copy(
-                                loading = false,
-                                inboxList = updatedList,
-                                markMessageStatus = Result.Success(Unit)
-                            )
                         }
                     },
                     onFailure = { err ->
@@ -106,7 +119,7 @@ class InboxViewModel @Inject constructor(
 data class InboxUIState(
     val loading: Boolean = false,
     val errorMessage: String? = null,
-    val inboxList: List<InboxItem> = emptyList(),
+    val inboxList: Messages? = null,
     val deleteInboxStatus: Result<Unit>? = null,
     val markMessageStatus: Result<Unit>? = null,
     val unreadCount: Int = 0

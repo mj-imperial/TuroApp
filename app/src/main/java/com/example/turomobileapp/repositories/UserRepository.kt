@@ -3,6 +3,7 @@ package com.example.turomobileapp.repositories
 import com.example.turomobileapp.helperfunctions.handleApiResponse
 import com.example.turomobileapp.interfaces.UserApiService
 import com.example.turomobileapp.models.ApiResponse
+import com.example.turomobileapp.models.CatchUpClassResponse
 import com.example.turomobileapp.models.StudentProfileProgress
 import com.example.turomobileapp.models.UserResponse
 import kotlinx.coroutines.flow.Flow
@@ -58,5 +59,11 @@ class UserRepository @Inject constructor(private val userApiService: UserApiServ
         handleApiResponse(
             call = { userApiService.getStudentProfileProgress(studentId) },
             errorMessage = "Failed to get student profile progress for $studentId"
+        )
+
+    fun checkIfStudentIsCatchUp(studentId: String): Flow<Result<CatchUpClassResponse>> =
+        handleApiResponse(
+            call = { userApiService.checkIfStudentIsCatchUp(studentId) },
+            errorMessage = "Failed to check if student $studentId is in the Catch-up class"
         )
 }

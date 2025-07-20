@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 
 @JsonClass(generateAdapter = true)
 data class CalendarEventsResponse(
-    @Json(name = "success") val success: Boolean,
     @Json(name = "events") val events: List<CalendarResponse>
 )
 

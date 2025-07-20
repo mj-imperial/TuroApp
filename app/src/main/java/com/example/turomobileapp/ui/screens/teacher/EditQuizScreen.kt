@@ -104,7 +104,8 @@ fun EditQuizScreen(
     navController: NavController,
     sessionManager: SessionManager,
     viewModel: EditQuizViewModel,
-    moduleId: String
+    moduleId: String,
+    sectionId: String
 ){
     val windowInfo = rememberWindowInfo()
     val pullRefreshState = rememberPullToRefreshState()
@@ -120,7 +121,7 @@ fun EditQuizScreen(
 
     LaunchedEffect(uiState.editQuizStatus) {
         if (uiState.editQuizStatus is Result.Success){
-            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
+            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId, sectionId))
             viewModel.clearEditStatus()
         }
     }

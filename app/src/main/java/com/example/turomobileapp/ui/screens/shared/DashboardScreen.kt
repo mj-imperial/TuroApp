@@ -51,6 +51,7 @@ import coil.compose.AsyncImage
 import com.example.turomobileapp.R
 import com.example.turomobileapp.enums.UserRole
 import com.example.turomobileapp.models.CourseResponse
+import com.example.turomobileapp.models.TeacherCourseResponse
 import com.example.turomobileapp.ui.components.AppScaffold
 import com.example.turomobileapp.ui.components.BlobImage
 import com.example.turomobileapp.ui.components.PopupAlertWithActions
@@ -181,14 +182,25 @@ fun DashboardScreen(
                             viewModel.loadCourses()
                         },
                     ) {
-                        DashboardContent(
-                            innerPadding = innerPadding,
-                            coursesList = uiState.courses,
-                            body = ResponsiveFont.body(windowInfo),
-                            subtitle = ResponsiveFont.subtitle(windowInfo),
-                            navController = navController,
-                            role = role
-                        )
+                        if (uiState.isStudent){
+                            DashboardContent(
+                                innerPadding = innerPadding,
+                                coursesList = uiState.courses,
+                                body = ResponsiveFont.body(windowInfo),
+                                subtitle = ResponsiveFont.subtitle(windowInfo),
+                                navController = navController,
+                                role = role
+                            )
+                        }else{
+                            TeacherDashboardContent(
+                                innerPadding = innerPadding,
+                                coursesList = uiState.teacherCourses,
+                                body = ResponsiveFont.body(windowInfo),
+                                subtitle = ResponsiveFont.subtitle(windowInfo),
+                                navController = navController,
+                                role = role
+                            )
+                        }
                     }
                 }
             }
@@ -220,11 +232,45 @@ fun DashboardContent(
                 courseCode = course.courseCode,
                 coursePic = course.coursePicture,
                 onCardClick = {
-                    if (role == UserRole.STUDENT){
-                        navController.navigate(Screen.StudentCourseDetail.createRoute(course.courseId))
-                    }else if (role ==UserRole.TEACHER){
-                        navController.navigate(Screen.TeacherCourseDetail.createRoute(course.courseId))
-                    }
+                    navController.navigate(Screen.StudentCourseDetail.createRoute(course.courseId))
+                },
+                body = body,
+                subtitle = subtitle
+            )
+        }
+    }
+}
+
+@Composable
+fun TeacherDashboardContent(
+    innerPadding: PaddingValues,
+    coursesList: List<TeacherCourseResponse>,
+    body: TextUnit,
+    subtitle: TextUnit,
+    navController: NavController,
+    role: UserRole
+) {
+    LazyVerticalGrid(
+        modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize(),
+        columns = GridCells.Adaptive(minSize = 160.dp),
+        contentPadding = PaddingValues(15.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        items(
+            items = coursesList,
+            key = { "${it.courseId}-${it.sectionId}" }
+        ) { course ->
+            TeacherDashboardItem(
+                courseName = course.courseName,
+                sectionName = course.sectionName,
+                coursePic = course.coursePicture,
+                onCardClick = {
+                    navController.navigate(
+                        Screen.TeacherCourseDetail.createRoute(course.courseId, course.sectionId)
+                    )
                 },
                 body = body,
                 subtitle = subtitle
@@ -282,6 +328,64 @@ fun DashboardItem(
 
                 Text(
                     text = courseCode,
+                    color = TextBlack,
+                    fontSize = subtitle,
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TeacherDashboardItem(
+    courseName: String,
+    sectionName: String,
+    coursePic: ByteArray?,
+    onCardClick: () -> Unit,
+    body: TextUnit,
+    subtitle: TextUnit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clickable(onClick = onCardClick),
+        shape = RoundedCornerShape(10.dp),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Column {
+            if (coursePic != null){
+                BlobImage(
+                    byteArray = coursePic,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                )
+            }else{
+                AsyncImage(
+                    model = "https://img.freepik.com/free-photo/blackboard-inscribed-with-scientific-formulas-calculations_1150-19413.jpg?semt=ais_hybrid&w=740",
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = courseName,
+                    color = TextBlack,
+                    fontSize = body,
+                    fontFamily = FontFamily(Font(R.font.alata)),
+                )
+
+                Text(
+                    text = sectionName,
                     color = TextBlack,
                     fontSize = subtitle,
                     fontFamily = FontFamily(Font(R.font.alata)),

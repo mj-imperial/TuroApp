@@ -3,10 +3,7 @@ package com.example.turomobileapp.viewmodels.student
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.StudentBadgeResponse
-import com.example.turomobileapp.models.StudentProfileProgress
-import com.example.turomobileapp.repositories.BadgesRepository
-import com.example.turomobileapp.repositories.UserRepository
+import com.example.turomobileapp.repositories.GamificationRepository
 import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,8 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StudentProfileViewModel @Inject constructor(
-    private val userRepository: UserRepository,
-    private val badgesRepository: BadgesRepository,
+    private val gamificationRepository: GamificationRepository,
     private val sessionManager: SessionManager
 ): ViewModel(){
 
@@ -35,45 +31,31 @@ class StudentProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            launch { getStudentProgress() }
-            launch { getBadgesForStudent() }
+            getGamificationElements()
         }
     }
 
-    fun getStudentProgress(){
+    fun getGamificationElements(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loadingProgress = true, errorMessage = null) }
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
-            userRepository.getStudentProfileProgress(studentId).collect { result ->
+            gamificationRepository.getGamifiedElements(studentId).collect { result ->
                 handleResult(
                     result = result,
                     onSuccess = { resp ->
-                        _uiState.update { it.copy(loadingProgress = false, studentProgress = resp) }
+                        _uiState.update {
+                            it.copy(
+                                loading = false,
+                                section = resp.section,
+                                overallPoints = resp.overallPoints,
+                                leaderboardRank = resp.leaderboardRanking
+                            )
+                        }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loadingProgress = false, errorMessage = err) }
-                    }
-                )
-            }
-        }
-    }
-
-    fun getBadgesForStudent(){
-        viewModelScope.launch {
-            _uiState.update { it.copy(loadingBadges = true, errorMessage = null) }
-
-            val studentId: String = sessionManager.userId.filterNotNull().first()
-
-            badgesRepository.getAllBadgesForStudent(studentId).collect { result ->
-                handleResult(
-                    result = result,
-                    onSuccess = { badges ->
-                        _uiState.update { it.copy(loadingBadges = false, badges = badges) }
-                    },
-                    onFailure = { err ->
-                        _uiState.update { it.copy(loadingBadges = false, errorMessage = err) }
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
                     }
                 )
             }
@@ -82,48 +64,37 @@ class StudentProfileViewModel @Inject constructor(
 }
 
 data class StudentProfileUIState(
-    val loadingProgress: Boolean = false,
-    val loadingBadges: Boolean = false,
+    val loading: Boolean = false,
     val errorMessage: String? = null,
     val studentName: String = "",
     val email: String = "",
     val role: String = "",
     val profilePic: ByteArray? = null,
-    val badges: List<StudentBadgeResponse> = emptyList(),
-    val studentProgress: StudentProfileProgress? = null
-){
-    val loading: Boolean get() = loadingProgress || loadingBadges
+    val overallPoints: Int = 0,
+    val section: String = "",
+    val leaderboardRank: Int = 0
+) {
     override fun equals(other: Any?): Boolean {
         if (this===other) return true
         if (javaClass!=other?.javaClass) return false
 
         other as StudentProfileUIState
 
-        if (loadingProgress!=other.loadingProgress) return false
-        if (loadingBadges!=other.loadingBadges) return false
-        if (errorMessage!=other.errorMessage) return false
+        if (loading!=other.loading) return false
         if (studentName!=other.studentName) return false
         if (email!=other.email) return false
         if (role!=other.role) return false
         if (!profilePic.contentEquals(other.profilePic)) return false
-        if (badges!=other.badges) return false
-        if (studentProgress!=other.studentProgress) return false
-        if (loading!=other.loading) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = loadingProgress.hashCode()
-        result = 31 * result + loadingBadges.hashCode()
-        result = 31 * result + (errorMessage?.hashCode() ?: 0)
+        var result = loading.hashCode()
         result = 31 * result + studentName.hashCode()
         result = 31 * result + email.hashCode()
         result = 31 * result + role.hashCode()
         result = 31 * result + (profilePic?.contentHashCode() ?: 0)
-        result = 31 * result + badges.hashCode()
-        result = 31 * result + (studentProgress?.hashCode() ?: 0)
-        result = 31 * result + loading.hashCode()
         return result
     }
 }

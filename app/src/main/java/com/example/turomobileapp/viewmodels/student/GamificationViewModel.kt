@@ -3,12 +3,12 @@ package com.example.turomobileapp.viewmodels.student
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
-import com.example.turomobileapp.models.StudentAchievementResponse
-import com.example.turomobileapp.models.StudentBadgeResponse
-import com.example.turomobileapp.models.StudentLeaderboardResponse
-import com.example.turomobileapp.repositories.AchievementsRepository
-import com.example.turomobileapp.repositories.BadgesRepository
-import com.example.turomobileapp.repositories.StudentProgressRepository
+import com.example.turomobileapp.models.Achievement
+import com.example.turomobileapp.models.AchievementRetrieved
+import com.example.turomobileapp.models.Badge
+import com.example.turomobileapp.models.BadgeRetrieved
+import com.example.turomobileapp.models.LeaderboardEntry
+import com.example.turomobileapp.repositories.GamificationRepository
 import com.example.turomobileapp.viewmodels.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,9 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GamificationViewModel @Inject constructor(
-    private val studentProgressRepository: StudentProgressRepository,
-    private val badgesRepository: BadgesRepository,
-    private val achievementsRepository: AchievementsRepository,
+    private val gamificationRepository: GamificationRepository,
     private val sessionManager: SessionManager
 ): ViewModel(){
 
@@ -33,81 +31,98 @@ class GamificationViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            launch { getLeaderboard() }
-            launch { getBadgesForStudent() }
-            launch { getAchievementsForStudent() }
+            getGamificationElements()
         }
     }
 
-    fun getLeaderboard(){
+    fun getGamificationElements(){
         viewModelScope.launch {
-            _uiState.update { it.copy(loadingLeaderboard = true, errorMessage = null) }
+            _uiState.update { it.copy(loading = true, errorMessage = null) }
 
             val studentId: String = sessionManager.userId.filterNotNull().first()
 
-            studentProgressRepository.getLeaderboardCourse(studentId).collect { result ->
+            gamificationRepository.getGamifiedElements(studentId).collect { result ->
                 handleResult(
                     result = result,
-                    onSuccess = { progresses ->
-                        _uiState.update { it.copy(loadingLeaderboard = false, progresses = progresses) }
+                    onSuccess = { resp ->
+                        _uiState.update {
+                            it.copy(
+                                loading = false,
+                                section = resp.section,
+                                currentUserName = resp.studentName,
+                                leaderboards = resp.leaderboards,
+                                achievements = resp.achievements,
+                                achievementsRetrieved = mergeAchievements(resp.achievements, resp.achievementsRetrieved),
+                                badges = resp.badges,
+                                badgesRetrieved = mergeBadges(resp.badges, resp.badgesRetrieved)
+                            )
+                        }
                     },
                     onFailure = { err ->
-                        _uiState.update { it.copy(loadingLeaderboard = false, errorMessage = err) }
-                    },
-                )
-            }
-        }
-    }
-
-    fun getBadgesForStudent(){
-        viewModelScope.launch {
-            _uiState.update { it.copy(loadingBadges = true, errorMessage = null) }
-
-            val studentId: String = sessionManager.userId.filterNotNull().first()
-
-            badgesRepository.getAllBadgesForStudent(studentId).collect { result ->
-                handleResult(
-                    result = result,
-                    onSuccess = { badges ->
-                        _uiState.update { it.copy(loadingBadges = false, studentBadges = badges) }
-                    },
-                    onFailure = { err ->
-                        _uiState.update { it.copy(loadingBadges = false, errorMessage = err) }
+                        _uiState.update { it.copy(loading = false, errorMessage = err) }
                     }
                 )
             }
         }
     }
-
-    fun getAchievementsForStudent(){
-        viewModelScope.launch {
-            _uiState.update { it.copy(loadingAchievements = true, errorMessage = null) }
-
-            val studentId: String = sessionManager.userId.filterNotNull().first()
-
-             achievementsRepository.getAchievementsForStudent(studentId).collect { result ->
-                 handleResult(
-                     result = result,
-                     onSuccess = { resp ->
-                         _uiState.update { it.copy(loadingAchievements = false, studentAchievements = resp) }
-                     },
-                     onFailure = { err ->
-                         _uiState.update { it.copy(loadingAchievements = false, errorMessage = err) }
-                     }
-                 )
-             }
-        }
-    }
 }
 
 data class LeaderboardUIState(
-    val loadingLeaderboard: Boolean = false,
-    val loadingBadges: Boolean = false,
-    val loadingAchievements: Boolean = false,
+    val loading: Boolean = false,
     val errorMessage: String? = null,
-    val progresses: List<StudentLeaderboardResponse> = emptyList(),
-    val studentBadges: List<StudentBadgeResponse> = emptyList(),
-    val studentAchievements: List<StudentAchievementResponse> = emptyList()
-){
-    val loading: Boolean get() = loadingLeaderboard || loadingBadges || loadingAchievements
+    val currentUserName: String = "",
+    val section: String = "",
+    val leaderboards: List<LeaderboardEntry> = emptyList(),
+    val achievements: List<Achievement> = emptyList(),
+    val achievementsRetrieved: List<StudentAchievementResponseCompose> = emptyList(),
+    val badges: List<Badge> = emptyList(),
+    val badgesRetrieved: List<StudentBadgeResponseCompose> = emptyList()
+)
+
+data class StudentAchievementResponseCompose(
+    val achievementId: Int,
+    val achievementName: String,
+    val achievementDescription: String,
+    val achievementImage: String,
+    val isUnlocked: Boolean
+)
+
+data class StudentBadgeResponseCompose(
+    val badgeId: Int,
+    val badgeName: String,
+    val badgeDescription: String,
+    val badgeImage: String,
+    val isUnlocked: Boolean
+)
+
+fun mergeAchievements(
+    all: List<Achievement>,
+    unlocked: List<AchievementRetrieved>
+): List<StudentAchievementResponseCompose> {
+    val unlockedIds = unlocked.map { it.achievementId }.toSet()
+    return all.map { ach ->
+        StudentAchievementResponseCompose(
+            achievementId = ach.achievementId,
+            achievementName = ach.achievementName,
+            achievementDescription = ach.achievementDescription,
+            achievementImage = ach.imageName,
+            isUnlocked = unlockedIds.contains(ach.achievementId)
+        )
+    }
+}
+
+fun mergeBadges(
+    all: List<Badge>,
+    unlocked: List<BadgeRetrieved>
+): List<StudentBadgeResponseCompose> {
+    val unlockedIds = unlocked.map { it.badgeId }.toSet()
+    return all.map { badge ->
+        StudentBadgeResponseCompose(
+            badgeId = badge.badgeId,
+            badgeName = badge.badgeName,
+            badgeDescription = badge.badgeDescription,
+            badgeImage = badge.imageName,
+            isUnlocked = unlockedIds.contains(badge.badgeId)
+        )
+    }
 }

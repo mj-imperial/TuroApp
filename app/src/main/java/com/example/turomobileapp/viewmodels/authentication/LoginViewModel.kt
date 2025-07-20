@@ -1,5 +1,6 @@
 package com.example.turomobileapp.viewmodels.authentication
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turomobileapp.helperfunctions.handleResult
@@ -61,6 +62,7 @@ class LoginViewModel @Inject constructor(
             _uiState.update { it.copy(loading = true, errorMessage = null, loginSuccess = null) }
 
             userRepository.login(_uiState.value.email.trim(), _uiState.value.password).collect { result ->
+                Log.d("LoginDebug", "Login result=$result")
                 handleResult(
                     result = result,
                     onSuccess = { user ->
@@ -78,6 +80,8 @@ class LoginViewModel @Inject constructor(
                             sessionManager.saveTokens(user.accessToken)
                             sessionManager.startSession(user)
                         }
+
+                        Log.d("LoginDebug", "Email=${_uiState.value.email}, Password=${_uiState.value.password}")
 
                         if (user.data.requiresPasswordChange){
                             _eventFlow.tryEmit(LoginEvent.NavigateToChangeDefaultPassword(user.data.userId,user.data.email,true))

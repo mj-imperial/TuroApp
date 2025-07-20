@@ -76,7 +76,8 @@ fun CreateLectureScreen(
     navController: NavController,
     sessionManager: SessionManager,
     moduleId: String,
-    viewModel: CreateLectureViewModel
+    viewModel: CreateLectureViewModel,
+    sectionId: String
 ){
     val windowInfo = rememberWindowInfo()
     val context = LocalContext.current
@@ -90,7 +91,7 @@ fun CreateLectureScreen(
 
     LaunchedEffect(uiState.createLectureStatus) {
         if (uiState.createLectureStatus is Result.Success){
-            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId))
+            navController.navigate(Screen.TeacherCreateEditActivitiesInModule.createRoute(moduleId, sectionId))
             viewModel.clearCreateLectureStatus()
         }
     }
